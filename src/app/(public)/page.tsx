@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { ArrowRight, Search, ShieldCheck, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PropertyCard } from "@/components/properties/PropertyCard";
 import type { Metadata } from "next";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "RentNest — Find & List Rental Properties",
@@ -30,7 +33,20 @@ const features = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  let featuredProperties: any[] = [];
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api"}/properties?limit=3`, {
+      cache: "no-store",
+    });
+    const json = await res.json();
+    if (json.success) {
+      featuredProperties = json.data;
+    }
+  } catch (error) {
+    console.error("Failed to fetch featured properties", error);
+  }
+
   return (
     <>
       {/* Hero */}
@@ -72,9 +88,36 @@ export default function HomePage() {
         />
       </section>
 
+      {/* Featured Properties */}
+      {featuredProperties.length > 0 && (
+        <section className="container mx-auto px-4 py-12 md:py-20" aria-label="Featured Properties">
+          <div className="flex justify-between items-end mb-8">
+            <div>
+              <h2 className="text-3xl font-bold mb-2">Featured Listings</h2>
+              <p className="text-muted-foreground">Discover some of our best rental properties.</p>
+            </div>
+            <Button variant="ghost" asChild className="hidden sm:flex">
+              <Link href="/properties">
+                View all <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {featuredProperties.map((property) => (
+              <PropertyCard key={property.id} property={property} />
+            ))}
+          </div>
+          <div className="mt-8 text-center sm:hidden">
+            <Button variant="outline" asChild className="w-full">
+              <Link href="/properties">View all properties</Link>
+            </Button>
+          </div>
+        </section>
+      )}
+
       {/* Features */}
       <section
-        className="container mx-auto px-4 py-20"
+        className="container mx-auto px-4 py-12 md:py-20"
         aria-label="Features section"
       >
         <h2 className="text-3xl font-bold text-center mb-12">

@@ -25,7 +25,11 @@ export default function PaymentInitiationPage({
       try {
         const res = await api.post<{ checkoutUrl: string }>(
           "/payments/create",
-          { rentalId: id },
+          { 
+            rentalRequestId: id,
+            successUrl: `${window.location.origin}/payment/success`,
+            cancelUrl: `${window.location.origin}/payment/cancel`
+          },
         );
 
         if (!mounted) return;

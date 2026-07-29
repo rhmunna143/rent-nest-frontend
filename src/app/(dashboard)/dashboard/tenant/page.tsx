@@ -125,11 +125,20 @@ export default function TenantDashboardPage() {
                         : "Not specified"}
                     </td>
                     <td className="px-4 py-4 text-right">
-                      <Button variant="ghost" size="sm" asChild>
-                        <Link href={`/dashboard/tenant/requests/${rental.id}`}>
-                          View <ArrowRight className="ml-2 h-4 w-4" />
-                        </Link>
-                      </Button>
+                      <div className="flex items-center justify-end gap-2">
+                        {rental.status === "APPROVED" && (
+                          <Button size="sm" variant="default" asChild>
+                            <Link href={`/dashboard/tenant/requests/${rental.id}/pay`}>
+                              Pay Now
+                            </Link>
+                          </Button>
+                        )}
+                        <Button variant="ghost" size="sm" asChild>
+                          <Link href={`/dashboard/tenant/requests/${rental.id}`}>
+                            View <ArrowRight className="ml-2 h-4 w-4" />
+                          </Link>
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}

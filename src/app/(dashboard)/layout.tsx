@@ -1,7 +1,5 @@
 import Link from "next/link";
-
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { Sidebar } from "@/components/dashboard/Sidebar";
 
 export default function DashboardLayout({
   children,
@@ -10,20 +8,28 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="flex min-h-screen flex-col bg-muted/10">
-      <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-        <div className="flex items-center gap-2 font-bold text-xl text-primary">
+      <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6 shrink-0 shadow-sm">
+        <Link href="/" className="flex items-center gap-2 font-bold text-xl text-primary">
           🏠 RentNest
-        </div>
+        </Link>
         <div className="ml-auto flex items-center gap-4">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to site
-            </Link>
-          </Button>
+          <span className="text-sm font-medium text-muted-foreground hidden sm:inline-block">Dashboard Portal</span>
         </div>
       </header>
-      <main className="flex-1">{children}</main>
+      
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar for Desktop */}
+        <div className="hidden md:block shrink-0">
+          <Sidebar />
+        </div>
+        
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto">
+          <div className="h-full">
+            {children}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

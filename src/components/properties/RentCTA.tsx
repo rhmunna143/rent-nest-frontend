@@ -94,7 +94,7 @@ export function RentCTA({ propertyId }: RentCTAProps) {
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-106.25">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Request to Rent</DialogTitle>
             <DialogDescription>

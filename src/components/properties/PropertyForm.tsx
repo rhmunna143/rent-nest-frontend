@@ -87,7 +87,7 @@ export function PropertyForm({ initialData, onSubmit, isSubmitting }: PropertyFo
               <Label htmlFor="description" className="mb-1 block">Description *</Label>
               <textarea
                 id="description"
-                className="flex min-h-[140px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="flex min-h-35 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 placeholder="Describe the property's key features, neighborhood, and unique selling points..."
                 {...register("description")}
               />
@@ -257,7 +257,7 @@ export function PropertyForm({ initialData, onSubmit, isSubmitting }: PropertyFo
       </div>
 
       <div className="flex justify-end pt-6 border-t mt-8">
-        <Button type="submit" size="lg" disabled={isSubmitting} className="min-w-[200px] text-base">
+        <Button type="submit" size="lg" disabled={isSubmitting} className="min-w-50 text-base">
           {isSubmitting ? "Processing..." : "Save Property Listing"}
         </Button>
       </div>

@@ -11,7 +11,7 @@ import {
 import { api } from "@/lib/api-client";
 import type { User } from "@/types";
 
-// ─── Types ──────────────────────────────────────────────────
+// ─── Types
 
 interface AuthContextValue {
   user: User | null;
@@ -22,25 +22,26 @@ interface AuthContextValue {
   clearUser: () => void;
 }
 
-// ─── Context ─────────────────────────────────────────────────
+// Context
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-// ─── Provider ────────────────────────────────────────────────
+// Provider
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const refreshUser = useCallback(async () => {
-    // skipAuthRedirect: a 401 here means "not logged in" — don't redirect to login
+    // skipAuthRedirect: a 401 here means "not logged in"- don't redirect to login
     const result = await api.get<User>("/auth/me", { skipAuthRedirect: true });
     if (result.ok) {
       setUser(result.data);
       document.cookie = `rn_role=${result.data.role}; path=/; max-age=${60 * 60 * 24 * 7}; samesite=lax`;
     } else {
       setUser(null);
-      document.cookie = "rn_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      document.cookie =
+        "rn_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     }
   }, []);
 
@@ -54,15 +55,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     (async () => {
       setIsLoading(true);
-      // skipAuthRedirect: a 401 here means "not logged in" — perfectly normal for public pages
-      const result = await api.get<User>("/auth/me", { skipAuthRedirect: true });
+      // skipAuthRedirect: a 401 here means "not logged in" - for public pages
+      const result = await api.get<User>("/auth/me", {
+        skipAuthRedirect: true,
+      });
       if (!cancelled) {
         if (result.ok) {
           setUser(result.data);
           document.cookie = `rn_role=${result.data.role}; path=/; max-age=${60 * 60 * 24 * 7}; samesite=lax`;
         } else {
           setUser(null);
-          document.cookie = "rn_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+          document.cookie =
+            "rn_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
         }
         setIsLoading(false);
       }
@@ -79,7 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// ─── Hook ────────────────────────────────────────────────────
+// Hook
 
 export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);

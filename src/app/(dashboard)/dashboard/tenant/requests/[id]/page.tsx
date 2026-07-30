@@ -10,6 +10,7 @@ import {
   Building,
   CreditCard,
   Star,
+  ArrowLeft,
 } from "lucide-react";
 import {
   PropertyStatusBadge,
@@ -78,7 +79,7 @@ export default function TenantRequestDetailPage({
   const onSubmitReview = async (data: ReviewInput) => {
     setIsSubmittingReview(true);
     try {
-      const payload = { ...data, rentalId: rental?.id };
+      const payload = { ...data, rentalRequestId: rental?.id };
       const res = await api.post("/reviews", payload);
       if (res.ok) {
         toast.success("Review submitted successfully!");
@@ -131,10 +132,18 @@ export default function TenantRequestDetailPage({
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-3 mb-2">
+            {/* back button */}
+            <Button variant="ghost" asChild>
+              <Link href="/dashboard/tenant">
+                <ArrowLeft className="h-4 w-4" />
+              </Link>
+            </Button>
+            
             <h1 className="text-3xl font-bold">Request Details</h1>
             <RentalStatusBadge status={rental.status as any} />
           </div>
-          <p className="text-muted-foreground flex items-center gap-1.5">
+
+          <p className="text-muted-foreground flex items-center gap-1.5 ml-15">
             Submitted on {format(new Date(rental.createdAt), "MMMM d, yyyy")}
           </p>
         </div>

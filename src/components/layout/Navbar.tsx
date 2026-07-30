@@ -29,7 +29,7 @@ import {
 import { cn } from "@/lib/cn";
 import Logo from "@/utils/images/logo";
 
-function dashboardHref(role: string): string {
+export function dashboardHref(role: string): string {
   switch (role) {
     case "TENANT":
       return "/dashboard/tenant";
@@ -46,7 +46,7 @@ function dashboardHref(role: string): string {
   }
 }
 
-function getInitials(name: string): string {
+export function getInitials(name: string): string {
   return name
     .split(" ")
     .slice(0, 2)
@@ -213,6 +213,7 @@ export function Navbar() {
               </Link>
             ))}
           </nav>
+
           <div className="border-t pt-4 space-y-2">
             {user ? (
               <>

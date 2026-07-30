@@ -48,7 +48,7 @@ export default function TenantDashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-6xl space-y-8">
+      <div className="container mx-auto p-4 space-y-8">
         <Skeleton className="h-10 w-64 mb-2" />
         <div className="space-y-4 pt-8">
           <Skeleton className="h-48 w-full" />
@@ -58,7 +58,7 @@ export default function TenantDashboardPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl space-y-12">
+    <div className="container mx-auto p-4 space-y-12">
       <div>
         <h1 className="text-3xl font-bold tracking-tight mb-2">
           Tenant Dashboard

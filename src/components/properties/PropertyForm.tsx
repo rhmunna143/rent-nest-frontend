@@ -3,7 +3,10 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { propertySchema, type PropertyInput } from "@/lib/schemas/property.schema";
+import {
+  propertySchema,
+  type PropertyInput,
+} from "@/lib/schemas/property.schema";
 import { api } from "@/lib/api-client";
 import { type Category } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -17,15 +20,19 @@ interface PropertyFormProps {
   isSubmitting: boolean;
 }
 
-export function PropertyForm({ initialData, onSubmit, isSubmitting }: PropertyFormProps) {
+export function PropertyForm({
+  initialData,
+  onSubmit,
+  isSubmitting,
+}: PropertyFormProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
 
   const [amenityCount, setAmenityCount] = useState(
-    initialData?.amenities?.length ? initialData.amenities.length : 1
+    initialData?.amenities?.length ? initialData.amenities.length : 1,
   );
   const [imageCount, setImageCount] = useState(
-    initialData?.images?.length ? initialData.images.length : 1
+    initialData?.images?.length ? initialData.images.length : 1,
   );
 
   const {
@@ -68,7 +75,6 @@ export function PropertyForm({ initialData, onSubmit, isSubmitting }: PropertyFo
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-8">
-        
         {/* Left Column: Basic Details & Pricing */}
         <div className="space-y-8">
           <div className="space-y-6">
@@ -76,32 +82,62 @@ export function PropertyForm({ initialData, onSubmit, isSubmitting }: PropertyFo
               <Info className="w-5 h-5" />
               <h3 className="text-lg font-medium">Basic Information</h3>
             </div>
-            
+
             <div>
-              <Label htmlFor="title" className="mb-1 block">Property Title *</Label>
-              <Input id="title" placeholder="e.g. Modern Apartment in Downtown" {...register("title")} className="bg-background" />
-              {errors.title && <p className="text-sm text-destructive mt-1">{errors.title.message}</p>}
+              <Label htmlFor="title" className="mb-1 block">
+                Property Title *
+              </Label>
+              <Input
+                id="title"
+                placeholder="e.g. Modern Apartment in Downtown"
+                {...register("title")}
+                className="bg-background"
+              />
+              {errors.title && (
+                <p className="text-sm text-destructive mt-1">
+                  {errors.title.message}
+                </p>
+              )}
             </div>
 
             <div>
-              <Label htmlFor="description" className="mb-1 block">Description *</Label>
+              <Label htmlFor="description" className="mb-1 block">
+                Description *
+              </Label>
               <textarea
                 id="description"
                 className="flex min-h-35 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 placeholder="Describe the property's key features, neighborhood, and unique selling points..."
                 {...register("description")}
               />
-              {errors.description && <p className="text-sm text-destructive mt-1">{errors.description.message}</p>}
+              {errors.description && (
+                <p className="text-sm text-destructive mt-1">
+                  {errors.description.message}
+                </p>
+              )}
             </div>
 
             <div>
-              <Label htmlFor="location" className="mb-1 block">Location / Address *</Label>
-              <Input id="location" placeholder="e.g. 123 Main St, New York, NY 10001" {...register("location")} className="bg-background" />
-              {errors.location && <p className="text-sm text-destructive mt-1">{errors.location.message}</p>}
+              <Label htmlFor="location" className="mb-1 block">
+                Location / Address *
+              </Label>
+              <Input
+                id="location"
+                placeholder="e.g. 123 Main St, New York, NY 10001"
+                {...register("location")}
+                className="bg-background"
+              />
+              {errors.location && (
+                <p className="text-sm text-destructive mt-1">
+                  {errors.location.message}
+                </p>
+              )}
             </div>
 
             <div>
-              <Label htmlFor="categoryId" className="mb-1 block">Property Category *</Label>
+              <Label htmlFor="categoryId" className="mb-1 block">
+                Property Category *
+              </Label>
               <select
                 id="categoryId"
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
@@ -110,10 +146,16 @@ export function PropertyForm({ initialData, onSubmit, isSubmitting }: PropertyFo
               >
                 <option value="">Select a category</option>
                 {categories.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
                 ))}
               </select>
-              {errors.categoryId && <p className="text-sm text-destructive mt-1">{errors.categoryId.message}</p>}
+              {errors.categoryId && (
+                <p className="text-sm text-destructive mt-1">
+                  {errors.categoryId.message}
+                </p>
+              )}
             </div>
           </div>
 
@@ -124,21 +166,57 @@ export function PropertyForm({ initialData, onSubmit, isSubmitting }: PropertyFo
             </div>
 
             <div>
-              <Label htmlFor="rentAmount" className="mb-1 block">Rent Amount ($/mo) *</Label>
-              <Input id="rentAmount" type="number" placeholder="e.g. 1500" {...register("rentAmount", { valueAsNumber: true })} className="bg-background" />
-              {errors.rentAmount && <p className="text-sm text-destructive mt-1">{errors.rentAmount.message}</p>}
+              <Label htmlFor="rentAmount" className="mb-1 block">
+                Rent Amount ($/mo) *
+              </Label>
+              <Input
+                id="rentAmount"
+                type="number"
+                placeholder="e.g. 1500"
+                {...register("rentAmount", { valueAsNumber: true })}
+                className="bg-background"
+              />
+              {errors.rentAmount && (
+                <p className="text-sm text-destructive mt-1">
+                  {errors.rentAmount.message}
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-6">
               <div>
-                <Label htmlFor="bedrooms" className="mb-1 block">Bedrooms *</Label>
-                <Input id="bedrooms" type="number" placeholder="e.g. 2" {...register("bedrooms", { valueAsNumber: true })} className="bg-background" />
-                {errors.bedrooms && <p className="text-sm text-destructive mt-1">{errors.bedrooms.message}</p>}
+                <Label htmlFor="bedrooms" className="mb-1 block">
+                  Bedrooms *
+                </Label>
+                <Input
+                  id="bedrooms"
+                  type="number"
+                  placeholder="e.g. 2"
+                  {...register("bedrooms", { valueAsNumber: true })}
+                  className="bg-background"
+                />
+                {errors.bedrooms && (
+                  <p className="text-sm text-destructive mt-1">
+                    {errors.bedrooms.message}
+                  </p>
+                )}
               </div>
               <div>
-                <Label htmlFor="bathrooms" className="mb-1 block">Bathrooms *</Label>
-                <Input id="bathrooms" type="number" placeholder="e.g. 1" {...register("bathrooms", { valueAsNumber: true })} className="bg-background" />
-                {errors.bathrooms && <p className="text-sm text-destructive mt-1">{errors.bathrooms.message}</p>}
+                <Label htmlFor="bathrooms" className="mb-1 block">
+                  Bathrooms *
+                </Label>
+                <Input
+                  id="bathrooms"
+                  type="number"
+                  placeholder="e.g. 1"
+                  {...register("bathrooms", { valueAsNumber: true })}
+                  className="bg-background"
+                />
+                {errors.bathrooms && (
+                  <p className="text-sm text-destructive mt-1">
+                    {errors.bathrooms.message}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -162,14 +240,14 @@ export function PropertyForm({ initialData, onSubmit, isSubmitting }: PropertyFo
                 <Plus className="w-4 h-4 mr-1" /> Add Image URL
               </Button>
             </div>
-            
+
             <div className="space-y-3">
               {Array.from({ length: imageCount }).map((_, i) => (
                 <div key={`image-${i}`} className="flex items-start gap-2">
                   <div className="flex-1">
-                    <Input 
-                      placeholder="https://example.com/image.jpg" 
-                      {...register(`images.${i}` as const)} 
+                    <Input
+                      placeholder="https://example.com/image.jpg"
+                      {...register(`images.${i}` as const)}
                       className="bg-background"
                     />
                   </div>
@@ -198,7 +276,8 @@ export function PropertyForm({ initialData, onSubmit, isSubmitting }: PropertyFo
               )}
             </div>
             <p className="text-xs text-muted-foreground">
-              Provide direct links to publicly hosted images (e.g. Imgur, AWS S3). The first image will be used as the thumbnail.
+              Provide direct links to publicly hosted images (e.g. Imgur, AWS
+              S3). The first image will be used as the thumbnail.
             </p>
           </div>
 
@@ -218,14 +297,14 @@ export function PropertyForm({ initialData, onSubmit, isSubmitting }: PropertyFo
                 <Plus className="w-4 h-4 mr-1" /> Add Amenity
               </Button>
             </div>
-            
+
             <div className="space-y-3">
               {Array.from({ length: amenityCount }).map((_, i) => (
                 <div key={`amenity-${i}`} className="flex items-start gap-2">
                   <div className="flex-1">
-                    <Input 
-                      placeholder="e.g. High-speed WiFi, In-unit Laundry" 
-                      {...register(`amenities.${i}` as const)} 
+                    <Input
+                      placeholder="e.g. High-speed WiFi, In-unit Laundry"
+                      {...register(`amenities.${i}` as const)}
                       className="bg-background"
                     />
                   </div>
@@ -247,17 +326,27 @@ export function PropertyForm({ initialData, onSubmit, isSubmitting }: PropertyFo
                   )}
                 </div>
               ))}
-              {errors.amenities && <p className="text-sm text-destructive mt-1">{errors.amenities.message}</p>}
+              {errors.amenities && (
+                <p className="text-sm text-destructive mt-1">
+                  {errors.amenities.message}
+                </p>
+              )}
             </div>
             <p className="text-xs text-muted-foreground">
-              List the features and amenities that make this property stand out to potential tenants.
+              List the features and amenities that make this property stand out
+              to potential tenants.
             </p>
           </div>
         </div>
       </div>
 
       <div className="flex justify-end pt-6 border-t mt-8">
-        <Button type="submit" size="lg" disabled={isSubmitting} className="min-w-50 text-base">
+        <Button
+          type="submit"
+          size="lg"
+          disabled={isSubmitting}
+          className="min-w-50 text-base"
+        >
           {isSubmitting ? "Processing..." : "Save Property Listing"}
         </Button>
       </div>

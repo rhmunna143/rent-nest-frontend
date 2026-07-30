@@ -77,7 +77,7 @@ export default function LandlordDashboardPage() {
 
   // Estimate earnings (sum of rentAmount for ACTIVE/COMPLETED rentals)
   const estimatedEarnings = requests
-    .filter(r => r.status === "ACTIVE" || r.status === "COMPLETED")
+    .filter((r) => r.status === "ACTIVE" || r.status === "COMPLETED")
     .reduce((sum, req) => sum + Number(req.property?.rentAmount || 0), 0);
 
   const recentRequests = [...requests]

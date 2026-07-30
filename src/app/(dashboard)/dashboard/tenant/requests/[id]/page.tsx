@@ -9,6 +9,7 @@ import {
   MessageSquare,
   Building,
   CreditCard,
+  Star,
 } from "lucide-react";
 import {
   PropertyStatusBadge,
@@ -20,6 +21,10 @@ import { api } from "@/lib/api-client";
 import Link from "next/link";
 import { useEffect, useState, use } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { reviewSchema, type ReviewInput } from "@/lib/schemas/review.schema";
+import { toast } from "sonner";
 
 export default function TenantRequestDetailPage({
   params,
@@ -30,6 +35,25 @@ export default function TenantRequestDetailPage({
   const [rental, setRental] = useState<RentalRequest | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [hasReviewed, setHasReviewed] = useState(false);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<ReviewInput>({
+    resolver: zodResolver(reviewSchema),
+    defaultValues: {
+      rating: 0 as any, // force user to pick
+      comment: "",
+    },
+  });
+
+  const selectedRating = watch("rating");
 
   useEffect(() => {
     async function loadData() {
@@ -51,9 +75,32 @@ export default function TenantRequestDetailPage({
     loadData();
   }, [unwrappedParams.id]);
 
+  const onSubmitReview = async (data: ReviewInput) => {
+    setIsSubmittingReview(true);
+    try {
+      const payload = { ...data, rentalId: rental?.id };
+      const res = await api.post("/reviews", payload);
+      if (res.ok) {
+        toast.success("Review submitted successfully!");
+        setHasReviewed(true);
+      } else {
+        if (res.status === 409) {
+          toast.error("You have already reviewed this stay.");
+          setHasReviewed(true); // Hide form since it's already done
+        } else {
+          toast.error(res.message || "Failed to submit review");
+        }
+      }
+    } catch (err: any) {
+      toast.error(err.message || "An unexpected error occurred");
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
+
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-4xl space-y-8">
+      <div className="container mx-auto p-4 space-y-8">
         <Skeleton className="h-10 w-64 mb-2" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <Skeleton className="h-96 md:col-span-2" />
@@ -80,7 +127,7 @@ export default function TenantRequestDetailPage({
   const property = rental.property;
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl space-y-8">
+    <div className="container mx-auto p-4 space-y-8">
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-3 mb-2">
@@ -170,6 +217,85 @@ export default function TenantRequestDetailPage({
                   </Button>
                 </div>
               </div>
+            </div>
+          )}
+
+          {rental.status === "COMPLETED" && (
+            <div className="p-6 border rounded-xl bg-card space-y-4">
+              <h2 className="text-xl font-semibold border-b pb-2 flex items-center gap-2">
+                <Star className="h-5 w-5 text-primary" /> Review Your Stay
+              </h2>
+
+              {hasReviewed ? (
+                <div className="p-6 bg-green-50 text-green-800 border border-green-200 rounded-lg text-center shadow-sm">
+                  <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-green-600" />
+                  <p className="font-medium">Thank you for your review!</p>
+                  <p className="text-sm mt-1">
+                    Your feedback helps others make great decisions.
+                  </p>
+                </div>
+              ) : (
+                <form
+                  onSubmit={handleSubmit(onSubmitReview)}
+                  className="space-y-4 pt-2"
+                >
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-foreground">
+                      How was your stay?
+                    </label>
+                    <div className="flex gap-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() =>
+                            setValue("rating", star as any, {
+                              shouldValidate: true,
+                            })
+                          }
+                          className={`p-1 transition-colors ${
+                            selectedRating >= star
+                              ? "text-yellow-400"
+                              : "text-muted-foreground/30 hover:text-yellow-400/50"
+                          }`}
+                        >
+                          <Star
+                            className={`w-8 h-8 ${selectedRating >= star ? "fill-current" : ""}`}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                    {errors.rating && (
+                      <p className="text-sm text-destructive mt-1">
+                        {errors.rating.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-foreground">
+                      Share your experience (optional)
+                    </label>
+                    <textarea
+                      className="flex min-h-25 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                      placeholder="What did you love about this property? How was the landlord?"
+                      {...register("comment")}
+                    />
+                    {errors.comment && (
+                      <p className="text-sm text-destructive mt-1">
+                        {errors.comment.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <Button
+                    type="submit"
+                    disabled={isSubmittingReview || selectedRating === 0}
+                  >
+                    {isSubmittingReview ? "Submitting..." : "Submit Review"}
+                  </Button>
+                </form>
+              )}
             </div>
           )}
         </div>

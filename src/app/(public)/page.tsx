@@ -3,6 +3,7 @@ import { ArrowRight, Search, ShieldCheck, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PropertyCard } from "@/components/properties/PropertyCard";
 import type { Metadata } from "next";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 export const dynamic = "force-dynamic";
 
@@ -57,27 +58,44 @@ export default async function HomePage() {
         className="relative overflow-hidden bg-linear-to-br from-primary/10 via-background to-background"
         aria-label="Hero section"
       >
-        <div className="container mx-auto px-4 py-24 md:py-36 text-center space-y-8">
-          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-4 py-1.5 text-sm font-medium">
-            🏠 Find your perfect home
+        <div className="container flex mx-auto flex-col md:flex-row items-center justify-between gap-12 px-4 lg:px-0">
+          <div className="container mx-auto px-4 lg:px-0 py-24 md:py-36 text-center space-y-8">
+            <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-4 py-1.5 text-sm font-medium">
+              🏠 Find your perfect home
+            </div>
+
+            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight max-w-3xl mx-auto leading-tight">
+              Rent Smarter. <span className="text-primary">List Easier.</span>
+            </h1>
+
+            <p className="text-muted-foreground text-lg md:text-xl max-w-xl mx-auto">
+              RentNest connects tenants with the perfect rental property and
+              gives landlords the tools to manage listings effortlessly.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button size="lg" asChild id="browse-properties-cta">
+                <Link href="/properties">
+                  Browse Properties <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+
+              <Button
+                size="lg"
+                variant="outline"
+                asChild
+                id="list-property-cta"
+              >
+                <Link href="/auth/register">List Your Property</Link>
+              </Button>
+            </div>
           </div>
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight max-w-3xl mx-auto leading-tight">
-            Rent Smarter. <span className="text-primary">List Easier.</span>
-          </h1>
-          <p className="text-muted-foreground text-lg md:text-xl max-w-xl mx-auto">
-            RentNest connects tenants with the perfect rental property and gives
-            landlords the tools to manage listings effortlessly.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button size="lg" asChild id="browse-properties-cta">
-              <Link href="/properties">
-                Browse Properties <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-            <Button size="lg" variant="outline" asChild id="list-property-cta">
-              <Link href="/auth/register">List Your Property</Link>
-            </Button>
-          </div>
+
+          <DotLottieReact
+            src="https://lottie.host/9ddae27f-81ac-4221-b043-f60a6de269ff/rDDX4YO8qp.lottie"
+            loop
+            autoplay
+          />
         </div>
 
         {/* Decorative gradient blobs */}

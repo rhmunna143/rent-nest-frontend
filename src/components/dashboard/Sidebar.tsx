@@ -57,9 +57,7 @@ export function Sidebar() {
 
   const adminLinks = [
     { name: "Dashboard", href: "/dashboard/admin", icon: LayoutDashboard },
-    { name: "Users", href: "/dashboard/admin/users", icon: Users },
     { name: "Categories", href: "/dashboard/admin/categories", icon: Tags },
-    { name: "Properties", href: "/dashboard/admin/properties", icon: Building },
   ];
 
   const roleLinks =

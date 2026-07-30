@@ -11,7 +11,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "RentNest — Find & List Rental Properties",
+    default: "RentNest | Find & List Rental Properties",
     template: "%s | RentNest",
   },
   description:
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "RentNest",
-    title: "RentNest — Find & List Rental Properties",
+    title: "RentNest | Find & List Rental Properties",
     description: "Browse, list, and manage rental properties with ease.",
   },
 };

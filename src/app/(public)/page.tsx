@@ -7,7 +7,7 @@ import type { Metadata } from "next";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "RentNest — Find & List Rental Properties",
+  title: "RentNest | Find & List Rental Properties",
   description:
     "Browse, list, and manage rental properties with ease. RentNest connects tenants and landlords on a seamless marketplace.",
 };
@@ -36,9 +36,12 @@ const features = [
 export default async function HomePage() {
   let featuredProperties: any[] = [];
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api"}/properties?limit=3`, {
-      cache: "no-store",
-    });
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api"}/properties?limit=3`,
+      {
+        cache: "no-store",
+      },
+    );
     const json = await res.json();
     if (json.success) {
       featuredProperties = json.data;
@@ -76,7 +79,7 @@ export default async function HomePage() {
             </Button>
           </div>
         </div>
-        
+
         {/* Decorative gradient blobs */}
         <div
           aria-hidden
@@ -90,11 +93,16 @@ export default async function HomePage() {
 
       {/* Featured Properties */}
       {featuredProperties.length > 0 && (
-        <section className="container mx-auto px-4 py-12 md:py-20" aria-label="Featured Properties">
+        <section
+          className="container mx-auto px-4 py-12 md:py-20"
+          aria-label="Featured Properties"
+        >
           <div className="flex justify-between items-end mb-8">
             <div>
               <h2 className="text-3xl font-bold mb-2">Featured Listings</h2>
-              <p className="text-muted-foreground">Discover some of our best rental properties.</p>
+              <p className="text-muted-foreground">
+                Discover some of our best rental properties.
+              </p>
             </div>
             <Button variant="ghost" asChild className="hidden sm:flex">
               <Link href="/properties">

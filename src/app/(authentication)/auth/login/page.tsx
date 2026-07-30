@@ -23,13 +23,18 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { User } from "@/types";
+import Logo from "@/utils/images/logo";
 
 function dashboardFor(role: string) {
   switch (role) {
-    case "TENANT": return "/dashboard/tenant";
-    case "LANDLORD": return "/dashboard/landlord";
-    case "ADMIN": return "/dashboard/admin";
-    default: return "/";
+    case "TENANT":
+      return "/dashboard/tenant";
+    case "LANDLORD":
+      return "/dashboard/landlord";
+    case "ADMIN":
+      return "/dashboard/admin";
+    default:
+      return "/";
   }
 }
 
@@ -68,7 +73,7 @@ function LoginForm() {
       <Card className="w-full max-w-md shadow-lg animate-fade-in">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-2">
-            <span className="text-4xl">🏠</span>
+            <Logo />
           </div>
           <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
           <CardDescription>Sign in to your RentNest account</CardDescription>
@@ -90,7 +95,9 @@ function LoginForm() {
                 placeholder="jane@example.com"
                 autoComplete="email"
                 aria-invalid={!!errors.email}
-                aria-describedby={errors.email ? "login-email-error" : undefined}
+                aria-describedby={
+                  errors.email ? "login-email-error" : undefined
+                }
                 {...register("email")}
               />
               {errors.email && (
@@ -109,11 +116,16 @@ function LoginForm() {
                 placeholder="Your password"
                 autoComplete="current-password"
                 aria-invalid={!!errors.password}
-                aria-describedby={errors.password ? "login-password-error" : undefined}
+                aria-describedby={
+                  errors.password ? "login-password-error" : undefined
+                }
                 {...register("password")}
               />
               {errors.password && (
-                <p id="login-password-error" className="text-xs text-destructive">
+                <p
+                  id="login-password-error"
+                  className="text-xs text-destructive"
+                >
                   {errors.password.message}
                 </p>
               )}
@@ -125,7 +137,9 @@ function LoginForm() {
               disabled={isSubmitting}
               id="login-submit"
             >
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isSubmitting && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
               {isSubmitting ? "Signing in…" : "Sign in"}
             </Button>
           </form>

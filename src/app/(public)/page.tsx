@@ -17,7 +17,7 @@ const features = [
     icon: Search,
     title: "Browse Listings",
     description:
-      "Search hundreds of rental properties by location, price, size, and category — all in one place.",
+      "Search hundreds of rental properties by location, price, size, and category - all in one place.",
   },
   {
     icon: ShieldCheck,

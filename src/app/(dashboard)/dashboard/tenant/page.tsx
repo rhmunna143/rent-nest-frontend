@@ -170,6 +170,7 @@ export default function TenantDashboardPage() {
                   <th className="px-4 py-3 font-medium">Transaction ID</th>
                 </tr>
               </thead>
+
               <tbody className="divide-y">
                 {payments.map((payment) => (
                   <tr
@@ -184,18 +185,20 @@ export default function TenantDashboardPage() {
                       <span
                         className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                           payment.status === "COMPLETED"
-                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                            ? "bg-primary text-primary-foreground dark:bg-primary/60 dark:text-primary-foreground"
                             : payment.status === "PENDING"
-                              ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
-                              : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                              ? "bg-accent-foreground text-accent-foreground dark:bg-yellow-900/30 dark:text-primary"
+                              : "bg-destructive text-destructive-foreground dark:bg-destructive/30 dark:text-destructive-foreground"
                         }`}
                       >
                         {payment.status}
                       </span>
                     </td>
+
                     <td className="px-4 py-4 text-muted-foreground font-mono text-xs">
                       {payment.transactionId || "N/A"}
                     </td>
+
                   </tr>
                 ))}
               </tbody>

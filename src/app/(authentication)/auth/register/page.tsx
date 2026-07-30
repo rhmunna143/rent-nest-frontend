@@ -14,22 +14,35 @@ import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { cn } from "@/lib/cn";
 import type { User } from "@/types";
+import Logo from "@/utils/images/logo";
 
 function dashboardFor(role: string) {
   switch (role) {
-    case "TENANT": return "/dashboard/tenant";
-    case "LANDLORD": return "/dashboard/landlord";
-    default: return "/";
+    case "TENANT":
+      return "/dashboard/tenant";
+    case "LANDLORD":
+      return "/dashboard/landlord";
+    default:
+      return "/";
   }
 }
 
 export default function RegisterPage() {
   const router = useRouter();
   const { refreshUser } = useAuth();
-  const [selectedRole, setSelectedRole] = useState<"TENANT" | "LANDLORD">("TENANT");
+  const [selectedRole, setSelectedRole] = useState<"TENANT" | "LANDLORD">(
+    "TENANT",
+  );
 
   const {
     register,
@@ -66,16 +79,23 @@ export default function RegisterPage() {
       <Card className="w-full max-w-md shadow-lg animate-fade-in">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-2">
-            <span className="text-4xl">🏠</span>
+            <Logo />
           </div>
-          <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            Create an account
+          </CardTitle>
           <CardDescription>
             Join RentNest as a tenant or landlord
           </CardDescription>
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} id="register-form" noValidate className="space-y-5">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            id="register-form"
+            noValidate
+            className="space-y-5"
+          >
             {/* Role selector */}
             <div className="space-y-2">
               <Label>I am a…</Label>
@@ -90,7 +110,7 @@ export default function RegisterPage() {
                       "flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all hover:border-primary/60",
                       selectedRole === role
                         ? "border-primary bg-primary/5"
-                        : "border-muted bg-card"
+                        : "border-muted bg-card",
                     )}
                   >
                     {role === "TENANT" ? (
@@ -110,7 +130,9 @@ export default function RegisterPage() {
                 ))}
               </div>
               {errors.role && (
-                <p className="text-xs text-destructive">{errors.role.message}</p>
+                <p className="text-xs text-destructive">
+                  {errors.role.message}
+                </p>
               )}
             </div>
 
@@ -123,11 +145,16 @@ export default function RegisterPage() {
                 placeholder="Jane Smith"
                 autoComplete="name"
                 aria-invalid={!!errors.name}
-                aria-describedby={errors.name ? "register-name-error" : undefined}
+                aria-describedby={
+                  errors.name ? "register-name-error" : undefined
+                }
                 {...register("name")}
               />
               {errors.name && (
-                <p id="register-name-error" className="text-xs text-destructive">
+                <p
+                  id="register-name-error"
+                  className="text-xs text-destructive"
+                >
                   {errors.name.message}
                 </p>
               )}
@@ -142,11 +169,16 @@ export default function RegisterPage() {
                 placeholder="jane@example.com"
                 autoComplete="email"
                 aria-invalid={!!errors.email}
-                aria-describedby={errors.email ? "register-email-error" : undefined}
+                aria-describedby={
+                  errors.email ? "register-email-error" : undefined
+                }
                 {...register("email")}
               />
               {errors.email && (
-                <p id="register-email-error" className="text-xs text-destructive">
+                <p
+                  id="register-email-error"
+                  className="text-xs text-destructive"
+                >
                   {errors.email.message}
                 </p>
               )}
@@ -161,11 +193,16 @@ export default function RegisterPage() {
                 placeholder="Min. 6 characters"
                 autoComplete="new-password"
                 aria-invalid={!!errors.password}
-                aria-describedby={errors.password ? "register-password-error" : undefined}
+                aria-describedby={
+                  errors.password ? "register-password-error" : undefined
+                }
                 {...register("password")}
               />
               {errors.password && (
-                <p id="register-password-error" className="text-xs text-destructive">
+                <p
+                  id="register-password-error"
+                  className="text-xs text-destructive"
+                >
                   {errors.password.message}
                 </p>
               )}
@@ -177,7 +214,9 @@ export default function RegisterPage() {
               disabled={isSubmitting}
               id="register-submit"
             >
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isSubmitting && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
               {isSubmitting ? "Creating account…" : "Create account"}
             </Button>
           </form>

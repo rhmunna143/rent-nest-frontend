@@ -64,6 +64,8 @@ export function Navbar() {
   const navLinks = [
     { href: "/", label: "Home", icon: Home },
     { href: "/properties", label: "Properties", icon: Search },
+    { href: "/about", label: "About Us", icon: Home },
+    { href: "/contact", label: "Contact Us", icon: Home },
   ];
 
   async function handleLogout() {

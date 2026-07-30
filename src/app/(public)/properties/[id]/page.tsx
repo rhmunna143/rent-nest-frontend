@@ -4,6 +4,7 @@ import { PropertyStatusBadge } from "@/components/ui/status-badge";
 import { RentCTA } from "@/components/properties/RentCTA";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { Property } from "@/types";
+import Image from "next/image";
 
 interface PropertyDetailPageProps {
   params: Promise<{ id: string }>;
@@ -46,7 +47,7 @@ export default async function PropertyDetailPage(
   const otherImages = property.images.slice(1);
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-5xl">
+    <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
           <PropertyStatusBadge status={property.status} />
@@ -70,10 +71,12 @@ export default async function PropertyDetailPage(
           {/* Images */}
           <div className="space-y-2">
             <div className="aspect-video w-full rounded-xl overflow-hidden bg-muted relative">
-              <img
+              <Image
                 src={mainImage}
                 alt={property.title}
                 className="object-cover w-full h-full"
+                width={700}
+                height={600}
               />
             </div>
             {otherImages.length > 0 && (
@@ -83,10 +86,12 @@ export default async function PropertyDetailPage(
                     key={idx}
                     className="aspect-video rounded-md overflow-hidden bg-muted relative"
                   >
-                    <img
+                    <Image
                       src={img}
                       alt={`Gallery image ${idx + 1}`}
                       className="object-cover w-full h-full"
+                      width={700}
+                      height={600}
                     />
                   </div>
                 ))}
@@ -169,7 +174,7 @@ export default async function PropertyDetailPage(
 
         {/* Sidebar */}
         <div className="space-y-6">
-          <div className="p-6 border rounded-xl bg-card sticky top-24 shadow-sm">
+          <div className="p-6 border rounded-xl bg-card sticky z-100 top-24 shadow-sm">
             <div className="mb-6">
               <p className="text-3xl font-bold text-primary">
                 ${property.rentAmount}

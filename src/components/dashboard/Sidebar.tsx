@@ -130,7 +130,7 @@ export function Sidebar() {
       <div className="border-t p-4">
         <Button
           variant="outline"
-          className="w-full justify-start text-muted-foreground"
+          className="w-full justify-start text-muted-foreground cursor-pointer"
           onClick={handleLogout}
         >
           <LogOut className="mr-2 h-4 w-4" />

@@ -27,8 +27,8 @@ export default function PaymentInitiationPage({
           "/payments/create",
           { 
             rentalRequestId: id,
-            successUrl: `${window.location.origin}/payment/success`,
-            cancelUrl: `${window.location.origin}/payment/cancel`
+            successUrl: `${window.location.origin}/payment/success?rentalId=${id}`,
+            cancelUrl: `${window.location.origin}/payment/cancel?rentalId=${id}`
           },
         );
 

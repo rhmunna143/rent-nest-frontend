@@ -21,7 +21,7 @@ import {
 
 export default function AdminDashboardPage() {
   const { user } = useAuth();
-  
+
   const [totalProperties, setTotalProperties] = useState<number | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -40,8 +40,8 @@ export default function AdminDashboardPage() {
         if (propRes.ok && propRes.meta) {
           setTotalProperties(propRes.meta.total);
         } else if (propRes.ok && propRes.data) {
-           // fallback if meta isn't correctly returning total
-           setTotalProperties(propRes.data.length);
+          // fallback if meta isn't correctly returning total
+          setTotalProperties(propRes.data.length);
         }
       } catch (error) {
         console.error("Failed to load analytics", error);
@@ -59,7 +59,14 @@ export default function AdminDashboardPage() {
   }));
 
   // Theme colors for the bars
-  const COLORS = ["#0ea5e9", "#10b981", "#8b5cf6", "#f59e0b", "#f43f5e", "#64748b"];
+  const COLORS = [
+    "#0ea5e9",
+    "#10b981",
+    "#8b5cf6",
+    "#f59e0b",
+    "#f43f5e",
+    "#64748b",
+  ];
 
   if (isLoading) {
     return (
@@ -70,7 +77,7 @@ export default function AdminDashboardPage() {
           <Skeleton className="h-32" />
           <Skeleton className="h-32" />
         </div>
-        <Skeleton className="h-[400px] mt-8" />
+        <Skeleton className="h-100 mt-8" />
       </div>
     );
   }
@@ -80,7 +87,8 @@ export default function AdminDashboardPage() {
       <div>
         <h1 className="text-3xl font-bold text-primary">Admin Analytics</h1>
         <p className="text-muted-foreground mt-2">
-          Welcome back, {user?.name || "Admin"}. Here is your live platform overview.
+          Welcome back, {user?.name || "Admin"}. Here is your live platform
+          overview.
         </p>
       </div>
 
@@ -92,8 +100,12 @@ export default function AdminDashboardPage() {
             <Building className="w-7 h-7" />
           </div>
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Active Properties</p>
-            <h2 className="text-3xl font-bold">{totalProperties !== null ? totalProperties : "—"}</h2>
+            <p className="text-sm font-medium text-muted-foreground">
+              Active Properties
+            </p>
+            <h2 className="text-3xl font-bold">
+              {totalProperties !== null ? totalProperties : "—"}
+            </h2>
           </div>
         </div>
 
@@ -103,7 +115,9 @@ export default function AdminDashboardPage() {
             <Tags className="w-7 h-7" />
           </div>
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Platform Categories</p>
+            <p className="text-sm font-medium text-muted-foreground">
+              Platform Categories
+            </p>
             <h2 className="text-3xl font-bold">{categories.length}</h2>
           </div>
         </div>
@@ -114,7 +128,9 @@ export default function AdminDashboardPage() {
             <TrendingUp className="w-7 h-7" />
           </div>
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Marketplace Status</p>
+            <p className="text-sm font-medium text-muted-foreground">
+              Marketplace Status
+            </p>
             <h2 className="text-xl font-bold text-green-600 flex items-center gap-2">
               <ShieldCheck className="w-5 h-5" /> Operational
             </h2>
@@ -127,36 +143,59 @@ export default function AdminDashboardPage() {
         <div className="lg:col-span-2 border rounded-xl bg-card shadow-sm p-6">
           <h3 className="text-lg font-semibold mb-6">Properties by Category</h3>
           {chartData.length > 0 ? (
-            <div className="h-[350px] w-full">
+            <div className="h-87.5 w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted))" />
-                  <XAxis 
-                    dataKey="name" 
+                <BarChart
+                  data={chartData}
+                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    stroke="hsl(var(--muted))"
+                  />
+                  <XAxis
+                    dataKey="name"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                    tick={{
+                      fill: "hsl(var(--muted-foreground))",
+                      fontSize: 12,
+                    }}
                     dy={10}
                   />
-                  <YAxis 
+                  <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                    tick={{
+                      fill: "hsl(var(--muted-foreground))",
+                      fontSize: 12,
+                    }}
                   />
-                  <Tooltip 
+                  <Tooltip
                     cursor={{ fill: "hsl(var(--muted)/0.5)" }}
-                    contentStyle={{ borderRadius: "8px", border: "1px solid hsl(var(--border))" }}
+                    contentStyle={{
+                      borderRadius: "8px",
+                      border: "1px solid hsl(var(--border))",
+                    }}
                   />
-                  <Bar dataKey="properties" radius={[4, 4, 0, 0]} maxBarSize={60}>
+                  <Bar
+                    dataKey="properties"
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={60}
+                  >
                     {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
                     ))}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="h-[350px] flex items-center justify-center text-muted-foreground border-2 border-dashed rounded-lg">
+            <div className="h-87.5 flex items-center justify-center text-muted-foreground border-2 border-dashed rounded-lg">
               No category data available to chart.
             </div>
           )}
@@ -167,20 +206,23 @@ export default function AdminDashboardPage() {
           <div className="border rounded-xl bg-card shadow-sm p-6">
             <h3 className="text-lg font-semibold mb-2">Category Management</h3>
             <p className="text-muted-foreground text-sm mb-4">
-              Create and manage the primary classification tags used by landlords to list their properties.
+              Create and manage the primary classification tags used by
+              landlords to list their properties.
             </p>
             <Button className="w-full" asChild>
-              <Link href="/dashboard/admin/categories">
-                Manage Categories
-              </Link>
+              <Link href="/dashboard/admin/categories">Manage Categories</Link>
             </Button>
           </div>
 
           <div className="border rounded-xl bg-muted/30 p-6">
-             <h3 className="text-sm font-semibold mb-2 uppercase text-muted-foreground tracking-wider">Dashboard Scope</h3>
-             <p className="text-xs text-muted-foreground leading-relaxed">
-               Because global user aggregates and historical revenue endpoints are currently out of scope for the backend v1 API, this dashboard exclusively showcases 100% live property and category metrics.
-             </p>
+            <h3 className="text-sm font-semibold mb-2 uppercase text-muted-foreground tracking-wider">
+              Dashboard Scope
+            </h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Because global user aggregates and historical revenue endpoints
+              are currently out of scope for the backend v1 API, this dashboard
+              exclusively showcases 100% live property and category metrics.
+            </p>
           </div>
         </div>
       </div>

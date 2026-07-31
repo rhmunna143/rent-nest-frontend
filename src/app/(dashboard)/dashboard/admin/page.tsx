@@ -93,7 +93,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
         {/* Total Properties */}
         <div className="p-6 border rounded-xl bg-card shadow-sm flex items-center gap-4">
           <div className="w-14 h-14 bg-blue-500/10 text-blue-600 rounded-xl flex items-center justify-center shrink-0">
@@ -138,9 +138,9 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Chart Section */}
-        <div className="lg:col-span-2 border rounded-xl bg-card shadow-sm p-6">
+        <div className="xl:col-span-2 border rounded-xl bg-card shadow-sm p-6">
           <h3 className="text-lg font-semibold mb-6">Properties by Category</h3>
           {chartData.length > 0 ? (
             <div className="h-87.5 w-full">

@@ -10,7 +10,16 @@ import Link from "next/link";
 
 function PaymentSuccessContent() {
   const searchParams = useSearchParams();
-  const rentalId = searchParams.get("rentalId");
+  const [rentalId, setRentalId] = useState<string | null>(null);
+  const [isInitializing, setIsInitializing] = useState(true);
+
+  useEffect(() => {
+    // Try to get from URL first, fallback to localStorage if backend stripped query params
+    const idFromUrl = searchParams.get("rentalId");
+    const idFromStorage = typeof window !== "undefined" ? localStorage.getItem("latest_payment_rental_id") : null;
+    setRentalId(idFromUrl || idFromStorage);
+    setIsInitializing(false);
+  }, [searchParams]);
 
   const [status, setStatus] = useState<
     "polling" | "success" | "timeout" | "error"
@@ -18,6 +27,8 @@ function PaymentSuccessContent() {
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
+    if (isInitializing) return;
+
     if (!rentalId) {
       setStatus("error");
       setErrorMessage("No rental ID provided. Unable to verify payment.");

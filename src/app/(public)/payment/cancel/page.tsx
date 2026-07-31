@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { XCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,13 @@ import Link from "next/link";
 
 function PaymentCancelContent() {
   const searchParams = useSearchParams();
-  const rentalId = searchParams.get("rentalId");
+  const [rentalId, setRentalId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const idFromUrl = searchParams.get("rentalId");
+    const idFromStorage = typeof window !== "undefined" ? localStorage.getItem("latest_payment_rental_id") : null;
+    setRentalId(idFromUrl || idFromStorage);
+  }, [searchParams]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4 space-y-6">

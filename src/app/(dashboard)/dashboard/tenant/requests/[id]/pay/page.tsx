@@ -25,10 +25,10 @@ export default function PaymentInitiationPage({
       try {
         const res = await api.post<{ checkoutUrl: string }>(
           "/payments/create",
-          { 
+          {
             rentalRequestId: id,
             successUrl: `${window.location.origin}/payment/success?rentalId=${id}`,
-            cancelUrl: `${window.location.origin}/payment/cancel?rentalId=${id}`
+            cancelUrl: `${window.location.origin}/payment/cancel?rentalId=${id}`,
           },
         );
 
@@ -36,6 +36,7 @@ export default function PaymentInitiationPage({
 
         if (res.ok) {
           if (res.data?.checkoutUrl) {
+            localStorage.setItem("latest_payment_rental_id", id);
             window.location.href = res.data.checkoutUrl;
           } else {
             setError("Invalid response: missing checkout URL.");

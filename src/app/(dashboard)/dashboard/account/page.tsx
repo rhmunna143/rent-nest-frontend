@@ -1,26 +1,52 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { Loader2, User as UserIcon, Mail, Phone, Image as ImageIcon, Lock } from "lucide-react";
+import {
+  Loader2,
+  User as UserIcon,
+  Mail,
+  Phone,
+  Image as ImageIcon,
+  Lock,
+  ShieldCheck,
+  BadgeInfo,
+  CalendarDays,
+} from "lucide-react";
 import { toast } from "sonner";
 
-import { profileUpdateSchema, type ProfileUpdateInput } from "@/lib/schemas/auth.schema";
+import {
+  profileUpdateSchema,
+  type ProfileUpdateInput,
+} from "@/lib/schemas/auth.schema";
 import { api } from "@/lib/api-client";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import type { User } from "@/types";
+import { cn } from "@/lib/cn";
 
 function getInitials(name: string) {
-  return name.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase();
+  return name
+    .split(" ")
+    .slice(0, 2)
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase();
 }
 
 export default function AccountPage() {
@@ -39,7 +65,7 @@ export default function AccountPage() {
   // Redirect unauthenticated users
   useEffect(() => {
     if (!isLoading && !user) {
-      router.replace("/auth/login?returnTo=/account");
+      router.replace("/auth/login?returnTo=/dashboard/account");
     }
   }, [isLoading, user, router]);
 
@@ -58,7 +84,7 @@ export default function AccountPage() {
   async function onSubmit(data: ProfileUpdateInput) {
     // Remove empty optional fields before sending
     const payload = Object.fromEntries(
-      Object.entries(data).filter(([, v]) => v !== "" && v !== undefined)
+      Object.entries(data).filter(([, v]) => v !== "" && v !== undefined),
     );
 
     const result = await api.patch<User>("/auth/me", payload);
@@ -76,9 +102,12 @@ export default function AccountPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto max-w-2xl px-4 py-12 space-y-6">
-        <LoadingSkeleton className="h-8 w-48" />
-        <LoadingSkeleton className="h-64 w-full rounded-xl" />
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+        <LoadingSkeleton className="h-10 w-48 mb-6" />
+        <div className="grid gap-6 md:grid-cols-7">
+          <LoadingSkeleton className="h-64 md:col-span-2 rounded-xl" />
+          <LoadingSkeleton className="h-96 md:col-span-5 rounded-xl" />
+        </div>
       </div>
     );
   }
@@ -86,155 +115,253 @@ export default function AccountPage() {
   if (!user) return null;
 
   return (
-    <div className="container mx-auto max-w-2xl px-4 py-12 space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-3xl font-bold">Account Settings</h1>
-        <p className="text-muted-foreground mt-1">
-          Manage your profile and account preferences
-        </p>
+    <div className="flex-1 space-y-6 p-4 md:p-8 pt-6 animate-fade-in mx-auto w-full">
+      <div className="flex flex-col space-y-2 md:flex-row md:items-center md:justify-between md:space-y-0">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">
+            Account Settings
+          </h2>
+          <p className="text-muted-foreground mt-1">
+            Manage your personal profile and security preferences.
+          </p>
+        </div>
       </div>
 
-      {/* Profile summary */}
-      <Card>
-        <CardContent className="flex items-center gap-4 pt-6">
-          <Avatar className="h-16 w-16">
-            <AvatarImage src={user.profileImage ?? undefined} alt={user.name} />
-            <AvatarFallback className="text-xl bg-primary text-primary-foreground">
-              {getInitials(user.name)}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <p className="text-lg font-semibold">{user.name}</p>
-            <p className="text-sm text-muted-foreground">{user.email}</p>
-            <span className="mt-1 inline-flex items-center rounded-full bg-primary/10 text-primary text-xs font-medium px-2.5 py-0.5">
-              {user.role.charAt(0) + user.role.slice(1).toLowerCase()}
-            </span>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="grid gap-6 md:grid-cols-7 lg:grid-cols-12">
+        {/* Left Column - Profile Overview */}
+        <div className="md:col-span-3 lg:col-span-4 space-y-6">
+          <Card className="overflow-hidden border-border/50 shadow-sm">
+            <div className="h-24 bg-linear-to-r from-primary/20 via-primary/10 to-blue-500/10 w-full" />
+            <CardContent className="px-6 pb-6 pt-0">
+              <div className="flex flex-col items-center text-center -mt-12 space-y-4">
+                <Avatar className="h-24 w-24 border-4 border-card shadow-sm">
+                  <AvatarImage
+                    src={user.profileImage ?? undefined}
+                    alt={user.name}
+                    className="object-cover"
+                  />
+                  <AvatarFallback className="text-3xl bg-primary text-primary-foreground font-semibold">
+                    {getInitials(user.name)}
+                  </AvatarFallback>
+                </Avatar>
 
-      {/* Edit form */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Edit Profile</CardTitle>
-          <CardDescription>
-            Update your personal information. Leave a field blank to keep it unchanged.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            id="account-form"
-            noValidate
-            className="space-y-5"
-          >
-            {/* Name */}
-            <div className="space-y-1.5">
-              <Label htmlFor="account-name" className="flex items-center gap-1.5">
-                <UserIcon className="h-3.5 w-3.5" /> Full name
-              </Label>
-              <Input
-                id="account-name"
-                type="text"
-                placeholder={user.name}
-                aria-invalid={!!errors.name}
-                aria-describedby={errors.name ? "account-name-error" : undefined}
-                {...register("name")}
-              />
-              {errors.name && (
-                <p id="account-name-error" className="text-xs text-destructive">
-                  {errors.name.message}
-                </p>
-              )}
-            </div>
+                <div className="space-y-1">
+                  <h3 className="text-xl font-bold">{user.name}</h3>
+                  <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                    <Mail className="h-3.5 w-3.5" />
+                    <span className="text-sm">{user.email}</span>
+                  </div>
+                </div>
 
-            {/* Email (read-only) */}
-            <div className="space-y-1.5">
-              <Label className="flex items-center gap-1.5">
-                <Mail className="h-3.5 w-3.5" /> Email
-              </Label>
-              <Input
-                type="email"
-                value={user.email}
-                disabled
-                className="bg-muted"
-                aria-label="Email (read-only)"
-              />
-              <p className="text-xs text-muted-foreground">Email cannot be changed.</p>
-            </div>
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 text-primary px-3 py-1 text-xs font-semibold shadow-sm uppercase tracking-wide">
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                  {user.role}
+                </div>
+              </div>
 
-            {/* Phone */}
-            <div className="space-y-1.5">
-              <Label htmlFor="account-phone" className="flex items-center gap-1.5">
-                <Phone className="h-3.5 w-3.5" /> Phone number
-              </Label>
-              <Input
-                id="account-phone"
-                type="tel"
-                placeholder="+1 555 000 0000"
-                aria-invalid={!!errors.phone}
-                {...register("phone")}
-              />
-              {errors.phone && (
-                <p className="text-xs text-destructive">{errors.phone.message}</p>
-              )}
-            </div>
+              <Separator className="my-6" />
 
-            {/* Profile image URL */}
-            <div className="space-y-1.5">
-              <Label htmlFor="account-profile-image" className="flex items-center gap-1.5">
-                <ImageIcon className="h-3.5 w-3.5" /> Profile image URL
-              </Label>
-              <Input
-                id="account-profile-image"
-                type="url"
-                placeholder="https://example.com/your-photo.jpg"
-                aria-invalid={!!errors.profileImage}
-                aria-describedby={errors.profileImage ? "account-profile-image-error" : undefined}
-                {...register("profileImage")}
-              />
-              {errors.profileImage && (
-                <p id="account-profile-image-error" className="text-xs text-destructive">
-                  {errors.profileImage.message}
-                </p>
-              )}
-            </div>
+              <div className="space-y-3 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground flex items-center gap-2">
+                    <BadgeInfo className="h-4 w-4" /> Account Status
+                  </span>
+                  <span className="font-medium text-green-600 bg-green-100 px-2 py-0.5 rounded text-xs">
+                    Active
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground flex items-center gap-2">
+                    <CalendarDays className="h-4 w-4" /> Member Since
+                  </span>
+                  <span className="font-medium">
+                    {new Date(user.createdAt).toLocaleDateString(undefined, {
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-            <Separator />
-
-            {/* New password */}
-            <div className="space-y-1.5">
-              <Label htmlFor="account-password" className="flex items-center gap-1.5">
-                <Lock className="h-3.5 w-3.5" /> New password
-              </Label>
-              <Input
-                id="account-password"
-                type="password"
-                placeholder="Leave blank to keep current password"
-                autoComplete="new-password"
-                aria-invalid={!!errors.password}
-                aria-describedby={errors.password ? "account-password-error" : undefined}
-                {...register("password")}
-              />
-              {errors.password && (
-                <p id="account-password-error" className="text-xs text-destructive">
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full sm:w-auto"
-              disabled={isSubmitting || !isDirty}
-              id="account-save"
+        {/* Right Column - Edit Form */}
+        <div className="md:col-span-4 lg:col-span-8">
+          <Card className="border-border/50 shadow-sm">
+            <CardHeader className="pb-4">
+              <CardTitle>Profile Details</CardTitle>
+              <CardDescription>
+                Update your contact information. Leave the password field blank
+                to keep your current password.
+              </CardDescription>
+            </CardHeader>
+            <form
+              id="account-form"
+              noValidate
+              onSubmit={handleSubmit(onSubmit)}
             >
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isSubmitting ? "Saving…" : "Save changes"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Name */}
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="account-name"
+                      className="flex items-center gap-1.5 font-medium"
+                    >
+                      <UserIcon className="h-4 w-4 text-muted-foreground" />{" "}
+                      Full Name
+                    </Label>
+                    <Input
+                      id="account-name"
+                      type="text"
+                      className={cn(
+                        "bg-background",
+                        errors.name &&
+                          "border-destructive focus-visible:ring-destructive",
+                      )}
+                      placeholder={user.name}
+                      aria-invalid={!!errors.name}
+                      {...register("name")}
+                    />
+                    {errors.name && (
+                      <p className="text-xs text-destructive font-medium">
+                        {errors.name.message}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Phone */}
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="account-phone"
+                      className="flex items-center gap-1.5 font-medium"
+                    >
+                      <Phone className="h-4 w-4 text-muted-foreground" /> Phone
+                      Number
+                    </Label>
+                    <Input
+                      id="account-phone"
+                      type="tel"
+                      className={cn(
+                        "bg-background",
+                        errors.phone &&
+                          "border-destructive focus-visible:ring-destructive",
+                      )}
+                      placeholder="+1 555 000 0000"
+                      aria-invalid={!!errors.phone}
+                      {...register("phone")}
+                    />
+                    {errors.phone && (
+                      <p className="text-xs text-destructive font-medium">
+                        {errors.phone.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Email (read-only) */}
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-1.5 font-medium">
+                    <Mail className="h-4 w-4 text-muted-foreground" /> Email
+                    Address
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      type="email"
+                      value={user.email}
+                      disabled
+                      className="bg-muted/50 cursor-not-allowed text-muted-foreground"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/70 font-medium bg-muted px-2 py-0.5 rounded">
+                      Cannot be changed
+                    </span>
+                  </div>
+                </div>
+
+                {/* Profile image URL */}
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="account-profile-image"
+                    className="flex items-center gap-1.5 font-medium"
+                  >
+                    <ImageIcon className="h-4 w-4 text-muted-foreground" />{" "}
+                    Profile Image URL
+                  </Label>
+                  <Input
+                    id="account-profile-image"
+                    type="url"
+                    className={cn(
+                      "bg-background",
+                      errors.profileImage &&
+                        "border-destructive focus-visible:ring-destructive",
+                    )}
+                    placeholder="https://example.com/your-photo.jpg"
+                    aria-invalid={!!errors.profileImage}
+                    {...register("profileImage")}
+                  />
+                  {errors.profileImage && (
+                    <p className="text-xs text-destructive font-medium">
+                      {errors.profileImage.message}
+                    </p>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Provide a direct link to an image (e.g., Imgur, GitHub).
+                  </p>
+                </div>
+
+                <Separator className="my-6" />
+
+                {/* Security Section */}
+                <div>
+                  <h3 className="text-lg font-medium mb-4">Security</h3>
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="account-password"
+                      className="flex items-center gap-1.5 font-medium"
+                    >
+                      <Lock className="h-4 w-4 text-muted-foreground" /> Change
+                      Password
+                    </Label>
+                    <Input
+                      id="account-password"
+                      type="password"
+                      className={cn(
+                        "bg-background max-w-md",
+                        errors.password &&
+                          "border-destructive focus-visible:ring-destructive",
+                      )}
+                      placeholder="Enter new password"
+                      autoComplete="new-password"
+                      aria-invalid={!!errors.password}
+                      {...register("password")}
+                    />
+                    {errors.password && (
+                      <p className="text-xs text-destructive font-medium">
+                        {errors.password.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="bg-muted/30 px-6 py-4 border-t flex justify-end">
+                <Button
+                  type="submit"
+                  size="lg"
+                  disabled={isSubmitting || !isDirty}
+                  className="w-full sm:w-auto shadow-sm"
+                  id="account-save"
+                >
+                  {isSubmitting && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  {isSubmitting ? "Saving Changes..." : "Save Changes"}
+                </Button>
+              </CardFooter>
+            </form>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

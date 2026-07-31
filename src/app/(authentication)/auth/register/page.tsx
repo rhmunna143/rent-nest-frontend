@@ -25,6 +25,7 @@ import {
 import { cn } from "@/lib/cn";
 import type { User } from "@/types";
 import Logo from "@/utils/images/logo";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 function dashboardFor(role: string) {
   switch (role) {
@@ -75,7 +76,14 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
+    <div className="min-h-[calc(100vh-4rem)] grid md:grid-cols-2 items-center justify-center md:gap-12 p-4">
+      <DotLottieReact
+        src="https://lottie.host/658192f0-15d1-47b0-87ce-318da80dcdc6/IPCEaK8PNz.lottie"
+        loop
+        autoplay
+        className="w-full max-w-xxl mx-auto hidden md:flex"
+      />
+
       <Card className="w-full max-w-md shadow-lg animate-fade-in">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-2">

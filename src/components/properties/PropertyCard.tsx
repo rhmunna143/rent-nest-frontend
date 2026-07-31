@@ -18,7 +18,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
         href={`/properties/${property.id}`}
         className="block relative aspect-video overflow-hidden"
       >
-        {/* Placeholder gradient if no image */}
+        {/* Placeholder linear if no image */}
         <div className="absolute inset-0 bg-muted/20" />
         {/* Actual image */}
         <img

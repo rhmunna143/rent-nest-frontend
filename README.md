@@ -8,6 +8,14 @@ Built on **Next.js (App Router)** and styled with **Tailwind CSS**, RentNest pro
 
 ---
 
+## 🔗 Backend Information
+
+This frontend connects to a dedicated backend service. You can find the source code and live API here:
+- **Backend Repository:** [https://github.com/rhmunna143/rent-nest-backend](https://github.com/rhmunna143/rent-nest-backend)
+- **Live Backend API URL:** `https://rent-nest-backend-eight.vercel.app/api`
+
+---
+
 ## ✨ Comprehensive Features
 
 ### 🌐 Public Marketplace

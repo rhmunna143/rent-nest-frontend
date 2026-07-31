@@ -127,10 +127,10 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div className="flex-1 w-full max-w-2xl relative z-10 hidden md:block">
+          <div className="flex-1 w-full relative z-10">
             <div className="absolute inset-0 bg-linear-to-tr from-primary/20 to-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
             <DotLottieReact
-              src="https://lottie.host/9ddae27f-81ac-4221-b043-f60a6de269ff/rDDX4YO8qp.lottie"
+              src="https://lottie.host/3cfcbdbf-6602-4989-ab0b-d24f6aee3294/5tajUe8fVj.lottie"
               loop
               autoplay
               className="w-full h-auto drop-shadow-2xl scale-110 relative z-10"
@@ -281,9 +281,9 @@ export default async function HomePage() {
       <section className="py-24 bg-primary/5">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center gap-12">
-            <div className="flex-1 w-full max-w-lg">
+            <div className="flex-1 w-full">
               <DotLottieReact
-                src="https://lottie.host/9ddae27f-81ac-4221-b043-f60a6de269ff/rDDX4YO8qp.lottie"
+                src="https://lottie.host/2aaaeb91-2e33-4c1f-822e-229fe49c5eb7/SPedm53EAu.lottie"
                 loop
                 autoplay
                 className="w-full drop-shadow-xl hue-rotate-90"
@@ -391,9 +391,10 @@ export default async function HomePage() {
                 </Button>
               </div>
             </div>
-            <div className="flex-1 w-full max-w-lg">
+
+            <div className="flex-1 w-full">
               <DotLottieReact
-                src="https://lottie.host/9ddae27f-81ac-4221-b043-f60a6de269ff/rDDX4YO8qp.lottie"
+                src="https://lottie.host/c4e0c755-4546-4309-a09c-c31f1b836ff9/QeFTQOPw12.lottie"
                 loop
                 autoplay
                 className="w-full drop-shadow-xl hue-rotate-180 -scale-x-100"

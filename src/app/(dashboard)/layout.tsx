@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Sidebar } from "@/components/dashboard/Sidebar";
+import { MobileSidebar } from "@/components/dashboard/MobileSidebar";
 import Logo from "@/utils/images/logo";
 import NavAvatar from "@/components/layout/Avatar";
 
@@ -11,6 +12,7 @@ export default function DashboardLayout({
   return (
     <div className="flex h-screen flex-col bg-muted/10">
       <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6 shrink-0 shadow-sm">
+        <MobileSidebar />
         <Link
           href="/"
           className="flex items-center gap-2 font-bold text-xl text-primary"
@@ -28,7 +30,7 @@ export default function DashboardLayout({
 
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar for Desktop */}
-        <div className="hidden md:block shrink-0">
+        <div className="hidden lg:block shrink-0">
           <Sidebar />
         </div>
 

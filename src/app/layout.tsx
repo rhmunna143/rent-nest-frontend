@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/providers/Providers";
+import { FloatingActions } from "@/components/layout/FloatingActions";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -38,6 +39,7 @@ export default function RootLayout({
       >
         <Providers>
           {children}
+          <FloatingActions />
         </Providers>
       </body>
     </html>

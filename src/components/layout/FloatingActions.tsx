@@ -47,7 +47,7 @@ export function FloatingActions() {
           src="https://lottie.host/9687b192-7205-456a-abc0-dcad26843575/910UK3OzCa.lottie"
           loop
           autoplay
-          className="w-full h-full object-cover scale-150"
+          className="w-full h-full scale-150"
         />
 
         {/* Tooltip */}

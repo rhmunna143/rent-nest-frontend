@@ -164,7 +164,7 @@ export default async function HomePage() {
 
           <div className="grid md:grid-cols-3 gap-12 relative py-10">
             {/* Animated Connecting Line */}
-            <div className="hidden md:block absolute top-1/2 left-[15%] right-[15%] h-1 bg-muted rounded-full -translate-y-1/2 z-0 overflow-hidden">
+            <div className="hidden lg:block absolute top-1/2 left-[15%] right-[15%] h-1 bg-muted rounded-full -translate-y-1/2 z-0 overflow-hidden">
               <div className="w-1/3 h-full bg-primary/60 blur-[1px] animate-flow-line rounded-full"></div>
             </div>
 

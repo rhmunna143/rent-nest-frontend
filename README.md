@@ -8,11 +8,18 @@ Built on **Next.js (App Router)** and styled with **Tailwind CSS**, RentNest pro
 
 ---
 
-## 🔗 Backend Information
+## 🔗 Project Links & Demo
 
-This frontend connects to a dedicated backend service. You can find the source code and live API here:
-- **Backend Repository:** [https://github.com/rhmunna143/rent-nest-backend](https://github.com/rhmunna143/rent-nest-backend)
-- **Live Backend API URL:** `https://rent-nest-backend-eight.vercel.app/api`
+- **Frontend Repo:** [https://github.com/rhmunna143/rent-nest-frontend](https://github.com/rhmunna143/rent-nest-frontend)
+- **Live Frontend:** [https://rent-nest-frontend-sigma.vercel.app](https://rent-nest-frontend-sigma.vercel.app)
+- **Backend API:** `https://rent-nest-backend-eight.vercel.app/api`
+- **Demo Video:** [https://youtu.be/z8wbl2pG3k8](https://youtu.be/z8wbl2pG3k8)
+- **Backend Repo:** [https://github.com/rhmunna143/rent-nest-backend](https://github.com/rhmunna143/rent-nest-backend)
+
+### 🔐 Admin Demo Credentials
+To explore the Admin dashboard on the live site without registering, you can use the seeded admin account:
+- **Email:** `admin@rentnest.com`
+- **Password:** `admin123`
 
 ---
 

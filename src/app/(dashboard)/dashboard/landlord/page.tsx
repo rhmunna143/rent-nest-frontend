@@ -8,6 +8,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { RentalStatusBadge } from "@/components/ui/status-badge";
 import { format } from "date-fns";
+import { EmptyState } from "@/components/shared";
 
 export default function LandlordDashboardPage() {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -131,9 +132,12 @@ export default function LandlordDashboardPage() {
           </div>
           <div className="p-6 flex-1">
             {recentRequests.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-muted-foreground space-y-2">
-                <Users className="w-8 h-8 opacity-20" />
-                <p>No recent requests</p>
+              <div className="h-full pt-4">
+                <EmptyState
+                  icon={Users}
+                  title="No recent requests"
+                  description="You don't have any new rental requests."
+                />
               </div>
             ) : (
               <div className="space-y-4">
@@ -171,14 +175,13 @@ export default function LandlordDashboardPage() {
           </div>
           <div className="p-6 flex-1">
             {properties.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-muted-foreground space-y-4">
-                <Building2 className="w-12 h-12 opacity-20" />
-                <p>You haven't listed any properties yet.</p>
-                <Button variant="outline" asChild>
-                  <Link href="/dashboard/landlord/properties/new">
-                    List your first property
-                  </Link>
-                </Button>
+              <div className="h-full pt-4">
+                <EmptyState
+                  icon={Building2}
+                  title="No properties listed"
+                  description="You haven't listed any properties yet."
+                  action={{ label: "List a Property", onClick: () => window.location.href = "/dashboard/landlord/properties/new" }}
+                />
               </div>
             ) : (
               <div className="space-y-4">

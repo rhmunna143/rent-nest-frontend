@@ -12,6 +12,7 @@ import type { RentalRequest, Payment } from "@/types";
 import { api } from "@/lib/api-client";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/shared";
 
 export default function TenantDashboardPage() {
   const [rentals, setRentals] = useState<RentalRequest[]>([]);
@@ -82,15 +83,12 @@ export default function TenantDashboardPage() {
         )}
 
         {rentals.length === 0 ? (
-          <div className="text-center py-12 border rounded-lg bg-muted/20 border-dashed">
-            <h3 className="text-lg font-medium mb-2">No requests yet</h3>
-            <p className="text-muted-foreground mb-4">
-              You haven't requested any properties.
-            </p>
-            <Button asChild>
-              <Link href="/properties">Browse Properties</Link>
-            </Button>
-          </div>
+          <EmptyState
+            icon={FileText}
+            title="No requests yet"
+            description="You haven't requested any properties."
+            action={{ label: "Browse Properties", onClick: () => window.location.href = "/properties" }}
+          />
         ) : (
           <div className="border rounded-lg overflow-hidden bg-card shadow-sm overflow-x-auto">
             <table className="w-full text-sm text-left">
@@ -156,9 +154,11 @@ export default function TenantDashboardPage() {
         </div>
 
         {payments.length === 0 ? (
-          <div className="text-center py-8 border rounded-lg bg-muted/20 border-dashed">
-            <p className="text-muted-foreground">No payments found.</p>
-          </div>
+          <EmptyState
+            icon={CreditCard}
+            title="No payments found"
+            description="You have no payment history at this time."
+          />
         ) : (
           <div className="border rounded-lg overflow-hidden bg-card shadow-sm overflow-x-auto">
             <table className="w-full text-sm text-left">

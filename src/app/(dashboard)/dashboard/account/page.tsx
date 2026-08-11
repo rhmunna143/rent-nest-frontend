@@ -37,6 +37,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
+import { FormField, SubmitButton } from "@/components/shared";
 import type { User } from "@/types";
 import { cn } from "@/lib/cn";
 
@@ -204,60 +205,31 @@ export default function AccountPage() {
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Name */}
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="account-name"
-                      className="flex items-center gap-1.5 font-medium"
-                    >
-                      <UserIcon className="h-4 w-4 text-muted-foreground" />{" "}
-                      Full Name
-                    </Label>
-                    <Input
-                      id="account-name"
-                      type="text"
-                      className={cn(
-                        "bg-background",
-                        errors.name &&
-                          "border-destructive focus-visible:ring-destructive",
-                      )}
-                      placeholder={user.name}
-                      aria-invalid={!!errors.name}
-                      {...register("name")}
-                    />
-                    {errors.name && (
-                      <p className="text-xs text-destructive font-medium">
-                        {errors.name.message}
-                      </p>
-                    )}
-                  </div>
+                  <FormField
+                    id="account-name"
+                    label={
+                      <div className="flex items-center gap-1.5 font-medium">
+                        <UserIcon className="h-4 w-4 text-muted-foreground" /> Full Name
+                      </div>
+                    }
+                    placeholder={user.name}
+                    error={errors.name?.message}
+                    {...register("name")}
+                  />
 
                   {/* Phone */}
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="account-phone"
-                      className="flex items-center gap-1.5 font-medium"
-                    >
-                      <Phone className="h-4 w-4 text-muted-foreground" /> Phone
-                      Number
-                    </Label>
-                    <Input
-                      id="account-phone"
-                      type="tel"
-                      className={cn(
-                        "bg-background",
-                        errors.phone &&
-                          "border-destructive focus-visible:ring-destructive",
-                      )}
-                      placeholder="+1 555 000 0000"
-                      aria-invalid={!!errors.phone}
-                      {...register("phone")}
-                    />
-                    {errors.phone && (
-                      <p className="text-xs text-destructive font-medium">
-                        {errors.phone.message}
-                      </p>
-                    )}
-                  </div>
+                  <FormField
+                    id="account-phone"
+                    type="tel"
+                    label={
+                      <div className="flex items-center gap-1.5 font-medium">
+                        <Phone className="h-4 w-4 text-muted-foreground" /> Phone Number
+                      </div>
+                    }
+                    placeholder="+1 555 000 0000"
+                    error={errors.phone?.message}
+                    {...register("phone")}
+                  />
                 </div>
 
                 {/* Email (read-only) */}
@@ -280,83 +252,50 @@ export default function AccountPage() {
                 </div>
 
                 {/* Profile image URL */}
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="account-profile-image"
-                    className="flex items-center gap-1.5 font-medium"
-                  >
-                    <ImageIcon className="h-4 w-4 text-muted-foreground" />{" "}
-                    Profile Image URL
-                  </Label>
-                  <Input
-                    id="account-profile-image"
-                    type="url"
-                    className={cn(
-                      "bg-background",
-                      errors.profileImage &&
-                        "border-destructive focus-visible:ring-destructive",
-                    )}
-                    placeholder="https://example.com/your-photo.jpg"
-                    aria-invalid={!!errors.profileImage}
-                    {...register("profileImage")}
-                  />
-                  {errors.profileImage && (
-                    <p className="text-xs text-destructive font-medium">
-                      {errors.profileImage.message}
-                    </p>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    Provide a direct link to an image (e.g., Imgur, GitHub).
-                  </p>
-                </div>
+                <FormField
+                  id="account-profile-image"
+                  type="url"
+                  label={
+                    <div className="flex items-center gap-1.5 font-medium">
+                      <ImageIcon className="h-4 w-4 text-muted-foreground" /> Profile Image URL
+                    </div>
+                  }
+                  description="Provide a direct link to an image (e.g., Imgur, GitHub)."
+                  placeholder="https://example.com/your-photo.jpg"
+                  error={errors.profileImage?.message}
+                  {...register("profileImage")}
+                />
 
                 <Separator className="my-6" />
 
                 {/* Security Section */}
                 <div>
                   <h3 className="text-lg font-medium mb-4">Security</h3>
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="account-password"
-                      className="flex items-center gap-1.5 font-medium"
-                    >
-                      <Lock className="h-4 w-4 text-muted-foreground" /> Change
-                      Password
-                    </Label>
-                    <Input
-                      id="account-password"
-                      type="password"
-                      className={cn(
-                        "bg-background max-w-md",
-                        errors.password &&
-                          "border-destructive focus-visible:ring-destructive",
-                      )}
-                      placeholder="Enter new password"
-                      autoComplete="new-password"
-                      aria-invalid={!!errors.password}
-                      {...register("password")}
-                    />
-                    {errors.password && (
-                      <p className="text-xs text-destructive font-medium">
-                        {errors.password.message}
-                      </p>
-                    )}
-                  </div>
+                  <FormField
+                    id="account-password"
+                    type="password"
+                    label={
+                      <div className="flex items-center gap-1.5 font-medium">
+                        <Lock className="h-4 w-4 text-muted-foreground" /> Change Password
+                      </div>
+                    }
+                    placeholder="Enter new password"
+                    autoComplete="new-password"
+                    error={errors.password?.message}
+                    {...register("password")}
+                  />
                 </div>
               </CardContent>
               <CardFooter className="bg-muted/30 px-6 py-4 border-t flex justify-end">
-                <Button
-                  type="submit"
+                <SubmitButton
                   size="lg"
+                  isLoading={isSubmitting}
                   disabled={isSubmitting || !isDirty}
                   className="w-full sm:w-auto shadow-sm"
                   id="account-save"
                 >
-                  {isSubmitting && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  {isSubmitting ? "Saving Changes..." : "Save Changes"}
-                </Button>
+                  Save Changes
+                </SubmitButton>
               </CardFooter>
             </form>
           </Card>

@@ -4,7 +4,7 @@ import { Input, InputProps } from "@/components/ui/input";
 import { cn } from "@/lib/cn";
 
 export interface FormFieldProps extends InputProps {
-  label: string;
+  label: React.ReactNode;
   error?: string;
   description?: string;
   containerClassName?: string;

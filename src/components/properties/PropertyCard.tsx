@@ -4,6 +4,7 @@ import { BedDouble, Bath, MapPin, Star } from "lucide-react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { PropertyStatusBadge } from "@/components/ui/status-badge";
 import type { Property } from "@/types";
+import { SavePropertyButton } from "./SavePropertyButton";
 
 interface PropertyCardProps {
   property: Property;
@@ -30,12 +31,15 @@ export function PropertyCard({ property }: PropertyCardProps) {
         <div className="absolute top-2 left-2">
           <PropertyStatusBadge status={property.status} />
         </div>
-        {property.averageRating !== undefined && property.averageRating > 0 && (
-          <div className="absolute top-2 right-2 bg-background/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-medium flex items-center gap-1 shadow-sm">
-            <Star className="h-3 w-3 fill-yellow-400 text-yellow-500" />
-            {property.averageRating.toFixed(1)}
-          </div>
-        )}
+        <div className="absolute top-2 right-2 flex flex-col items-end gap-2">
+          {property.averageRating !== undefined && property.averageRating > 0 && (
+            <div className="bg-background/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-medium flex items-center gap-1 shadow-sm">
+              <Star className="h-3 w-3 fill-yellow-400 text-yellow-500" />
+              {property.averageRating.toFixed(1)}
+            </div>
+          )}
+          <SavePropertyButton property={property} />
+        </div>
       </Link>
 
       <CardContent className="p-4 flex-1 space-y-2">

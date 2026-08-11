@@ -127,20 +127,35 @@ export function PropertyFilters({ categories }: PropertyFiltersProps) {
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="bedrooms">Bedrooms</Label>
-        <select
-          id="bedrooms"
-          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-          value={currentBedrooms}
-          onChange={(e) => updateFilter("bedrooms", e.target.value)}
-        >
-          <option value="">Any</option>
-          <option value="1">1+</option>
-          <option value="2">2+</option>
-          <option value="3">3+</option>
-          <option value="4">4+</option>
-        </select>
+      <div className="grid grid-cols-2 gap-2">
+        <div className="space-y-2">
+          <Label htmlFor="bedrooms">Bedrooms</Label>
+          <select
+            id="bedrooms"
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            value={currentBedrooms}
+            onChange={(e) => updateFilter("bedrooms", e.target.value)}
+          >
+            <option value="">Any</option>
+            <option value="1">1+</option>
+            <option value="2">2+</option>
+            <option value="3">3+</option>
+            <option value="4">4+</option>
+          </select>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="status">Status</Label>
+          <select
+            id="status"
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            value={searchParams.get("status") || ""}
+            onChange={(e) => updateFilter("status", e.target.value)}
+          >
+            <option value="">Any</option>
+            <option value="AVAILABLE">Available</option>
+            <option value="RENTED">Rented</option>
+          </select>
+        </div>
       </div>
 
       <Button variant="outline" className="w-full" onClick={clearFilters}>

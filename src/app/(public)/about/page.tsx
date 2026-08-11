@@ -1,98 +1,102 @@
-import { Home, ShieldCheck, Users, Zap } from "lucide-react";
+import { Building, ShieldCheck, Users } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-
-export const metadata = {
-  title: "About Us | RentNest",
-  description: "Learn more about RentNest, our mission, and our values.",
-};
 
 export default function AboutPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="bg-primary/5 py-20 px-4 sm:px-6">
-        <div className="container mx-auto max-w-4xl text-center space-y-6">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">
-            Redefining the <span className="text-primary">Rental Experience</span>
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-            At RentNest, we believe finding a home should be as comfortable as living in one. Our platform bridges the gap between trustworthy landlords and verified tenants, creating a seamless, transparent, and secure rental marketplace.
-          </p>
-        </div>
-      </section>
-
-      {/* Our Values Section */}
-      <section className="py-20 px-4 sm:px-6 bg-background">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Our Core Values</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              We are driven by a commitment to make the rental process better for everyone involved.
+      <section className="bg-primary/5 py-20 lg:py-32">
+        <div className="container px-4 md:px-6">
+          <div className="flex flex-col items-center text-center space-y-4 md:w-3/4 mx-auto">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tighter">
+              Redefining the Rental Experience
+            </h1>
+            <p className="text-xl text-muted-foreground max-w-[700px]">
+              RentNest bridges the gap between trustworthy landlords and verified tenants, bringing transparency and ease to the modern rental market.
             </p>
           </div>
+        </div>
+      </section>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="p-6 border rounded-2xl bg-card shadow-sm text-center space-y-4 hover:shadow-md transition-shadow">
-              <div className="w-14 h-14 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mx-auto">
-                <ShieldCheck className="w-7 h-7" />
+      {/* Stats Section */}
+      <section className="py-16 bg-background border-b">
+        <div className="container px-4 md:px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div className="space-y-2">
+              <h3 className="text-4xl font-bold text-primary">10k+</h3>
+              <p className="text-muted-foreground font-medium">Active Tenants</p>
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-4xl font-bold text-primary">5k+</h3>
+              <p className="text-muted-foreground font-medium">Verified Landlords</p>
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-4xl font-bold text-primary">25k+</h3>
+              <p className="text-muted-foreground font-medium">Properties Listed</p>
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-4xl font-bold text-primary">99%</h3>
+              <p className="text-muted-foreground font-medium">Secure Payments</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Core Values */}
+      <section className="py-20 lg:py-24">
+        <div className="container px-4 md:px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold mb-4">Our Core Values</h2>
+            <p className="text-muted-foreground max-w-[600px] mx-auto">
+              We built RentNest on three foundational pillars designed to eliminate the anxiety and friction of traditional renting.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-12">
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400">
+                <ShieldCheck className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-semibold">Trust & Security</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                Every landlord and tenant is vetted to ensure a safe community. Secure payments are integrated directly into our platform.
+              <h3 className="text-xl font-bold">Trust & Safety</h3>
+              <p className="text-muted-foreground">
+                Every landlord and tenant is vetted to ensure a secure and reliable community.
               </p>
             </div>
-
-            <div className="p-6 border rounded-2xl bg-card shadow-sm text-center space-y-4 hover:shadow-md transition-shadow">
-              <div className="w-14 h-14 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mx-auto">
-                <Zap className="w-7 h-7" />
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center text-green-600 dark:text-green-400">
+                <Building className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-semibold">Frictionless Experience</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                From browsing properties to signing the lease and paying rent, everything happens smoothly in one centralized dashboard.
+              <h3 className="text-xl font-bold">Quality Listings</h3>
+              <p className="text-muted-foreground">
+                We strictly curate properties to ensure tenants only see high-quality, accurately described homes.
               </p>
             </div>
-
-            <div className="p-6 border rounded-2xl bg-card shadow-sm text-center space-y-4 hover:shadow-md transition-shadow">
-              <div className="w-14 h-14 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mx-auto">
-                <Users className="w-7 h-7" />
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center text-purple-600 dark:text-purple-400">
+                <Users className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-semibold">Community First</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                We foster a community based on respect and transparency. Read real reviews from previous tenants before you move.
-              </p>
-            </div>
-
-            <div className="p-6 border rounded-2xl bg-card shadow-sm text-center space-y-4 hover:shadow-md transition-shadow">
-              <div className="w-14 h-14 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mx-auto">
-                <Home className="w-7 h-7" />
-              </div>
-              <h3 className="text-xl font-semibold">Quality Homes</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                We enforce high standards for our listings, ensuring you only see properties that are truly ready to become your next home.
+              <h3 className="text-xl font-bold">Community First</h3>
+              <p className="text-muted-foreground">
+                Our platform is designed to foster positive, long-term relationships between renters and property owners.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="bg-primary text-primary-foreground py-20 px-4 sm:px-6">
-        <div className="container mx-auto max-w-4xl text-center space-y-8">
-          <h2 className="text-3xl md:text-4xl font-bold">Ready to join the RentNest community?</h2>
-          <p className="text-lg opacity-90 max-w-2xl mx-auto">
-            Whether you are looking for your next dream apartment, or looking to list your property to verified renters, we have you covered.
+      {/* CTA */}
+      <section className="py-24 bg-primary text-primary-foreground text-center">
+        <div className="container px-4 md:px-6">
+          <h2 className="text-3xl font-bold mb-6">Ready to find your next home?</h2>
+          <p className="text-primary-foreground/80 mb-8 max-w-[600px] mx-auto text-lg">
+            Join thousands of users who have already discovered a better way to rent with RentNest.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <Button size="lg" variant="secondary" asChild className="w-full sm:w-auto">
-              <Link href="/properties">
-                Find a Home
-              </Link>
+          <div className="flex justify-center gap-4">
+            <Button size="lg" variant="secondary" asChild>
+              <Link href="/properties">Browse Properties</Link>
             </Button>
-            <Button size="lg" variant="outline" asChild className="w-full sm:w-auto bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
-              <Link href="/auth/register">
-                List a Property
-              </Link>
+            <Button size="lg" variant="outline" className="bg-transparent text-primary-foreground border-primary-foreground hover:bg-primary-foreground hover:text-primary" asChild>
+              <Link href="/auth/register">Sign Up Now</Link>
             </Button>
           </div>
         </div>

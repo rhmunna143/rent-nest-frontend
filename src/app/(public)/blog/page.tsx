@@ -20,7 +20,11 @@ export default function BlogIndexPage() {
           <article key={post.id} className="flex flex-col bg-card border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
             {/* Optional Cover Image Placeholder */}
             <div className="h-48 bg-muted w-full relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-primary/5 group-hover:scale-105 transition-transform duration-500" />
+              {post.coverImage ? (
+                <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-primary/5 group-hover:scale-105 transition-transform duration-500" />
+              )}
             </div>
             
             <div className="p-6 flex flex-col flex-1">

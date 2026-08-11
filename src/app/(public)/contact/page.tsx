@@ -112,50 +112,45 @@ export default function ContactPage() {
               id="name"
               label="Full Name"
               error={errors.name?.message}
-            >
-              <input
-                {...register("name")}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                placeholder="John Doe"
-              />
-            </FormField>
+              placeholder="John Doe"
+              {...register("name")}
+            />
 
             <FormField
               id="email"
               label="Email Address"
               error={errors.email?.message}
-            >
-              <input
-                {...register("email")}
-                type="email"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                placeholder="john@example.com"
-              />
-            </FormField>
+              type="email"
+              placeholder="john@example.com"
+              {...register("email")}
+            />
 
             <FormField
               id="subject"
               label="Subject"
               error={errors.subject?.message}
-            >
-              <input
-                {...register("subject")}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                placeholder="How can we help?"
-              />
-            </FormField>
+              placeholder="How can we help?"
+              {...register("subject")}
+            />
 
-            <FormField
-              id="message"
-              label="Message"
-              error={errors.message?.message}
-            >
+            <div className="grid gap-2">
+              <label htmlFor="message" className={errors.message ? "text-destructive text-sm font-medium leading-none" : "text-sm font-medium leading-none"}>
+                Message
+              </label>
               <textarea
+                id="message"
                 {...register("message")}
-                className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className={`flex min-h-[120px] w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors.message ? "border-destructive focus-visible:ring-destructive" : "border-input"}`}
                 placeholder="Please describe your issue or question in detail..."
+                aria-invalid={!!errors.message}
+                aria-describedby={errors.message ? "message-error" : undefined}
               />
-            </FormField>
+              {errors.message && (
+                <p id="message-error" className="text-sm font-medium text-destructive">
+                  {errors.message.message}
+                </p>
+              )}
+            </div>
 
             <SubmitButton
               isLoading={isSubmitting}

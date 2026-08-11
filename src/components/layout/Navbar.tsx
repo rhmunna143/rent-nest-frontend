@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/cn";
 import Logo from "@/utils/images/logo";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export function dashboardHref(role: string): string {
   switch (role) {
@@ -179,6 +180,7 @@ export function Navbar() {
               </Button>
             </>
           )}
+          <ThemeToggle />
         </div>
 
         {/* Mobile hamburger */}

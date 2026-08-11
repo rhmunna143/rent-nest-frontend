@@ -6,9 +6,9 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 // Generate static params for all blog posts so they can be statically generated
@@ -18,8 +18,9 @@ export function generateStaticParams() {
   }));
 }
 
-export default function BlogPostPage({ params }: PageProps) {
-  const post = blogPosts.find((p) => p.slug === params.slug);
+export default async function BlogPostPage({ params }: PageProps) {
+  const resolvedParams = await params;
+  const post = blogPosts.find((p) => p.slug === resolvedParams.slug);
 
   if (!post) {
     notFound();
@@ -34,6 +35,12 @@ export default function BlogPostPage({ params }: PageProps) {
             Back to all guides
           </Link>
         </Button>
+
+        {post.coverImage && (
+          <div className="w-full h-64 md:h-96 relative rounded-2xl overflow-hidden mb-8">
+            <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover" />
+          </div>
+        )}
 
         <header className="mb-12">
           <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6">

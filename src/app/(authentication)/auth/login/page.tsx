@@ -48,10 +48,29 @@ function LoginForm() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
   });
+
+  const setDemoCredentials = (role: "ADMIN" | "LANDLORD" | "TENANT") => {
+    switch (role) {
+      case "ADMIN":
+        setValue("email", "admin@rentnest.com");
+        setValue("password", "admin123");
+        break;
+      case "LANDLORD":
+        setValue("email", "landlord@example.com");
+        setValue("password", "password123");
+        break;
+      case "TENANT":
+        setValue("email", "tenant@example.com");
+        setValue("password", "password123");
+        break;
+    }
+    toast.info(`${role} credentials filled. Click "Sign in" to continue.`);
+  };
 
   async function onSubmit(data: LoginInput) {
     const result = await api.post<{ user: User }>("/auth/login", data);
@@ -88,6 +107,27 @@ function LoginForm() {
         </CardHeader>
 
         <CardContent>
+          <div className="grid grid-cols-3 gap-2 mb-6">
+            <Button variant="outline" size="sm" type="button" onClick={() => setDemoCredentials("ADMIN")}>
+              Admin
+            </Button>
+            <Button variant="outline" size="sm" type="button" onClick={() => setDemoCredentials("LANDLORD")}>
+              Landlord
+            </Button>
+            <Button variant="outline" size="sm" type="button" onClick={() => setDemoCredentials("TENANT")}>
+              Tenant
+            </Button>
+          </div>
+          <div className="relative mb-6">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">
+                Or continue with email
+              </span>
+            </div>
+          </div>
           <form
             onSubmit={handleSubmit(onSubmit)}
             id="login-form"
@@ -154,14 +194,7 @@ function LoginForm() {
 
           {/* Admin hint */}
           <p className="mt-4 text-xs text-center text-muted-foreground">
-            Admin:{" "}
-            <code className="font-mono bg-muted px-1 py-0.5 rounded text-[11px]">
-              admin@rentnest.com
-            </code>{" "}
-            /{" "}
-            <code className="font-mono bg-muted px-1 py-0.5 rounded text-[11px]">
-              admin123
-            </code>
+            Use the buttons above for quick demo access.
           </p>
         </CardContent>
 

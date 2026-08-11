@@ -21,6 +21,7 @@ export const blogPosts: BlogPost[] = [
     author: "Jane Doe",
     category: "Guides",
     readTime: "4 min read",
+    coverImage: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
     content: `
       <h2>Understanding the Request Process</h2>
       <p>Securing a rental property in a competitive market can be stressful. RentNest simplifies this with our transparent request flow. Here is what you need to know from submission to moving in.</p>
@@ -47,6 +48,7 @@ export const blogPosts: BlogPost[] = [
     author: "John Smith",
     category: "Landlords",
     readTime: "6 min read",
+    coverImage: "https://images.unsplash.com/photo-1554469384-e58fac16e23a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
     content: `
       <h2>The Art of Pricing</h2>
       <p>Pricing your rental property isn't just about covering your mortgage; it's about finding the sweet spot between maximizing yield and minimizing vacancy periods.</p>
@@ -70,6 +72,7 @@ export const blogPosts: BlogPost[] = [
     author: "RentNest Support",
     category: "Platform Updates",
     readTime: "3 min read",
+    coverImage: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
     content: `
       <h2>Navigating Your Dashboard</h2>
       <p>Whether you're a tenant or a landlord, your RentNest dashboard revolves around the status of rental requests. Here's a definitive guide to what each status means.</p>

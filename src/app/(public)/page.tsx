@@ -15,9 +15,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { PropertyCard } from "@/components/properties/PropertyCard";
 import { type Property } from "@/types";
+import { blogPosts } from "@/lib/data/blog";
 import type { Metadata } from "next";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { Counter } from "@/components/ui/counter";
+import { NewsletterForm } from "@/components/newsletter-form";
 
 export const dynamic = "force-dynamic";
 
@@ -493,17 +495,21 @@ export default async function HomePage() {
             </Button>
           </div>
           <div className="grid gap-8 md:grid-cols-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="flex flex-col rounded-2xl overflow-hidden border bg-card shadow-sm hover:shadow-md transition-shadow">
-                <div className="h-48 bg-muted w-full relative">
-                  <div className="absolute inset-0 flex items-center justify-center text-muted-foreground"><BookOpen className="w-12 h-12 opacity-20" /></div>
+            {blogPosts.slice(0, 3).map((post) => (
+              <div key={post.id} className="flex flex-col rounded-2xl overflow-hidden border bg-card shadow-sm hover:shadow-md transition-shadow group">
+                <div className="h-48 bg-muted w-full relative overflow-hidden">
+                  {post.coverImage ? (
+                    <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center text-muted-foreground"><BookOpen className="w-12 h-12 opacity-20" /></div>
+                  )}
                 </div>
                 <div className="p-6 flex flex-col flex-1">
-                  <span className="text-sm text-primary font-medium mb-2">Guide</span>
-                  <h3 className="text-xl font-bold mb-3 line-clamp-2">How to Price Your Rental Property in {new Date().getFullYear()}</h3>
-                  <p className="text-muted-foreground mb-4 line-clamp-3">A comprehensive guide to understanding local market trends and setting a competitive price for your property.</p>
+                  <span className="text-sm text-primary font-medium mb-2">{post.category}</span>
+                  <h3 className="text-xl font-bold mb-3 line-clamp-2">{post.title}</h3>
+                  <p className="text-muted-foreground mb-4 line-clamp-3">{post.excerpt}</p>
                   <div className="mt-auto pt-4 border-t">
-                    <Link href="/blog" className="text-primary font-medium hover:underline inline-flex items-center">Read article <ArrowRight className="ml-1 w-4 h-4" /></Link>
+                    <Link href={`/blog/${post.slug}`} className="text-primary font-medium hover:underline inline-flex items-center">Read article <ArrowRight className="ml-1 w-4 h-4" /></Link>
                   </div>
                 </div>
               </div>
@@ -518,10 +524,7 @@ export default async function HomePage() {
           <div className="max-w-3xl mx-auto text-center space-y-8 bg-primary/5 rounded-3xl p-8 md:p-12 border border-primary/10">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Stay updated with RentNest</h2>
             <p className="text-lg text-muted-foreground">Get the latest rental market insights, property management tips, and platform updates delivered straight to your inbox.</p>
-            <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-              <input type="email" placeholder="Enter your email" className="flex-1 h-12 rounded-full border bg-background px-4 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" required />
-              <Button size="lg" className="h-12 rounded-full px-8">Subscribe</Button>
-            </div>
+            <NewsletterForm />
           </div>
         </div>
       </section>

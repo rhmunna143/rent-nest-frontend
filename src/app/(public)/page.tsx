@@ -68,7 +68,7 @@ export default async function HomePage() {
     <>
       {/* Hero */}
       <section
-        className="relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-primary/5 h-screen max-h-[70vh] flex items-center py-12 lg:py-0"
+        className="relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-primary/5 h-screen flex items-center py-12 lg:py-0"
         aria-label="Hero section"
       >
         <div className="container flex mx-auto flex-col lg:flex-row items-center justify-between gap-12 px-4 sm:px-6 lg:px-8">

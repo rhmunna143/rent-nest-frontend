@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { format } from "date-fns";
-import { ArrowRight, FileText, CreditCard } from "lucide-react";
+import { ArrowRight, FileText, CreditCard, Activity, DollarSign, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   PropertyStatusBadge,
   RentalStatusBadge,
@@ -19,6 +19,11 @@ export default function TenantDashboardPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Pagination states
+  const [requestsPage, setRequestsPage] = useState(1);
+  const [paymentsPage, setPaymentsPage] = useState(1);
+  const itemsPerPage = 5;
 
   useEffect(() => {
     async function loadData() {
@@ -69,8 +74,37 @@ export default function TenantDashboardPage() {
         </p>
       </div>
 
+      {/* Overview Cards */}
+      <div className="grid gap-6 md:grid-cols-3">
+        <div className="p-6 border rounded-xl bg-card shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-2 text-muted-foreground mb-4">
+            <FileText className="w-5 h-5 text-blue-500" />
+            <h3 className="font-medium text-sm">Total Requests</h3>
+          </div>
+          <p className="text-3xl font-bold">{rentals.length}</p>
+        </div>
+        <div className="p-6 border rounded-xl bg-card shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-2 text-muted-foreground mb-4">
+            <Activity className="w-5 h-5 text-green-500" />
+            <h3 className="font-medium text-sm">Active Rentals</h3>
+          </div>
+          <p className="text-3xl font-bold">
+            {rentals.filter(r => r.status === "ACTIVE").length}
+          </p>
+        </div>
+        <div className="p-6 border rounded-xl bg-card shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-2 text-muted-foreground mb-4">
+            <DollarSign className="w-5 h-5 text-purple-500" />
+            <h3 className="font-medium text-sm">Total Spent</h3>
+          </div>
+          <p className="text-3xl font-bold">
+            ${payments.filter(p => p.status === "COMPLETED").reduce((sum, p) => sum + Number(p.amount), 0).toLocaleString()}
+          </p>
+        </div>
+      </div>
+
       {/* Requests Section */}
-      <section className="space-y-4">
+      <section className="space-y-4" id="requests">
         <div className="flex items-center gap-2 border-b pb-2">
           <FileText className="h-5 w-5 text-primary" />
           <h2 className="text-2xl font-semibold">My Rental Requests</h2>
@@ -101,7 +135,7 @@ export default function TenantDashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {rentals.map((rental) => (
+                {rentals.slice((requestsPage - 1) * itemsPerPage, requestsPage * itemsPerPage).map((rental) => (
                   <tr
                     key={rental.id}
                     className="hover:bg-muted/20 transition-colors"
@@ -142,12 +176,38 @@ export default function TenantDashboardPage() {
                 ))}
               </tbody>
             </table>
+            {/* Pagination for Rentals */}
+            {rentals.length > itemsPerPage && (
+              <div className="flex items-center justify-between px-4 py-3 border-t">
+                <span className="text-sm text-muted-foreground">
+                  Showing {(requestsPage - 1) * itemsPerPage + 1} to {Math.min(requestsPage * itemsPerPage, rentals.length)} of {rentals.length}
+                </span>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setRequestsPage(p => Math.max(1, p - 1))}
+                    disabled={requestsPage === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setRequestsPage(p => Math.min(Math.ceil(rentals.length / itemsPerPage), p + 1))}
+                    disabled={requestsPage === Math.ceil(rentals.length / itemsPerPage)}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </section>
 
       {/* Payments Section */}
-      <section className="space-y-4">
+      <section className="space-y-4" id="payments">
         <div className="flex items-center gap-2 border-b pb-2">
           <CreditCard className="h-5 w-5 text-primary" />
           <h2 className="text-2xl font-semibold">Payment History</h2>
@@ -172,7 +232,7 @@ export default function TenantDashboardPage() {
               </thead>
 
               <tbody className="divide-y">
-                {payments.map((payment) => (
+                {payments.slice((paymentsPage - 1) * itemsPerPage, paymentsPage * itemsPerPage).map((payment) => (
                   <tr
                     key={payment.id}
                     className="hover:bg-muted/20 transition-colors"
@@ -203,6 +263,32 @@ export default function TenantDashboardPage() {
                 ))}
               </tbody>
             </table>
+            {/* Pagination for Payments */}
+            {payments.length > itemsPerPage && (
+              <div className="flex items-center justify-between px-4 py-3 border-t">
+                <span className="text-sm text-muted-foreground">
+                  Showing {(paymentsPage - 1) * itemsPerPage + 1} to {Math.min(paymentsPage * itemsPerPage, payments.length)} of {payments.length}
+                </span>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPaymentsPage(p => Math.max(1, p - 1))}
+                    disabled={paymentsPage === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPaymentsPage(p => Math.min(Math.ceil(payments.length / itemsPerPage), p + 1))}
+                    disabled={paymentsPage === Math.ceil(payments.length / itemsPerPage)}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </section>

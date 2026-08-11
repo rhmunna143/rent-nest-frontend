@@ -9,6 +9,15 @@ import { Button } from "@/components/ui/button";
 import { RentalStatusBadge } from "@/components/ui/status-badge";
 import { format } from "date-fns";
 import { EmptyState } from "@/components/shared";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 export default function LandlordDashboardPage() {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -81,6 +90,20 @@ export default function LandlordDashboardPage() {
     .filter((r) => r.status === "ACTIVE" || r.status === "COMPLETED")
     .reduce((sum, req) => sum + Number(req.property?.rentAmount || 0), 0);
 
+  // Group requests by month for the line chart
+  const requestsByMonth = requests.reduce((acc, req) => {
+    const month = format(new Date(req.createdAt), "MMM yyyy");
+    if (!acc[month]) {
+      acc[month] = { month, requests: 0 };
+    }
+    acc[month].requests += 1;
+    return acc;
+  }, {} as Record<string, { month: string; requests: number }>);
+
+  const chartData = Object.values(requestsByMonth).sort(
+    (a, b) => new Date(a.month).getTime() - new Date(b.month).getTime()
+  );
+
   const recentRequests = [...requests]
     .sort(
       (a, b) =>
@@ -120,6 +143,46 @@ export default function LandlordDashboardPage() {
           value={`$${estimatedEarnings.toLocaleString()}`}
           icon={<DollarSign className="w-5 h-5 text-purple-500" />}
         />
+      </div>
+
+      <div className="border rounded-xl bg-card shadow-sm p-6 mb-6">
+        <h3 className="text-lg font-semibold mb-6">Request Volume Over Time</h3>
+        {chartData.length > 0 ? (
+          <div className="h-72 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted))" />
+                <XAxis 
+                  dataKey="month" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} 
+                  dy={10} 
+                />
+                <YAxis 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} 
+                  allowDecimals={false}
+                />
+                <Tooltip 
+                  contentStyle={{ borderRadius: "8px", border: "1px solid hsl(var(--border))" }} 
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="requests" 
+                  stroke="hsl(var(--primary))" 
+                  strokeWidth={2} 
+                  activeDot={{ r: 6 }} 
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="h-72 flex items-center justify-center text-muted-foreground border-2 border-dashed rounded-lg">
+            No request data available to chart.
+          </div>
+        )}
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 flex-1">

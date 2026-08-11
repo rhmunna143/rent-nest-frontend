@@ -17,6 +17,8 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
+  PieChart,
+  Pie,
 } from "recharts";
 
 export default function AdminDashboardPage() {
@@ -140,11 +142,13 @@ export default function AdminDashboardPage() {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Chart Section */}
-        <div className="xl:col-span-2 border rounded-xl bg-card shadow-sm p-6">
-          <h3 className="text-lg font-semibold mb-6">Properties by Category</h3>
+        <div className="xl:col-span-2 border rounded-xl bg-card shadow-sm p-6 flex flex-col">
+          <h3 className="text-lg font-semibold mb-6">Properties by Category & Share</h3>
           {chartData.length > 0 ? (
-            <div className="h-87.5 w-full">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 h-87.5">
+              <div className="w-full h-full">
+                <h4 className="text-sm font-medium text-muted-foreground text-center mb-2">Total Count</h4>
+                <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={chartData}
                   margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
@@ -193,6 +197,37 @@ export default function AdminDashboardPage() {
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
+              </div>
+              <div className="w-full h-full">
+                <h4 className="text-sm font-medium text-muted-foreground text-center mb-2">Category Share</h4>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={chartData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="properties"
+                    >
+                      {chartData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      cursor={{ fill: "hsl(var(--muted)/0.5)" }}
+                      contentStyle={{
+                        borderRadius: "8px",
+                        border: "1px solid hsl(var(--border))",
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           ) : (
             <div className="h-87.5 flex items-center justify-center text-muted-foreground border-2 border-dashed rounded-lg">

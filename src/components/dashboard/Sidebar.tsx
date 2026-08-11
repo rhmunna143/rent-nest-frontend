@@ -13,6 +13,12 @@ import {
   Users,
   Tags,
   Inbox,
+  FileText,
+  CreditCard,
+  Heart,
+  DollarSign,
+  ShieldAlert,
+  BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -43,21 +49,24 @@ export function Sidebar() {
   // Role-specific navigation links
   const tenantLinks = [
     { name: "Dashboard", href: "/dashboard/tenant", icon: LayoutDashboard },
+    { name: "My Requests", href: "/dashboard/tenant#requests", icon: FileText },
+    { name: "Payments", href: "/dashboard/tenant#payments", icon: CreditCard },
+    { name: "Saved Properties", href: "/dashboard/tenant/saved", icon: Heart },
   ];
 
   const landlordLinks = [
     { name: "Dashboard", href: "/dashboard/landlord", icon: LayoutDashboard },
-    {
-      name: "My Properties",
-      href: "/dashboard/landlord/properties",
-      icon: Building,
-    },
+    { name: "My Properties", href: "/dashboard/landlord/properties", icon: Building },
     { name: "Requests", href: "/dashboard/landlord/requests", icon: Inbox },
+    { name: "Earnings", href: "/dashboard/landlord#earnings", icon: DollarSign },
   ];
 
   const adminLinks = [
     { name: "Dashboard", href: "/dashboard/admin", icon: LayoutDashboard },
     { name: "Categories", href: "/dashboard/admin/categories", icon: Tags },
+    { name: "Moderation", href: "/dashboard/admin/moderation", icon: ShieldAlert },
+    { name: "Analytics", href: "/dashboard/admin#analytics", icon: BarChart3 },
+    { name: "Users", href: "/dashboard/admin/users", icon: Users },
   ];
 
   const roleLinks =

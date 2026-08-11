@@ -8,6 +8,16 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { RentalStatusBadge } from "@/components/ui/status-badge";
 import { format } from "date-fns";
+import { EmptyState } from "@/components/shared";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 export default function LandlordDashboardPage() {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -34,8 +44,8 @@ export default function LandlordDashboardPage() {
         } else {
           throw new Error(reqsRes.message || "Failed to load requests");
         }
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "An unexpected error occurred");
       } finally {
         setIsLoading(false);
       }
@@ -80,6 +90,20 @@ export default function LandlordDashboardPage() {
     .filter((r) => r.status === "ACTIVE" || r.status === "COMPLETED")
     .reduce((sum, req) => sum + Number(req.property?.rentAmount || 0), 0);
 
+  // Group requests by month for the line chart
+  const requestsByMonth = requests.reduce((acc, req) => {
+    const month = format(new Date(req.createdAt), "MMM yyyy");
+    if (!acc[month]) {
+      acc[month] = { month, requests: 0 };
+    }
+    acc[month].requests += 1;
+    return acc;
+  }, {} as Record<string, { month: string; requests: number }>);
+
+  const chartData = Object.values(requestsByMonth).sort(
+    (a, b) => new Date(a.month).getTime() - new Date(b.month).getTime()
+  );
+
   const recentRequests = [...requests]
     .sort(
       (a, b) =>
@@ -121,6 +145,46 @@ export default function LandlordDashboardPage() {
         />
       </div>
 
+      <div className="border rounded-xl bg-card shadow-sm p-6 mb-6">
+        <h3 className="text-lg font-semibold mb-6">Request Volume Over Time</h3>
+        {chartData.length > 0 ? (
+          <div className="h-72 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted))" />
+                <XAxis 
+                  dataKey="month" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} 
+                  dy={10} 
+                />
+                <YAxis 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} 
+                  allowDecimals={false}
+                />
+                <Tooltip 
+                  contentStyle={{ borderRadius: "8px", border: "1px solid hsl(var(--border))" }} 
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="requests" 
+                  stroke="hsl(var(--primary))" 
+                  strokeWidth={2} 
+                  activeDot={{ r: 6 }} 
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="h-72 flex items-center justify-center text-muted-foreground border-2 border-dashed rounded-lg">
+            No request data available to chart.
+          </div>
+        )}
+      </div>
+
       <div className="grid gap-6 md:grid-cols-2 flex-1">
         <div className="border rounded-xl bg-card shadow-sm flex flex-col">
           <div className="p-6 border-b flex items-center justify-between">
@@ -131,9 +195,12 @@ export default function LandlordDashboardPage() {
           </div>
           <div className="p-6 flex-1">
             {recentRequests.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-muted-foreground space-y-2">
-                <Users className="w-8 h-8 opacity-20" />
-                <p>No recent requests</p>
+              <div className="h-full pt-4">
+                <EmptyState
+                  icon={Users}
+                  title="No recent requests"
+                  description="You don't have any new rental requests."
+                />
               </div>
             ) : (
               <div className="space-y-4">
@@ -171,14 +238,13 @@ export default function LandlordDashboardPage() {
           </div>
           <div className="p-6 flex-1">
             {properties.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-muted-foreground space-y-4">
-                <Building2 className="w-12 h-12 opacity-20" />
-                <p>You haven't listed any properties yet.</p>
-                <Button variant="outline" asChild>
-                  <Link href="/dashboard/landlord/properties/new">
-                    List your first property
-                  </Link>
-                </Button>
+              <div className="h-full pt-4">
+                <EmptyState
+                  icon={Building2}
+                  title="No properties listed"
+                  description="You haven't listed any properties yet."
+                  action={{ label: "List a Property", onClick: () => window.location.href = "/dashboard/landlord/properties/new" }}
+                />
               </div>
             ) : (
               <div className="space-y-4">
@@ -236,7 +302,7 @@ function DashboardCard({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="p-6 border rounded-xl bg-card shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+    <div className="p-6 border rounded-xl bg-card shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
       <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity transform group-hover:scale-110">
         {icon}
       </div>

@@ -11,6 +11,9 @@ import {
   LogOut,
   User,
   LayoutDashboard,
+  Info,
+  Mail,
+  BookOpen,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -28,6 +31,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/cn";
 import Logo from "@/utils/images/logo";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export function dashboardHref(role: string): string {
   switch (role) {
@@ -64,8 +68,9 @@ export function Navbar() {
   const navLinks = [
     { href: "/", label: "Home", icon: Home },
     { href: "/properties", label: "Properties", icon: Search },
-    { href: "/about", label: "About Us", icon: Home },
-    { href: "/contact", label: "Contact Us", icon: Home },
+    { href: "/about", label: "About Us", icon: Info },
+    { href: "/contact", label: "Contact Us", icon: Mail },
+    { href: "/blog", label: "Blog", icon: BookOpen },
   ];
 
   async function handleLogout() {
@@ -157,7 +162,7 @@ export function Navbar() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={handleLogout}
-                  className="text-destructive focus:text-destructive cursor-pointer"
+                  className="text-destructive focus:bg-destructive focus:text-destructive-foreground cursor-pointer"
                   id="logout-button"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
@@ -175,6 +180,7 @@ export function Navbar() {
               </Button>
             </>
           )}
+          <ThemeToggle />
         </div>
 
         {/* Mobile hamburger */}

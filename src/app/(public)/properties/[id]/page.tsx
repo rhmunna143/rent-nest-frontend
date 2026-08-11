@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { BedDouble, Bath, MapPin, CheckCircle2, Star } from "lucide-react";
 import { PropertyStatusBadge } from "@/components/ui/status-badge";
 import { RentCTA } from "@/components/properties/RentCTA";
+import { PropertyCard } from "@/components/properties/PropertyCard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { Property } from "@/types";
 import Image from "next/image";
@@ -45,6 +46,23 @@ export default async function PropertyDetailPage(
 
   const mainImage = property.images[0] || "/placeholder-house.webp";
   const otherImages = property.images.slice(1);
+
+  let similarProperties: Property[] = [];
+  try {
+    if (property.categoryId) {
+      const simRes = await fetch(`${BASE_URL}/properties?categoryId=${property.categoryId}&limit=5`, {
+        cache: "no-store",
+      });
+      if (simRes.ok) {
+        const simData = await simRes.json();
+        if (simData.success) {
+          similarProperties = simData.data.filter((p: Property) => p.id !== property!.id).slice(0, 4);
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Failed to fetch similar properties", error);
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -99,6 +117,29 @@ export default async function PropertyDetailPage(
             )}
           </div>
 
+          {/* Specifications */}
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">Specifications</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-6 bg-muted/30 rounded-xl border">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Property ID</p>
+                <p className="font-medium">{property.id.slice(0, 8)}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Category</p>
+                <p className="font-medium">{property.category?.name || "Uncategorized"}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Bedrooms</p>
+                <p className="font-medium flex items-center gap-1.5"><BedDouble className="h-4 w-4 text-primary" /> {property.bedrooms}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Bathrooms</p>
+                <p className="font-medium flex items-center gap-1.5"><Bath className="h-4 w-4 text-primary" /> {property.bathrooms}</p>
+              </div>
+            </div>
+          </div>
+
           {/* Details */}
           <div>
             <h2 className="text-2xl font-semibold mb-4">About this property</h2>
@@ -111,14 +152,6 @@ export default async function PropertyDetailPage(
           <div>
             <h2 className="text-2xl font-semibold mb-4">Amenities</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-3 gap-x-4">
-              <div className="flex items-center gap-2">
-                <BedDouble className="h-5 w-5 text-primary" />
-                <span>{property.bedrooms} Bedrooms</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Bath className="h-5 w-5 text-primary" />
-                <span>{property.bathrooms} Bathrooms</span>
-              </div>
               {property.amenities.map((amenity, idx) => (
                 <div key={idx} className="flex items-center gap-2">
                   <CheckCircle2 className="h-5 w-5 text-primary" />
@@ -209,6 +242,18 @@ export default async function PropertyDetailPage(
           )}
         </div>
       </div>
+
+      {/* Similar Properties */}
+      {similarProperties.length > 0 && (
+        <div className="border-t pt-16 mt-8">
+          <h2 className="text-2xl font-bold mb-6">Similar Properties</h2>
+          <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {similarProperties.map((prop: Property) => (
+              <PropertyCard key={prop.id} property={prop} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

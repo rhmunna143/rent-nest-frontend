@@ -10,12 +10,16 @@ import {
   Building2,
   Users,
   CircleUserRound,
+  BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PropertyCard } from "@/components/properties/PropertyCard";
+import { type Property } from "@/types";
+import { blogPosts } from "@/lib/data/blog";
 import type { Metadata } from "next";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { Counter } from "@/components/ui/counter";
+import { NewsletterForm } from "@/components/newsletter-form";
 
 export const dynamic = "force-dynamic";
 
@@ -47,7 +51,7 @@ const features = [
 ];
 
 export default async function HomePage() {
-  let featuredProperties: any[] = [];
+  let featuredProperties: Property[] = [];
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api"}/properties?limit=3`,
@@ -67,7 +71,7 @@ export default async function HomePage() {
     <>
       {/* Hero */}
       <section
-        className="relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-primary/5 pt-24 pb-32"
+        className="relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-primary/5 h-screen flex items-center py-12 lg:py-0"
         aria-label="Hero section"
       >
         <div className="container flex mx-auto flex-col lg:flex-row items-center justify-between gap-12 px-4 sm:px-6 lg:px-8">
@@ -107,7 +111,7 @@ export default async function HomePage() {
               <Button
                 size="lg"
                 variant="outline"
-                className="h-14 px-8 text-lg rounded-full border-2 hover:bg-primary/5 transition-all hover:-translate-y-1"
+                className="h-14 px-8 text-lg rounded-full border-2 hover:bg-primary/5 hover:text-primary transition-all hover:-translate-y-1"
                 asChild
                 id="list-property-cta"
               >
@@ -474,6 +478,53 @@ export default async function HomePage() {
                 Satisfaction Rate
               </span>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Blog / Rental Guides Preview Section */}
+      <section className="bg-muted/30 py-24" aria-label="Rental Guides">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row justify-between items-end mb-12 gap-4">
+            <div className="max-w-2xl">
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Rental Living Guides</h2>
+              <p className="text-lg text-muted-foreground">Expert advice, market insights, and practical tips for renting and managing properties.</p>
+            </div>
+            <Button variant="outline" size="lg" asChild className="hidden sm:flex rounded-full">
+              <Link href="/blog">View all guides <ArrowRight className="ml-2 h-4 w-4" /></Link>
+            </Button>
+          </div>
+          <div className="grid gap-8 md:grid-cols-3">
+            {blogPosts.slice(0, 3).map((post) => (
+              <div key={post.id} className="flex flex-col rounded-2xl overflow-hidden border bg-card shadow-sm hover:shadow-md transition-shadow group">
+                <div className="h-48 bg-muted w-full relative overflow-hidden">
+                  {post.coverImage ? (
+                    <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center text-muted-foreground"><BookOpen className="w-12 h-12 opacity-20" /></div>
+                  )}
+                </div>
+                <div className="p-6 flex flex-col flex-1">
+                  <span className="text-sm text-primary font-medium mb-2">{post.category}</span>
+                  <h3 className="text-xl font-bold mb-3 line-clamp-2">{post.title}</h3>
+                  <p className="text-muted-foreground mb-4 line-clamp-3">{post.excerpt}</p>
+                  <div className="mt-auto pt-4 border-t">
+                    <Link href={`/blog/${post.slug}`} className="text-primary font-medium hover:underline inline-flex items-center">Read article <ArrowRight className="ml-1 w-4 h-4" /></Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Newsletter Section */}
+      <section className="py-24 bg-background border-t" aria-label="Newsletter subscribe">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center space-y-8 bg-primary/5 rounded-3xl p-8 md:p-12 border border-primary/10">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Stay updated with RentNest</h2>
+            <p className="text-lg text-muted-foreground">Get the latest rental market insights, property management tips, and platform updates delivered straight to your inbox.</p>
+            <NewsletterForm />
           </div>
         </div>
       </section>

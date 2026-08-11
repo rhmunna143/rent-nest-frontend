@@ -44,7 +44,15 @@ To explore the Admin dashboard on the live site without registering, you can use
 ### 🛡️ Admin Experience
 - **Live Platform Analytics:** A responsive, multi-column dashboard featuring live charts (built with `recharts`) showing active properties and platform categories.
 - **Category Management:** Full CRUD interface for managing global property categories used by landlords.
+- **Content Moderation:** Built a foundational content moderation queue for categories and global platform health.
 - **Robust Security:** Strict middleware-level route guarding ensures Admins are the only users who can access platform settings.
+
+### 🌟 New Features & Upgrades
+- **Standalone Informational Pages:** Implemented comprehensive "About Us", "Contact", and domain-specific "Rental Living Guides" (Blog) complete with rich markdown formatting and dynamic routing.
+- **Dark/Light Mode:** Seamless theme switching integrated across the entire platform using `next-themes` with zero hydration mismatches.
+- **Demo Login System:** One-click seeded demo login buttons for all three roles (Admin, Landlord, Tenant) to effortlessly explore the platform.
+- **Saved Properties (Wishlist):** A localized tenant feature to heart and save favorite properties, accessible via a dedicated "Saved" tab in the dashboard.
+- **AI Assistant Ready:** Pre-configured a "Floating Actions" widget ready for the upcoming Gemini AI API Chatbot integration.
 
 ---
 

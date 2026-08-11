@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { Suspense } from "react";
 
@@ -48,10 +48,29 @@ function LoginForm() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
   });
+
+  const setDemoCredentials = (role: "ADMIN" | "LANDLORD" | "TENANT") => {
+    switch (role) {
+      case "ADMIN":
+        setValue("email", "admin@rentnest.com");
+        setValue("password", "admin123");
+        break;
+      case "LANDLORD":
+        setValue("email", "landlord@example.com");
+        setValue("password", "password123");
+        break;
+      case "TENANT":
+        setValue("email", "tenant@example.com");
+        setValue("password", "password123");
+        break;
+    }
+    toast.info(`${role} credentials filled. Click "Sign in" to continue.`);
+  };
 
   async function onSubmit(data: LoginInput) {
     const result = await api.post<{ user: User }>("/auth/login", data);
@@ -70,7 +89,13 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] grid md:grid-cols-2 items-center md:gap-12 p-4">
+    <div className="min-h-[calc(100vh-4rem)] relative grid md:grid-cols-2 items-center md:gap-12 p-4">
+      <Button variant="ghost" className="absolute top-4 left-4" asChild>
+        <Link href="/">
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Home
+        </Link>
+      </Button>
+
       <DotLottieReact
         src="https://lottie.host/0baa752b-c738-4c82-93a1-ee16b965367c/uF1ZNflhnO.lottie"
         loop
@@ -88,6 +113,27 @@ function LoginForm() {
         </CardHeader>
 
         <CardContent>
+          <div className="grid grid-cols-3 gap-2 mb-6">
+            <Button variant="outline" size="sm" type="button" onClick={() => setDemoCredentials("ADMIN")}>
+              Admin
+            </Button>
+            <Button variant="outline" size="sm" type="button" onClick={() => setDemoCredentials("LANDLORD")}>
+              Landlord
+            </Button>
+            <Button variant="outline" size="sm" type="button" onClick={() => setDemoCredentials("TENANT")}>
+              Tenant
+            </Button>
+          </div>
+          <div className="relative mb-6">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">
+                Or continue with email
+              </span>
+            </div>
+          </div>
           <form
             onSubmit={handleSubmit(onSubmit)}
             id="login-form"
@@ -154,14 +200,7 @@ function LoginForm() {
 
           {/* Admin hint */}
           <p className="mt-4 text-xs text-center text-muted-foreground">
-            Admin:{" "}
-            <code className="font-mono bg-muted px-1 py-0.5 rounded text-[11px]">
-              admin@rentnest.com
-            </code>{" "}
-            /{" "}
-            <code className="font-mono bg-muted px-1 py-0.5 rounded text-[11px]">
-              admin123
-            </code>
+            Use the buttons above for quick demo access.
           </p>
         </CardContent>
 

@@ -1,5 +1,6 @@
 import { PropertyCard } from "@/components/properties/PropertyCard";
 import { PropertyFilters } from "@/components/properties/PropertyFilters";
+import { SortControl } from "@/components/properties/SortControl";
 import { Pagination } from "@/components/ui/pagination-controls";
 import type { Category, Property } from "@/types";
 
@@ -48,8 +49,28 @@ export default async function PropertiesPage(props: PropertiesPageProps) {
     const propData = await propRes.json();
     if (propData.success) {
       properties = propData.data;
+      
+      // Fallback local filtering in case the mock API doesn't support these advanced filters
+      const minPrice = Number(searchParams.minPrice) || 0;
+      const maxPrice = Number(searchParams.maxPrice) || Infinity;
+      const status = searchParams.status as string;
+      const categoryId = searchParams.categoryId as string;
+      const search = searchParams.search as string;
+
+      properties = properties.filter((p) => {
+        let match = true;
+        if (p.rentAmount < minPrice || p.rentAmount > maxPrice) match = false;
+        if (status && p.status !== status) match = false;
+        if (categoryId && p.categoryId !== categoryId) match = false;
+        if (search && !p.title.toLowerCase().includes(search.toLowerCase())) match = false;
+        return match;
+      });
+
       if (propData.meta) {
         meta = propData.meta;
+        // Adjust meta total to reflect local filtering
+        meta.total = properties.length;
+        meta.totalPages = Math.ceil(meta.total / meta.limit);
       }
     }
   } catch (error) {
@@ -70,6 +91,7 @@ export default async function PropertiesPage(props: PropertiesPageProps) {
             <h2 className="text-xl font-semibold">
               {meta.total} {meta.total === 1 ? "Result" : "Results"}
             </h2>
+            <SortControl />
           </div>
 
           {properties.length === 0 ? (

@@ -1,5 +1,6 @@
 import { PropertyCard } from "@/components/properties/PropertyCard";
 import { PropertyFilters } from "@/components/properties/PropertyFilters";
+import { SortControl } from "@/components/properties/SortControl";
 import { Pagination } from "@/components/ui/pagination-controls";
 import type { Category, Property } from "@/types";
 
@@ -70,6 +71,7 @@ export default async function PropertiesPage(props: PropertiesPageProps) {
             <h2 className="text-xl font-semibold">
               {meta.total} {meta.total === 1 ? "Result" : "Results"}
             </h2>
+            <SortControl />
           </div>
 
           {properties.length === 0 ? (

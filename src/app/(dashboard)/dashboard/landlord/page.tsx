@@ -44,8 +44,8 @@ export default function LandlordDashboardPage() {
         } else {
           throw new Error(reqsRes.message || "Failed to load requests");
         }
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "An unexpected error occurred");
       } finally {
         setIsLoading(false);
       }
@@ -302,7 +302,7 @@ function DashboardCard({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="p-6 border rounded-xl bg-card shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+    <div className="p-6 border rounded-xl bg-card shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
       <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity transform group-hover:scale-110">
         {icon}
       </div>

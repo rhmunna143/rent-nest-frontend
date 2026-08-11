@@ -38,7 +38,7 @@ export default function AdminDashboardPage() {
         }
 
         // Fetch properties with limit=1 just to extract the total count from pagination meta
-        const propRes = await api.get<any>("/properties?limit=1");
+        const propRes = await api.get<unknown[]>("/properties?limit=1");
         if (propRes.ok && propRes.meta) {
           setTotalProperties(propRes.meta.total);
         } else if (propRes.ok && propRes.data) {

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PropertyCard } from "@/components/properties/PropertyCard";
+import { type Property } from "@/types";
 import type { Metadata } from "next";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { Counter } from "@/components/ui/counter";
@@ -48,7 +49,7 @@ const features = [
 ];
 
 export default async function HomePage() {
-  let featuredProperties: any[] = [];
+  let featuredProperties: Property[] = [];
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api"}/properties?limit=3`,

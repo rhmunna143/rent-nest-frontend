@@ -36,14 +36,14 @@ export default function TenantDashboardPage() {
         if (rentalsRes.ok) {
           setRentals(rentalsRes.data || []);
         } else {
-          setError(rentalsRes.message);
+          setError(rentalsRes.message ?? "Failed to load rentals");
         }
 
         if (paymentsRes.ok) {
           setPayments(paymentsRes.data || []);
         }
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "An unexpected error occurred");
       } finally {
         setIsLoading(false);
       }
@@ -76,14 +76,14 @@ export default function TenantDashboardPage() {
 
       {/* Overview Cards */}
       <div className="grid gap-6 md:grid-cols-3">
-        <div className="p-6 border rounded-xl bg-card shadow-sm hover:shadow-md transition-shadow">
+        <div className="p-6 border rounded-xl bg-card shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
           <div className="flex items-center gap-2 text-muted-foreground mb-4">
             <FileText className="w-5 h-5 text-blue-500" />
             <h3 className="font-medium text-sm">Total Requests</h3>
           </div>
           <p className="text-3xl font-bold">{rentals.length}</p>
         </div>
-        <div className="p-6 border rounded-xl bg-card shadow-sm hover:shadow-md transition-shadow">
+        <div className="p-6 border rounded-xl bg-card shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
           <div className="flex items-center gap-2 text-muted-foreground mb-4">
             <Activity className="w-5 h-5 text-green-500" />
             <h3 className="font-medium text-sm">Active Rentals</h3>
@@ -92,7 +92,7 @@ export default function TenantDashboardPage() {
             {rentals.filter(r => r.status === "ACTIVE").length}
           </p>
         </div>
-        <div className="p-6 border rounded-xl bg-card shadow-sm hover:shadow-md transition-shadow">
+        <div className="p-6 border rounded-xl bg-card shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
           <div className="flex items-center gap-2 text-muted-foreground mb-4">
             <DollarSign className="w-5 h-5 text-purple-500" />
             <h3 className="font-medium text-sm">Total Spent</h3>
@@ -110,99 +110,103 @@ export default function TenantDashboardPage() {
           <h2 className="text-2xl font-semibold">My Rental Requests</h2>
         </div>
 
-        {error && (
-          <div className="p-4 bg-red-100 text-red-800 rounded-md text-sm mb-4">
-            Error loading data: {error}
-          </div>
-        )}
-
         {rentals.length === 0 ? (
           <EmptyState
             icon={FileText}
-            title="No requests yet"
-            description="You haven't requested any properties."
-            action={{ label: "Browse Properties", onClick: () => window.location.href = "/properties" }}
+            title="No rental requests yet"
+            description="You haven't made any rental requests. Start browsing properties to find your next home."
+            action={{
+              label: "Browse Properties",
+              onClick: () => window.location.href = "/properties",
+            }}
           />
         ) : (
-          <div className="border rounded-lg overflow-hidden bg-card shadow-sm overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="bg-muted/50 text-muted-foreground">
-                <tr>
-                  <th className="px-4 py-3 font-medium">Property</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3 font-medium">Move-in Date</th>
-                  <th className="px-4 py-3 font-medium text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {rentals.slice((requestsPage - 1) * itemsPerPage, requestsPage * itemsPerPage).map((rental) => (
-                  <tr
-                    key={rental.id}
-                    className="hover:bg-muted/20 transition-colors"
-                  >
-                    <td className="px-4 py-4">
-                      <div className="font-medium text-base">
-                        {rental.property?.title || "Unknown Property"}
-                      </div>
-                      <div className="text-muted-foreground text-xs">
-                        {rental.property?.location}
-                      </div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <RentalStatusBadge status={rental.status as any} />
-                    </td>
-                    <td className="px-4 py-4">
-                      {rental.moveInDate
-                        ? format(new Date(rental.moveInDate), "MMM d, yyyy")
-                        : "Not specified"}
-                    </td>
-                    <td className="px-4 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        {rental.status === "APPROVED" && (
-                          <Button size="sm" variant="default" asChild>
-                            <Link href={`/dashboard/tenant/requests/${rental.id}/pay`}>
-                              Pay Now
-                            </Link>
-                          </Button>
-                        )}
-                        <Button variant="ghost" size="sm" asChild>
-                          <Link href={`/dashboard/tenant/requests/${rental.id}`}>
-                            View <ArrowRight className="ml-2 h-4 w-4" />
-                          </Link>
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {/* Pagination for Rentals */}
-            {rentals.length > itemsPerPage && (
-              <div className="flex items-center justify-between px-4 py-3 border-t">
-                <span className="text-sm text-muted-foreground">
-                  Showing {(requestsPage - 1) * itemsPerPage + 1} to {Math.min(requestsPage * itemsPerPage, rentals.length)} of {rentals.length}
-                </span>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setRequestsPage(p => Math.max(1, p - 1))}
-                    disabled={requestsPage === 1}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setRequestsPage(p => Math.min(Math.ceil(rentals.length / itemsPerPage), p + 1))}
-                    disabled={requestsPage === Math.ceil(rentals.length / itemsPerPage)}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
+          <>
+            {error && (
+              <div className="p-4 bg-red-100 text-red-800 rounded-md text-sm mb-4">
+                Error loading data: {error}
               </div>
             )}
-          </div>
+            <div className="border rounded-lg overflow-hidden bg-card shadow-sm overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-muted/50 text-muted-foreground">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">Property</th>
+                    <th className="px-4 py-3 font-medium">Status</th>
+                    <th className="px-4 py-3 font-medium">Move-in Date</th>
+                    <th className="px-4 py-3 font-medium text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {rentals.slice((requestsPage - 1) * itemsPerPage, requestsPage * itemsPerPage).map((rental) => (
+                    <tr
+                      key={rental.id}
+                      className="hover:bg-muted/20 transition-colors"
+                    >
+                      <td className="px-4 py-4">
+                        <div className="font-medium text-base">
+                          {rental.property?.title || "Unknown Property"}
+                        </div>
+                        <div className="text-muted-foreground text-xs">
+                          {rental.property?.location}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <RentalStatusBadge status={rental.status as "PENDING" | "APPROVED" | "ACTIVE" | "COMPLETED" | "REJECTED"} />
+                      </td>
+                      <td className="px-4 py-4">
+                        {rental.moveInDate
+                          ? format(new Date(rental.moveInDate), "MMM d, yyyy")
+                          : "Not specified"}
+                      </td>
+                      <td className="px-4 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          {rental.status === "APPROVED" && (
+                            <Button size="sm" variant="default" asChild>
+                              <Link href={`/dashboard/tenant/requests/${rental.id}/pay`}>
+                                Pay Now
+                              </Link>
+                            </Button>
+                          )}
+                          <Button variant="ghost" size="sm" asChild>
+                            <Link href={`/dashboard/tenant/requests/${rental.id}`}>
+                              View <ArrowRight className="ml-2 h-4 w-4" />
+                            </Link>
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {/* Pagination for Rentals */}
+              {rentals.length > itemsPerPage && (
+                <div className="flex items-center justify-between px-4 py-3 border-t">
+                  <span className="text-sm text-muted-foreground">
+                    Showing {(requestsPage - 1) * itemsPerPage + 1} to {Math.min(requestsPage * itemsPerPage, rentals.length)} of {rentals.length}
+                  </span>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setRequestsPage(p => Math.max(1, p - 1))}
+                      disabled={requestsPage === 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setRequestsPage(p => Math.min(Math.ceil(rentals.length / itemsPerPage), p + 1))}
+                      disabled={requestsPage === Math.ceil(rentals.length / itemsPerPage)}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
         )}
       </section>
 
@@ -216,11 +220,11 @@ export default function TenantDashboardPage() {
         {payments.length === 0 ? (
           <EmptyState
             icon={CreditCard}
-            title="No payments found"
-            description="You have no payment history at this time."
+            title="No payments yet"
+            description="Your payment history will appear here once you've made a payment."
           />
         ) : (
-          <div className="border rounded-lg overflow-hidden bg-card shadow-sm overflow-x-auto">
+          <div className="border rounded-xl bg-card shadow-sm overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead className="bg-muted/50 text-muted-foreground">
                 <tr>

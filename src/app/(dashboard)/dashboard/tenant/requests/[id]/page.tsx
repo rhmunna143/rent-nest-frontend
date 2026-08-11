@@ -49,7 +49,7 @@ export default function TenantRequestDetailPage({
   } = useForm<ReviewInput>({
     resolver: zodResolver(reviewSchema),
     defaultValues: {
-      rating: 0 as any, // force user to pick
+      rating: 0, // force user to pick
       comment: "",
     },
   });
@@ -67,8 +67,8 @@ export default function TenantRequestDetailPage({
         } else {
           setError(res.message);
         }
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "An unexpected error occurred");
       } finally {
         setIsLoading(false);
       }
@@ -92,8 +92,8 @@ export default function TenantRequestDetailPage({
           toast.error(res.message || "Failed to submit review");
         }
       }
-    } catch (err: any) {
-      toast.error(err.message || "An unexpected error occurred");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "An unexpected error occurred");
     } finally {
       setIsSubmittingReview(false);
     }
@@ -140,7 +140,7 @@ export default function TenantRequestDetailPage({
             </Button>
             
             <h1 className="text-3xl font-bold">Request Details</h1>
-            <RentalStatusBadge status={rental.status as any} />
+            <RentalStatusBadge status={rental.status as "PENDING" | "APPROVED" | "ACTIVE" | "COMPLETED" | "REJECTED"} />
           </div>
 
           <p className="text-muted-foreground flex items-center gap-1.5 ml-15">
@@ -258,7 +258,7 @@ export default function TenantRequestDetailPage({
                           key={star}
                           type="button"
                           onClick={() =>
-                            setValue("rating", star as any, {
+                            setValue("rating", star, {
                               shouldValidate: true,
                             })
                           }

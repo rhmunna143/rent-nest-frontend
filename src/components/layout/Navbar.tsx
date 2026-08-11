@@ -162,7 +162,7 @@ export function Navbar() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={handleLogout}
-                  className="text-destructive focus:text-destructive cursor-pointer"
+                  className="text-destructive focus:bg-destructive focus:text-destructive-foreground cursor-pointer"
                   id="logout-button"
                 >
                   <LogOut className="mr-2 h-4 w-4" />

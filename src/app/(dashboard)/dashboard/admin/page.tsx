@@ -163,7 +163,7 @@ export default function AdminDashboardPage() {
                     axisLine={false}
                     tickLine={false}
                     tick={{
-                      fill: "hsl(var(--muted-foreground))",
+                      fill: "currentColor",
                       fontSize: 12,
                     }}
                     dy={10}
@@ -172,7 +172,7 @@ export default function AdminDashboardPage() {
                     axisLine={false}
                     tickLine={false}
                     tick={{
-                      fill: "hsl(var(--muted-foreground))",
+                      fill: "currentColor",
                       fontSize: 12,
                     }}
                   />

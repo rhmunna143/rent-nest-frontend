@@ -4,6 +4,8 @@ import { MobileSidebar } from "@/components/dashboard/MobileSidebar";
 import Logo from "@/utils/images/logo";
 import NavAvatar from "@/components/layout/Avatar";
 
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+
 export default function DashboardLayout({
   children,
 }: {
@@ -19,11 +21,12 @@ export default function DashboardLayout({
         >
           <Logo />
         </Link>
-        <div className="ml-auto flex items-center gap-4">
+        <div className="ml-auto flex items-center gap-2">
           {/* <span className="text-sm font-medium text-muted-foreground hidden sm:inline-block">
             Dashboard Portal
           </span> */}
-
+          
+          <ThemeToggle />
           <NavAvatar />
         </div>
       </header>

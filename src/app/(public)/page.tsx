@@ -111,7 +111,7 @@ export default async function HomePage() {
               <Button
                 size="lg"
                 variant="outline"
-                className="h-14 px-8 text-lg rounded-full border-2 hover:bg-primary/5 transition-all hover:-translate-y-1"
+                className="h-14 px-8 text-lg rounded-full border-2 hover:bg-primary/5 hover:text-primary transition-all hover:-translate-y-1"
                 asChild
                 id="list-property-cta"
               >

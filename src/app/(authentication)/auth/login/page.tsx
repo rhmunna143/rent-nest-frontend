@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { Suspense } from "react";
 
@@ -89,7 +89,13 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] grid md:grid-cols-2 items-center md:gap-12 p-4">
+    <div className="min-h-[calc(100vh-4rem)] relative grid md:grid-cols-2 items-center md:gap-12 p-4">
+      <Button variant="ghost" className="absolute top-4 left-4" asChild>
+        <Link href="/">
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Home
+        </Link>
+      </Button>
+
       <DotLottieReact
         src="https://lottie.host/0baa752b-c738-4c82-93a1-ee16b965367c/uF1ZNflhnO.lottie"
         loop

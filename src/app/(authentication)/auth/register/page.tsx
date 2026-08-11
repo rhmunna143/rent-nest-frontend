@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { Loader2, Home, Users, Building2 } from "lucide-react";
+import { Loader2, Home, Users, Building2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 import { registerSchema, type RegisterInput } from "@/lib/schemas/auth.schema";
@@ -76,7 +76,13 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] grid md:grid-cols-2 items-center justify-center md:gap-12 p-4">
+    <div className="min-h-[calc(100vh-4rem)] relative grid md:grid-cols-2 items-center justify-center md:gap-12 p-4">
+      <Button variant="ghost" className="absolute top-4 left-4" asChild>
+        <Link href="/">
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Home
+        </Link>
+      </Button>
+
       <DotLottieReact
         src="https://lottie.host/658192f0-15d1-47b0-87ce-318da80dcdc6/IPCEaK8PNz.lottie"
         loop

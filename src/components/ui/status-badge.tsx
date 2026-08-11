@@ -9,23 +9,23 @@ const rentalStatusConfig: Record<
 > = {
   PENDING: {
     label: "Pending",
-    className: "bg-yellow-100 text-yellow-800 border-yellow-200",
+    className: "bg-warning/10 text-warning border-warning/20",
   },
   APPROVED: {
     label: "Approved",
-    className: "bg-blue-100 text-blue-800 border-blue-200",
+    className: "bg-primary/10 text-primary border-primary/20",
   },
   REJECTED: {
     label: "Rejected",
-    className: "bg-red-100 text-red-800 border-red-200",
+    className: "bg-destructive/10 text-destructive border-destructive/20",
   },
   ACTIVE: {
     label: "Active",
-    className: "bg-green-100 text-green-800 border-green-200",
+    className: "bg-success/10 text-success border-success/20",
   },
   COMPLETED: {
     label: "Completed",
-    className: "bg-gray-100 text-gray-700 border-gray-200",
+    className: "bg-muted text-muted-foreground border-border",
   },
 };
 
@@ -37,15 +37,15 @@ const propertyStatusConfig: Record<
 > = {
   AVAILABLE: {
     label: "Available",
-    className: "bg-green-100 text-green-800 border-green-200",
+    className: "bg-success/10 text-success border-success/20",
   },
   RENTED: {
     label: "Rented",
-    className: "bg-blue-100 text-blue-800 border-blue-200",
+    className: "bg-primary/10 text-primary border-primary/20",
   },
   UNAVAILABLE: {
     label: "Unavailable",
-    className: "bg-gray-100 text-gray-700 border-gray-200",
+    className: "bg-muted text-muted-foreground border-border",
   },
 };
 
@@ -57,15 +57,15 @@ const paymentStatusConfig: Record<
 > = {
   PENDING: {
     label: "Pending",
-    className: "bg-yellow-100 text-yellow-800 border-yellow-200",
+    className: "bg-warning/10 text-warning border-warning/20",
   },
   COMPLETED: {
     label: "Completed",
-    className: "bg-green-100 text-green-800 border-green-200",
+    className: "bg-success/10 text-success border-success/20",
   },
   FAILED: {
     label: "Failed",
-    className: "bg-red-100 text-red-800 border-red-200",
+    className: "bg-destructive/10 text-destructive border-destructive/20",
   },
 };
 

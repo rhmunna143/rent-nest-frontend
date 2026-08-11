@@ -89,12 +89,20 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* Company */}
           <div className="space-y-4">
             <h3 className="font-semibold text-foreground tracking-wide">
-              Explore
+              Company
             </h3>
             <ul className="space-y-3 text-sm">
+              <li>
+                <Link
+                  href="/about"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
+                  About Us
+                </Link>
+              </li>
               <li>
                 <Link
                   href="/properties"
@@ -105,26 +113,18 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/blog"
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
-                  Popular Categories
+                  Rental Guides (Blog)
                 </Link>
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/contact"
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
-                  How it Works
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#"
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                >
-                  Trust & Safety
+                  Contact Us
                 </Link>
               </li>
             </ul>
@@ -211,14 +211,11 @@ export function Footer() {
         <div className="mt-12 pt-8 border-t flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground">
           <p>© {new Date().getFullYear()} RentNest Inc. All rights reserved.</p>
           <div className="flex items-center gap-6">
-            <Link href="#" className="hover:text-primary transition-colors">
+            <Link href="/privacy" className="hover:text-primary transition-colors">
               Privacy Policy
             </Link>
-            <Link href="#" className="hover:text-primary transition-colors">
+            <Link href="/terms" className="hover:text-primary transition-colors">
               Terms of Service
-            </Link>
-            <Link href="#" className="hover:text-primary transition-colors">
-              Cookie Settings
             </Link>
           </div>
         </div>

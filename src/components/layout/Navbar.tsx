@@ -11,6 +11,9 @@ import {
   LogOut,
   User,
   LayoutDashboard,
+  Info,
+  Mail,
+  BookOpen,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -64,8 +67,9 @@ export function Navbar() {
   const navLinks = [
     { href: "/", label: "Home", icon: Home },
     { href: "/properties", label: "Properties", icon: Search },
-    { href: "/about", label: "About Us", icon: Home },
-    { href: "/contact", label: "Contact Us", icon: Home },
+    { href: "/about", label: "About Us", icon: Info },
+    { href: "/contact", label: "Contact Us", icon: Mail },
+    { href: "/blog", label: "Blog", icon: BookOpen },
   ];
 
   async function handleLogout() {

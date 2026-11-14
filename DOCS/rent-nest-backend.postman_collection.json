@@ -1,8 +1,8 @@
 {
   "info": {
     "_postman_id": "e373bcb8-30a0-49e3-b116-ed018b146c9e",
-    "name": "rent-nest-backend",
-    "description": "RentNest — rental property marketplace REST API.\n\n**Auth:** login (or register) first; the API sets httpOnly `accessToken`/`refreshToken` cookies which Postman sends automatically on subsequent requests. Alternatively, copy `data.accessToken` from the login response into an `Authorization: Bearer <token>` header (the raw token without `Bearer` also works).\n\n**Roles:** TENANT (rentals, payments, reviews), LANDLORD (properties, request approval), ADMIN (categories, user management). Admin credentials: `admin@rentnest.com` / `admin123`.\n\n**Response envelope:** success → `{ success, message, data, meta? }`; error → `{ success, message, errorDetails }`.\n\n**Payment flow:** tenant submits rental request → landlord approves → tenant calls `payments/create` and pays via the returned Stripe Checkout `checkoutUrl` (test card 4242 4242 4242 4242) → Stripe webhook activates the rental → landlord completes it → tenant can review.",
+    "name": "RentNest Backend API Collection (Complete v2.0)",
+    "description": "Comprehensive Postman collection for the RentNest rental property marketplace REST API.\n\n**Environments & Base URLs:**\n- `{{devBaseUrl}}`: `http://localhost:8080`\n- `{{prodBaseUrl}}`: `https://rent-nest-backend.vercel.app`\n\n**Auth:**\n- Use `/api/auth/login` or `/api/auth/google`. The API sets httpOnly `accessToken` and `refreshToken` cookies.\n- For header-based auth, provide `Authorization: Bearer {{token}}`.\n\n**Roles:**\n- `TENANT`: Search properties, submit rental requests, Stripe checkout & payment sync, favorites wishlist, leave reviews.\n- `LANDLORD`: Create/manage listings, approve/reject rental requests, view earnings dashboard.\n- `ADMIN`: Manage users, moderate listings, view global financial stats, contact submissions, newsletter subscribers, categories.\n\n**Demo Credentials:**\n- Admin: `admin@rentnest.com` / `admin123`\n- Landlord: `landlord@rentnest.com` / `Demo@1234`\n- Tenant: `tenant@rentnest.com` / `Demo@1234`",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "31457961"
   },
@@ -10,600 +10,1656 @@
     {
       "key": "devBaseUrl",
       "value": "http://localhost:8080"
+    },
+    {
+      "key": "prodBaseUrl",
+      "value": "https://rent-nest-backend.vercel.app"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "propertyId",
+      "value": "10000000-0000-4000-8000-000000000001"
+    },
+    {
+      "key": "rentalRequestId",
+      "value": "20000000-0000-4000-8000-000000000001"
+    },
+    {
+      "key": "categoryId",
+      "value": "00000000-0000-4000-8000-000000000001"
+    },
+    {
+      "key": "userId",
+      "value": "00000000-0000-4000-8000-000000000002"
+    },
+    {
+      "key": "contactId",
+      "value": ""
     }
   ],
   "item": [
     {
-      "name": "user",
+      "name": "01. System & Public",
       "item": [
         {
-          "name": "register",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n    \"name\": \"Munna\",\r\n    \"email\": \"rhmunna19@gmail.com\",\r\n    \"password\": \"User@123\",\r\n    \"role\": \"TENANT\",\r\n    \"phone\": \"01877255595\",\r\n    \"profileImage\": \"https://i.ibb.co.com/wF86M1VQ/my-dp.png\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{devBaseUrl}}/api/auth/register",
-              "host": ["{{devBaseUrl}}"],
-              "path": ["api", "auth", "register"]
-            },
-            "description": "Public. `role` must be TENANT or LANDLORD. Returns the user plus access/refresh tokens (also set as cookies)."
-          },
-          "response": []
-        },
-        {
-          "name": "login",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n    \"email\": \"admin@rentnest.com\",\r\n    \"password\": \"admin123\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{devBaseUrl}}/api/auth/login",
-              "host": ["{{devBaseUrl}}"],
-              "path": ["api", "auth", "login"]
-            },
-            "description": "Public. Returns `{ user, accessToken, refreshToken }` and sets auth cookies."
-          },
-          "response": []
-        },
-        {
-          "name": "get-me",
+          "name": "Health Check",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{devBaseUrl}}/api/auth/me",
-              "host": ["{{devBaseUrl}}"],
-              "path": ["api", "auth", "me"]
+              "raw": "{{devBaseUrl}}/api/health",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "health"
+              ]
             },
-            "description": "Any authenticated user. Current profile."
-          },
-          "response": []
+            "description": "Public health check endpoint checking server uptime and database connectivity (SELECT 1)."
+          }
         },
         {
-          "name": "refresh-token",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{devBaseUrl}}/api/auth/refresh-token",
-              "host": ["{{devBaseUrl}}"],
-              "path": ["api", "auth", "refresh-token"]
-            },
-            "description": "Public. Reads the refresh token from the cookie, or send `{ \"refreshToken\": \"...\" }` in the body. Issues a fresh token pair."
-          },
-          "response": []
-        },
-        {
-          "name": "logout",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{devBaseUrl}}/api/auth/logout",
-              "host": ["{{devBaseUrl}}"],
-              "path": ["api", "auth", "logout"]
-            },
-            "description": "Clears the auth cookies."
-          },
-          "response": []
-        },
-        {
-          "name": "update-me",
-          "request": {
-            "method": "PATCH",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n    \"name\": \"RH Munna\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{devBaseUrl}}/api/auth/me",
-              "host": ["{{devBaseUrl}}"],
-              "path": ["api", "auth", "me"]
-            },
-            "description": "Any authenticated user. Partial update: `name`, `phone`, `profileImage`, `password`."
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "property",
-      "item": [
-        {
-          "name": "get-properties",
+          "name": "Platform Public Stats",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{devBaseUrl}}/api/properties",
-              "host": ["{{devBaseUrl}}"],
-              "path": ["api", "properties"],
+              "raw": "{{devBaseUrl}}/api/stats",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "stats"
+              ]
+            },
+            "description": "Public platform stats cached with Cache-Control: public, max-age=300 (live properties, happy tenants, verified landlords, completed bookings)."
+          }
+        },
+        {
+          "name": "Featured Reviews",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{devBaseUrl}}/api/reviews?limit=6&sort=top",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reviews"
+              ],
               "query": [
                 {
-                  "key": "location",
-                  "value": "Dhaka",
-                  "disabled": true
+                  "key": "limit",
+                  "value": "6"
                 },
                 {
+                  "key": "sort",
+                  "value": "top",
+                  "description": "top | newest"
+                }
+              ]
+            },
+            "description": "Public featured testimonials with rating, comment, tenant profile, and property info."
+          }
+        },
+        {
+          "name": "Featured Properties",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{devBaseUrl}}/api/properties/featured?limit=4",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "properties",
+                "featured"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "4"
+                }
+              ]
+            },
+            "description": "Public curated listings: admin-featured first, then highest averageRating, then newest; only AVAILABLE."
+          }
+        },
+        {
+          "name": "List Properties (with filters & search)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{devBaseUrl}}/api/properties?search=apartment&location=downtown&minPrice=1000&maxPrice=3000&bedrooms=2&bathrooms=1&amenities=wifi,parking&sortBy=rentAmount&sortOrder=asc&page=1&limit=10",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "properties"
+              ],
+              "query": [
+                {
                   "key": "search",
-                  "value": "apartment",
-                  "disabled": true
+                  "value": "apartment"
+                },
+                {
+                  "key": "location",
+                  "value": "downtown"
                 },
                 {
                   "key": "categoryId",
-                  "value": "83078cec-8993-4d52-ab3a-f03d42f3a255",
+                  "value": "{{categoryId}}",
                   "disabled": true
                 },
                 {
                   "key": "minPrice",
-                  "value": "5000",
-                  "disabled": true
+                  "value": "1000"
                 },
                 {
                   "key": "maxPrice",
-                  "value": "20000",
-                  "disabled": true
+                  "value": "3000"
                 },
                 {
                   "key": "bedrooms",
-                  "value": "2",
-                  "disabled": true
+                  "value": "2"
                 },
                 {
-                  "key": "page",
-                  "value": "1",
-                  "disabled": true
+                  "key": "bathrooms",
+                  "value": "1"
                 },
                 {
-                  "key": "limit",
-                  "value": "10",
-                  "disabled": true
+                  "key": "amenities",
+                  "value": "wifi,parking"
                 },
                 {
                   "key": "sortBy",
-                  "value": "rentAmount",
-                  "disabled": true
+                  "value": "rentAmount"
                 },
                 {
                   "key": "sortOrder",
-                  "value": "asc",
-                  "disabled": true
+                  "value": "asc"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
                 }
               ]
             },
-            "description": "Public. Only AVAILABLE properties. Enable query params to filter; response includes `meta` pagination."
-          },
-          "response": []
+            "description": "Public search and filter properties with pagination and metadata."
+          }
         },
         {
-          "name": "get-single-property",
+          "name": "Get Property by ID",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{devBaseUrl}}/api/properties/2353f6bf-b860-4d08-bb74-b549ffe986ec",
-              "host": ["{{devBaseUrl}}"],
-              "path": ["api", "properties", "2353f6bf-b860-4d08-bb74-b549ffe986ec"]
+              "raw": "{{devBaseUrl}}/api/properties/{{propertyId}}",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "properties",
+                "{{propertyId}}"
+              ]
             },
-            "description": "Public. Property details with category, landlord, reviews, and `averageRating`."
-          },
-          "response": []
+            "description": "Public property detail view including landlord public info, reviews, averageRating, and reviewCount."
+          }
         },
         {
-          "name": "create-property",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n    \"title\": \"Gulshan 2\",\r\n    \"description\": \"debo na debo na debo na debo na debo na debo na debo na debo na debo na debo na debo na debo na\",\r\n    \"location\": \"Dhaka\",\r\n    \"rentAmount\": 15000,\r\n    \"bedrooms\": 2,\r\n    \"amenities\": [\"wifi\", \"electricity\", \"gas\", \"water\", \"lift\"],\r\n    \"bathrooms\": 2,\r\n    \"images\": [\"https://www.airportels.asia/wp-content/uploads/2023/12/Hotel-Facilities-and-Hotel-Amenities.webp\"],\r\n    \"categoryId\": \"83078cec-8993-4d52-ab3a-f03d42f3a255\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{devBaseUrl}}/api/landlord/properties",
-              "host": ["{{devBaseUrl}}"],
-              "path": ["api", "landlord", "properties"]
-            },
-            "description": "LANDLORD only."
-          },
-          "response": []
-        },
-        {
-          "name": "get-landlord-properties",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{devBaseUrl}}/api/landlord/properties",
-              "host": ["{{devBaseUrl}}"],
-              "path": ["api", "landlord", "properties"]
-            },
-            "description": "LANDLORD only. Own listings, all statuses."
-          },
-          "response": []
-        },
-        {
-          "name": "update property",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n    \"rentAmount\": 18000,\r\n    \"status\": \"UNAVAILABLE\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{devBaseUrl}}/api/landlord/properties/2353f6bf-b860-4d08-bb74-b549ffe986ec",
-              "host": ["{{devBaseUrl}}"],
-              "path": ["api", "landlord", "properties", "2353f6bf-b860-4d08-bb74-b549ffe986ec"]
-            },
-            "description": "LANDLORD only (own listing). Partial update; `status` accepts AVAILABLE | RENTED | UNAVAILABLE."
-          },
-          "response": []
-        },
-        {
-          "name": "delete property",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{devBaseUrl}}/api/landlord/properties/abf98b4a-caa3-4d80-aac6-9b10722b4d08",
-              "host": ["{{devBaseUrl}}"],
-              "path": ["api", "landlord", "properties", "abf98b4a-caa3-4d80-aac6-9b10722b4d08"]
-            },
-            "description": "LANDLORD only (own listing). Blocked with 409 while a rental is ACTIVE."
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "category",
-      "item": [
-        {
-          "name": "get all categories",
+          "name": "List Categories",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{devBaseUrl}}/api/categories",
-              "host": ["{{devBaseUrl}}"],
-              "path": ["api", "categories"]
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories"
+              ]
             },
-            "description": "Public. Includes per-category property counts."
-          },
-          "response": []
-        },
-        {
-          "name": "create category",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n    \"name\": \"Showroom\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{devBaseUrl}}/api/admin/categories",
-              "host": ["{{devBaseUrl}}"],
-              "path": ["api", "admin", "categories"]
-            },
-            "description": "ADMIN only. Duplicate name → 409."
-          },
-          "response": []
-        },
-        {
-          "name": "update category",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n    \"name\": \"Shopify\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{devBaseUrl}}/api/admin/categories/3b464fa0-54e7-4c35-b1a1-446f3e23d4d4",
-              "host": ["{{devBaseUrl}}"],
-              "path": ["api", "admin", "categories", "3b464fa0-54e7-4c35-b1a1-446f3e23d4d4"]
-            },
-            "description": "ADMIN only."
-          },
-          "response": []
-        },
-        {
-          "name": "delete category",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{devBaseUrl}}/api/admin/categories/3b464fa0-54e7-4c35-b1a1-446f3e23d4d4",
-              "host": ["{{devBaseUrl}}"],
-              "path": ["api", "admin", "categories", "3b464fa0-54e7-4c35-b1a1-446f3e23d4d4"]
-            },
-            "description": "ADMIN only. Blocked with 409 while properties reference the category."
-          },
-          "response": []
+            "description": "Public listing of all available property categories with name, slug, and description."
+          }
         }
       ]
     },
     {
-      "name": "rental-request",
+      "name": "02. Authentication & User Profile",
       "item": [
         {
-          "name": "create- rental-request",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n    \"propertyId\": \"2353f6bf-b860-4d08-bb74-b549ffe986ec\",\r\n    \"message\": \"I would love to rent this place.\",\r\n    \"moveInDate\": \"2026-08-01\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{devBaseUrl}}/api/rentals",
-              "host": ["{{devBaseUrl}}"],
-              "path": ["api", "rentals"]
-            },
-            "description": "TENANT only. Property must be AVAILABLE; duplicate pending request → 409. `message` and `moveInDate` are optional."
-          },
-          "response": []
-        },
-        {
-          "name": "tenant get rentals request",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{devBaseUrl}}/api/rentals",
-              "host": ["{{devBaseUrl}}"],
-              "path": ["api", "rentals"],
-              "query": [
-                {
-                  "key": "status",
-                  "value": "PENDING",
-                  "description": "PENDING | APPROVED | REJECTED | ACTIVE | COMPLETED",
-                  "disabled": true
-                }
-              ]
-            },
-            "description": "TENANT only. Own request history with property and payment summaries."
-          },
-          "response": []
-        },
-        {
-          "name": "tenant get single rentals request",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{devBaseUrl}}/api/rentals/24a6208d-2299-473a-8f8f-7fe917c37ba1",
-              "host": ["{{devBaseUrl}}"],
-              "path": ["api", "rentals", "24a6208d-2299-473a-8f8f-7fe917c37ba1"]
-            },
-            "description": "TENANT only (own request). Includes full payment record."
-          },
-          "response": []
-        },
-        {
-          "name": "landloard get rental requests",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{devBaseUrl}}/api/landlord/requests",
-              "host": ["{{devBaseUrl}}"],
-              "path": ["api", "landlord", "requests"],
-              "query": [
-                {
-                  "key": "status",
-                  "value": "PENDING",
-                  "description": "PENDING | APPROVED | REJECTED | ACTIVE | COMPLETED",
-                  "disabled": true
-                }
-              ]
-            },
-            "description": "LANDLORD only. Requests on own properties with tenant contact info."
-          },
-          "response": []
-        },
-        {
-          "name": "landloard update rental requests status",
-          "request": {
-            "method": "PATCH",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n    \"status\": \"APPROVED\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{devBaseUrl}}/api/landlord/requests/24a6208d-2299-473a-8f8f-7fe917c37ba1",
-              "host": ["{{devBaseUrl}}"],
-              "path": ["api", "landlord", "requests", "24a6208d-2299-473a-8f8f-7fe917c37ba1"]
-            },
-            "description": "LANDLORD only (own property). APPROVED/REJECTED require the request to be PENDING; COMPLETED requires ACTIVE (paid) and frees the property. ACTIVE is set only by the Stripe webhook."
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "payment",
-      "item": [
-        {
-          "name": "create checkout session",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n    \"rentalRequestId\": \"24a6208d-2299-473a-8f8f-7fe917c37ba1\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{devBaseUrl}}/api/payments/create",
-              "host": ["{{devBaseUrl}}"],
-              "path": ["api", "payments", "create"]
-            },
-            "description": "TENANT only (own request, status APPROVED). Returns `checkoutUrl` — open it in a browser and pay with Stripe test card 4242 4242 4242 4242 (any future expiry / any CVC). Already paid → 409."
-          },
-          "response": []
-        },
-        {
-          "name": "get payment history",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{devBaseUrl}}/api/payments",
-              "host": ["{{devBaseUrl}}"],
-              "path": ["api", "payments"]
-            },
-            "description": "TENANT only. Own payments with status (PENDING | COMPLETED | FAILED), transaction id, and rental/property summary."
-          },
-          "response": []
-        },
-        {
-          "name": "get single payment",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{devBaseUrl}}/api/payments/9a1f0d2e-0000-0000-0000-000000000000",
-              "host": ["{{devBaseUrl}}"],
-              "path": ["api", "payments", "9a1f0d2e-0000-0000-0000-000000000000"]
-            },
-            "description": "TENANT only (own payment)."
-          },
-          "response": []
-        },
-        {
-          "name": "stripe webhook (called by Stripe)",
+          "name": "Register",
           "request": {
             "method": "POST",
             "header": [
               {
-                "key": "stripe-signature",
-                "value": "t=timestamp,v1=signature",
-                "description": "Set automatically by Stripe — requests without a valid signature are rejected with 400."
+                "key": "Content-Type",
+                "value": "application/json"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"id\": \"evt_xxx\",\r\n    \"type\": \"checkout.session.completed\",\r\n    \"data\": {\r\n        \"object\": {\r\n            \"id\": \"cs_test_xxx\",\r\n            \"object\": \"checkout.session\",\r\n            \"payment_intent\": \"pi_xxx\"\r\n        }\r\n    }\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\n  \"name\": \"New Tenant User\",\n  \"email\": \"newtenant@example.com\",\n  \"password\": \"Password123!\",\n  \"role\": \"TENANT\",\n  \"phone\": \"+1-555-0199\",\n  \"profileImage\": \"https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80\"\n}"
             },
             "url": {
-              "raw": "{{devBaseUrl}}/api/payments/webhook",
-              "host": ["{{devBaseUrl}}"],
-              "path": ["api", "payments", "webhook"]
+              "raw": "{{devBaseUrl}}/api/auth/register",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
             },
-            "description": "Called by Stripe, not by clients — documented here for completeness. On `checkout.session.completed`: payment → COMPLETED, rental → ACTIVE, property → RENTED, other pending requests → REJECTED. For local testing run: `stripe listen --forward-to localhost:8080/api/payments/webhook`."
-          },
-          "response": []
+            "description": "Register a new user (TENANT or LANDLORD). Enforces password policy: >=8 chars, uppercase, lowercase, digit."
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"tenant@rentnest.com\",\n  \"password\": \"Demo@1234\"\n}"
+            },
+            "url": {
+              "raw": "{{devBaseUrl}}/api/auth/login",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Authenticate user. Sets HTTP-only accessToken and refreshToken cookies, and returns user object and tokens in JSON response."
+          }
+        },
+        {
+          "name": "Google OAuth Sign-in",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idToken\": \"mock-google-token-tenant\",\n  \"role\": \"TENANT\"\n}"
+            },
+            "url": {
+              "raw": "{{devBaseUrl}}/api/auth/google",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "google"
+              ]
+            },
+            "description": "Sign in with Google. Verifies idToken via google-auth-library. Requires role on first sign-in."
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{devBaseUrl}}/api/auth/refresh-token",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "refresh-token"
+              ]
+            },
+            "description": "Rotates refresh token and issues a new access token. Revokes token family on token reuse."
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{devBaseUrl}}/api/auth/logout",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Revokes refresh token in database and clears auth cookies."
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"tenant@rentnest.com\"\n}"
+            },
+            "url": {
+              "raw": "{{devBaseUrl}}/api/auth/forgot-password",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "forgot-password"
+              ]
+            },
+            "description": "Sends password reset link to user email (valid 30 minutes)."
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"sample-reset-token\",\n  \"newPassword\": \"NewPassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{devBaseUrl}}/api/auth/reset-password",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "reset-password"
+              ]
+            },
+            "description": "Resets password with reset token and invalidates active refresh tokens."
+          }
+        },
+        {
+          "name": "Get Current Profile (Me)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{devBaseUrl}}/api/auth/me",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Get authenticated user profile."
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Alex Rivera Updated\",\n  \"phone\": \"+1-555-0102\",\n  \"currentPassword\": \"Demo@1234\",\n  \"password\": \"NewPassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{devBaseUrl}}/api/auth/me",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Update user profile. Requires currentPassword when changing password."
+          }
         }
       ]
     },
     {
-      "name": "review",
+      "name": "03. Favorites (Tenant Wishlist)",
       "item": [
         {
-          "name": "create review",
+          "name": "List Favorites",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{devBaseUrl}}/api/favorites",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "favorites"
+              ]
+            },
+            "description": "TENANT only. List favorited properties formatted as property cards."
+          }
+        },
+        {
+          "name": "Add Property to Favorites",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{devBaseUrl}}/api/favorites/{{propertyId}}",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "favorites",
+                "{{propertyId}}"
+              ]
+            },
+            "description": "TENANT only. Idempotently add a property to the user wishlist."
+          }
+        },
+        {
+          "name": "Remove Property from Favorites",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{devBaseUrl}}/api/favorites/{{propertyId}}",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "favorites",
+                "{{propertyId}}"
+              ]
+            },
+            "description": "TENANT only. Idempotently remove a property from wishlist."
+          }
+        }
+      ]
+    },
+    {
+      "name": "04. Contact & Newsletter",
+      "item": [
+        {
+          "name": "Submit Contact Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"rentalRequestId\": \"24a6208d-2299-473a-8f8f-7fe917c37ba1\",\r\n    \"rating\": 4,\r\n    \"comment\": \"Great place, responsive landlord.\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
+              "raw": "{\n  \"name\": \"Inquiry Customer\",\n  \"email\": \"customer@example.com\",\n  \"subject\": \"Question regarding lease terms\",\n  \"message\": \"Hello, I would like to inquire about monthly leasing options.\",\n  \"website\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{devBaseUrl}}/api/contact",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "contact"
+              ]
+            },
+            "description": "Public contact form with honeypot field 'website' and rate limiting (5 req/min)."
+          }
+        },
+        {
+          "name": "Subscribe to Newsletter",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
               }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"subscriber@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{devBaseUrl}}/api/newsletter",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "newsletter"
+              ]
+            },
+            "description": "Public newsletter subscription. Idempotent upsert."
+          }
+        }
+      ]
+    },
+    {
+      "name": "05. Image Uploads (Cloudinary Direct)",
+      "item": [
+        {
+          "name": "Generate Upload Signature",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"folder\": \"properties\"\n}"
+            },
+            "url": {
+              "raw": "{{devBaseUrl}}/api/uploads/sign",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "uploads",
+                "sign"
+              ]
+            },
+            "description": "Authenticated users can generate a cryptographic signature to upload images directly from the browser to Cloudinary without hitting Vercel serverless size limits."
+          }
+        }
+      ]
+    },
+    {
+      "name": "06. Properties (Landlord)",
+      "item": [
+        {
+          "name": "Create Property",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Luxury Loft in Arts District\",\n  \"description\": \"High ceilings, industrial windows, and fully furnished loft in the city center.\",\n  \"location\": \"Downtown Metropolis\",\n  \"rentAmount\": 2200,\n  \"bedrooms\": 2,\n  \"bathrooms\": 2,\n  \"amenities\": [\n    \"wifi\",\n    \"parking\",\n    \"gym\",\n    \"balcony\"\n  ],\n  \"images\": [\n    \"https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80\"\n  ],\n  \"categoryId\": \"{{categoryId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{devBaseUrl}}/api/landlord/properties",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "landlord",
+                "properties"
+              ]
+            },
+            "description": "LANDLORD only. Create a new listing."
+          }
+        },
+        {
+          "name": "List Landlord Properties",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{devBaseUrl}}/api/landlord/properties?page=1&limit=10&status=AVAILABLE",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "landlord",
+                "properties"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "status",
+                  "value": "AVAILABLE"
+                }
+              ]
+            },
+            "description": "LANDLORD only. View own listings with pagination."
+          }
+        },
+        {
+          "name": "Update Property",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rentAmount\": 2300,\n  \"status\": \"AVAILABLE\"\n}"
+            },
+            "url": {
+              "raw": "{{devBaseUrl}}/api/landlord/properties/{{propertyId}}",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "landlord",
+                "properties",
+                "{{propertyId}}"
+              ]
+            },
+            "description": "LANDLORD only. Cannot set AVAILABLE if an ACTIVE rental exists."
+          }
+        },
+        {
+          "name": "Delete Property",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{devBaseUrl}}/api/landlord/properties/{{propertyId}}",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "landlord",
+                "properties",
+                "{{propertyId}}"
+              ]
+            },
+            "description": "LANDLORD only. Removes a property listing."
+          }
+        }
+      ]
+    },
+    {
+      "name": "07. Rental Requests",
+      "item": [
+        {
+          "name": "Submit Rental Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"propertyId\": \"{{propertyId}}\",\n  \"message\": \"I would love to rent this apartment starting next month.\",\n  \"moveInDate\": \"2026-12-01T00:00:00.000Z\"\n}"
+            },
+            "url": {
+              "raw": "{{devBaseUrl}}/api/rental-requests",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "rental-requests"
+              ]
+            },
+            "description": "TENANT only. Submit a booking request for an AVAILABLE property."
+          }
+        },
+        {
+          "name": "List Tenant Requests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{devBaseUrl}}/api/rentals?page=1&limit=10",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "rentals"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "status",
+                  "value": "PENDING",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "TENANT only. View own rental requests with pagination."
+          }
+        },
+        {
+          "name": "Get Rental Request Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{devBaseUrl}}/api/rentals/{{rentalRequestId}}",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "rentals",
+                "{{rentalRequestId}}"
+              ]
+            },
+            "description": "TENANT only. Get specific rental request details."
+          }
+        },
+        {
+          "name": "List Landlord Received Requests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{devBaseUrl}}/api/landlord/requests?page=1&limit=10",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "landlord",
+                "requests"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "LANDLORD only. View incoming booking requests across all properties."
+          }
+        },
+        {
+          "name": "Landlord Update Request Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"APPROVED\"\n}"
+            },
+            "url": {
+              "raw": "{{devBaseUrl}}/api/landlord/requests/{{rentalRequestId}}",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "landlord",
+                "requests",
+                "{{rentalRequestId}}"
+              ]
+            },
+            "description": "LANDLORD only. Set status to APPROVED, REJECTED, or COMPLETED."
+          }
+        }
+      ]
+    },
+    {
+      "name": "08. Payments (Stripe Checkout & Sync)",
+      "item": [
+        {
+          "name": "Create Stripe Checkout Session",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rentalRequestId\": \"{{rentalRequestId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{devBaseUrl}}/api/payments/create",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "payments",
+                "create"
+              ]
+            },
+            "description": "TENANT only. Generates a Stripe Checkout session URL for an APPROVED rental request. Guarded against double-rent."
+          }
+        },
+        {
+          "name": "Manual Payment Sync (Fallback)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sessionId\": \"cs_test_sample_session_id\"\n}"
+            },
+            "url": {
+              "raw": "{{devBaseUrl}}/api/payments/sync",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "payments",
+                "sync"
+              ]
+            },
+            "description": "TENANT only. Fallback sync if Stripe webhooks are delayed or offline; queries Stripe API directly and marks rental ACTIVE."
+          }
+        },
+        {
+          "name": "List Tenant Payments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{devBaseUrl}}/api/payments?page=1&limit=10",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "payments"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "TENANT only. View payment history with pagination."
+          }
+        },
+        {
+          "name": "List Landlord Received Payments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{devBaseUrl}}/api/landlord/payments?page=1&limit=10",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "landlord",
+                "payments"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "LANDLORD only. View incoming payments from tenants."
+          }
+        }
+      ]
+    },
+    {
+      "name": "09. Reviews",
+      "item": [
+        {
+          "name": "Create Review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rentalRequestId\": \"{{rentalRequestId}}\",\n  \"rating\": 5,\n  \"comment\": \"Wonderful apartment, sparkling clean and wonderful landlord!\"\n}"
             },
             "url": {
               "raw": "{{devBaseUrl}}/api/reviews",
-              "host": ["{{devBaseUrl}}"],
-              "path": ["api", "reviews"]
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reviews"
+              ]
             },
-            "description": "TENANT only (own rental, status COMPLETED). `rating` is an integer 1–5; one review per rental (duplicate → 409). Reviews appear on the public property detail with `averageRating`."
-          },
-          "response": []
+            "description": "TENANT only. Leave a review for a COMPLETED rental request."
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Landlord Analytics",
+      "item": [
+        {
+          "name": "Get Landlord Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{devBaseUrl}}/api/landlord/stats",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "landlord",
+                "stats"
+              ]
+            },
+            "description": "LANDLORD only. Total revenue, active listings, occupancy rate, and monthly earnings breakdown."
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Admin Module",
+      "item": [
+        {
+          "name": "Admin Platform Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{devBaseUrl}}/api/admin/stats",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "stats"
+              ]
+            },
+            "description": "ADMIN only. Global platform analytics: revenue, user counts, rental breakdown, category distribution, and 12-month trends."
+          }
+        },
+        {
+          "name": "List Users (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{devBaseUrl}}/api/admin/users?page=1&limit=10&role=TENANT&status=ACTIVE",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "role",
+                  "value": "TENANT"
+                },
+                {
+                  "key": "status",
+                  "value": "ACTIVE"
+                }
+              ]
+            },
+            "description": "ADMIN only. Paginated user management with search and filters."
+          }
+        },
+        {
+          "name": "Update User Status (Ban / Unban)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"BANNED\"\n}"
+            },
+            "url": {
+              "raw": "{{devBaseUrl}}/api/admin/users/{{userId}}",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": "ADMIN only. Ban or reactivate user accounts. Self-status modification is blocked."
+          }
+        },
+        {
+          "name": "List Properties (Admin Moderation)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{devBaseUrl}}/api/admin/properties?page=1&limit=10",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "properties"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "status",
+                  "value": "AVAILABLE",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "ADMIN only. Moderate listings across all landlords."
+          }
+        },
+        {
+          "name": "Update Property Moderation (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isFeatured\": true,\n  \"status\": \"AVAILABLE\"\n}"
+            },
+            "url": {
+              "raw": "{{devBaseUrl}}/api/admin/properties/{{propertyId}}",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "properties",
+                "{{propertyId}}"
+              ]
+            },
+            "description": "ADMIN only. Toggle isFeatured badge or change status."
+          }
+        },
+        {
+          "name": "Delete Property (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{devBaseUrl}}/api/admin/properties/{{propertyId}}",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "properties",
+                "{{propertyId}}"
+              ]
+            },
+            "description": "ADMIN only. Remove any listing from the platform."
+          }
+        },
+        {
+          "name": "List All Rentals (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{devBaseUrl}}/api/admin/rentals?page=1&limit=10",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "rentals"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "ADMIN only. View all rentals and booking status."
+          }
+        },
+        {
+          "name": "List All Payments (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{devBaseUrl}}/api/admin/payments?page=1&limit=10",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "payments"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "ADMIN only. Audit transaction history."
+          }
+        },
+        {
+          "name": "List Contact Messages (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{devBaseUrl}}/api/admin/contact?page=1&limit=10",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "contact"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "ADMIN only. View contact form inquiries."
+          }
+        },
+        {
+          "name": "Update Contact Message Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"RESOLVED\"\n}"
+            },
+            "url": {
+              "raw": "{{devBaseUrl}}/api/admin/contact/{{contactId}}",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "contact",
+                "{{contactId}}"
+              ]
+            },
+            "description": "ADMIN only. Mark contact inquiries NEW, READ, or RESOLVED."
+          }
+        },
+        {
+          "name": "List Newsletter Subscribers (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{devBaseUrl}}/api/admin/newsletter?page=1&limit=10",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "newsletter"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "ADMIN only. View email subscriber audience."
+          }
+        },
+        {
+          "name": "Create Category (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Penthouses\",\n  \"description\": \"Ultra-luxury top-floor residential spaces with skyline vistas.\"\n}"
+            },
+            "url": {
+              "raw": "{{devBaseUrl}}/api/admin/categories",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "categories"
+              ]
+            },
+            "description": "ADMIN only. Create a new property category."
+          }
+        },
+        {
+          "name": "Update Category (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Penthouse Suites\",\n  \"description\": \"Exclusive top-floor urban residences.\"\n}"
+            },
+            "url": {
+              "raw": "{{devBaseUrl}}/api/admin/categories/{{categoryId}}",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "categories",
+                "{{categoryId}}"
+              ]
+            },
+            "description": "ADMIN only. Update category name or description."
+          }
+        },
+        {
+          "name": "Delete Category (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{devBaseUrl}}/api/admin/categories/{{categoryId}}",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "categories",
+                "{{categoryId}}"
+              ]
+            },
+            "description": "ADMIN only. Delete category if not in use by any property."
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. API Documentation",
+      "item": [
+        {
+          "name": "Get OpenAPI JSON Spec",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{devBaseUrl}}/api/docs.json",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "docs.json"
+              ]
+            },
+            "description": "Returns the raw OpenAPI 3.0 JSON specification for automated client generation and Swagger tooling."
+          }
+        },
+        {
+          "name": "Swagger UI Interactive Docs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{devBaseUrl}}/api/docs/",
+              "host": [
+                "{{devBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "docs",
+                ""
+              ]
+            },
+            "description": "Renders interactive Swagger UI documentation for live browser testing."
+          }
         }
       ]
     }

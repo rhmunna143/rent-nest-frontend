@@ -6,6 +6,8 @@
 
 export type UserRole = "TENANT" | "LANDLORD" | "ADMIN";
 
+export type UserStatus = "ACTIVE" | "BANNED";
+
 export type RentalStatus =
   | "PENDING"
   | "APPROVED"
@@ -17,6 +19,8 @@ export type PropertyStatus = "AVAILABLE" | "RENTED" | "UNAVAILABLE";
 
 export type PaymentStatus = "PENDING" | "COMPLETED" | "FAILED";
 
+export type ContactStatus = "NEW" | "READ" | "RESOLVED";
+
 // --- Entities ---
 
 export interface User {
@@ -26,7 +30,8 @@ export interface User {
   role: UserRole;
   phone?: string | null;
   profileImage?: string | null;
-  isActive: boolean;
+  status?: UserStatus;
+  isActive?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -38,8 +43,8 @@ export interface Category {
   _count?: {
     properties: number;
   };
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Property {
@@ -70,7 +75,7 @@ export interface RentalRequest {
   status: RentalStatus;
   moveInDate?: string | null;
   message?: string | null;
-  tenant?: Pick<User, "id" | "name" | "email" | "phone">;
+  tenant?: Pick<User, "id" | "name" | "email" | "phone" | "profileImage">;
   property?: Property;
   payment?: Payment | null;
   createdAt: string;
@@ -79,7 +84,8 @@ export interface RentalRequest {
 
 export interface Payment {
   id: string;
-  rentalId: string;
+  rentalRequestId?: string;
+  rentalId?: string; // alias for compatibility
   tenantId: string;
   amount: number;
   status: PaymentStatus;
@@ -87,11 +93,17 @@ export interface Payment {
   checkoutUrl?: string | null;
   createdAt: string;
   updatedAt: string;
+  tenant?: Pick<User, "id" | "name" | "email">;
+  rentalRequest?: {
+    id: string;
+    property?: Pick<Property, "id" | "title" | "location" | "rentAmount">;
+  };
 }
 
 export interface Review {
   id: string;
-  rentalId: string;
+  rentalRequestId?: string;
+  rentalId?: string; // alias for compatibility
   tenantId: string;
   propertyId: string;
   rating: number;
@@ -101,6 +113,59 @@ export interface Review {
   updatedAt: string;
 }
 
+export interface ContactMessage {
+  id: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  status: ContactStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface NewsletterSubscriber {
+  id: string;
+  email: string;
+  createdAt: string;
+}
+
+// --- Analytics & Stats ---
+
+export interface PublicStats {
+  properties: number;
+  availableProperties: number;
+  landlords: number;
+  tenants: number;
+  completedRentals: number;
+  averageRating: number;
+  categories: number;
+}
+
+export interface AdminStats {
+  totals: {
+    users: number;
+    properties: number;
+    rentals: number;
+    revenue: number;
+  };
+  charts: {
+    categoryDistribution: { name: string; count: number }[];
+    monthlyGrowth: { month: string; users: number; rentals: number; revenue: number }[];
+    rentalStatuses: { status: RentalStatus; count: number }[];
+  };
+}
+
+export interface LandlordStats {
+  totals: {
+    totalProperties: number;
+    activeRentals: number;
+    pendingRequests: number;
+    totalEarnings: number;
+  };
+  monthlyEarnings: { month: string; amount: number }[];
+}
+
 // --- API Response Shapes ---
 
 export interface PaginationMeta {
@@ -108,6 +173,11 @@ export interface PaginationMeta {
   limit: number;
   total: number;
   totalPages: number;
+}
+
+export interface Paginated<T> {
+  data: T[];
+  meta: PaginationMeta;
 }
 
 export interface ApiSuccessResponse<T> {

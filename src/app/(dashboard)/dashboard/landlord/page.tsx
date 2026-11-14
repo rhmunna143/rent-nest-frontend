@@ -6,7 +6,7 @@ import { type Property, type RentalRequest } from "@/types";
 import { Building2, Users, AlertCircle, DollarSign } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { RentalStatusBadge } from "@/components/ui/status-badge";
+import { RentalStatusBadge, PropertyStatusBadge } from "@/components/ui/status-badge";
 import { format } from "date-fns";
 import { EmptyState } from "@/components/shared";
 import {
@@ -126,22 +126,22 @@ export default function LandlordDashboardPage() {
         <DashboardCard
           title="Total Properties"
           value={properties.length.toString()}
-          icon={<Building2 className="w-5 h-5 text-blue-500" />}
+          icon={<Building2 className="w-5 h-5 text-primary" />}
         />
         <DashboardCard
           title="Active Tenants"
           value={activeTenantsCount.toString()}
-          icon={<Users className="w-5 h-5 text-green-500" />}
+          icon={<Users className="w-5 h-5 text-success" />}
         />
         <DashboardCard
           title="Pending Requests"
           value={pendingRequestsCount.toString()}
-          icon={<AlertCircle className="w-5 h-5 text-yellow-500" />}
+          icon={<AlertCircle className="w-5 h-5 text-warning" />}
         />
         <DashboardCard
           title="Estimated Earnings"
           value={`$${estimatedEarnings.toLocaleString()}`}
-          icon={<DollarSign className="w-5 h-5 text-purple-500" />}
+          icon={<DollarSign className="w-5 h-5 text-secondary" />}
         />
       </div>
 
@@ -151,27 +151,32 @@ export default function LandlordDashboardPage() {
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted))" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
                 <XAxis 
                   dataKey="month" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} 
+                  tick={{ fill: "currentColor", fontSize: 12 }} 
                   dy={10} 
                 />
                 <YAxis 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} 
+                  tick={{ fill: "currentColor", fontSize: 12 }} 
                   allowDecimals={false}
                 />
                 <Tooltip 
-                  contentStyle={{ borderRadius: "8px", border: "1px solid hsl(var(--border))" }} 
+                  contentStyle={{
+                    borderRadius: "12px",
+                    border: "1px solid var(--border)",
+                    backgroundColor: "var(--card)",
+                    color: "var(--card-foreground)",
+                  }} 
                 />
                 <Line 
                   type="monotone" 
                   dataKey="requests" 
-                  stroke="hsl(var(--primary))" 
+                  stroke="var(--primary)" 
                   strokeWidth={2} 
                   activeDot={{ r: 6 }} 
                 />
@@ -276,11 +281,7 @@ export default function LandlordDashboardPage() {
                         </p>
                       </div>
                     </div>
-                    <div
-                      className={`px-2 py-1 rounded-full text-xs font-medium border ${prop.status === "AVAILABLE" ? "bg-green-50 text-green-700 border-green-200" : prop.status === "RENTED" ? "bg-blue-50 text-blue-700 border-blue-200" : "bg-gray-50 text-gray-700 border-gray-200"}`}
-                    >
-                      {prop.status}
-                    </div>
+                    <PropertyStatusBadge status={prop.status} />
                   </div>
                 ))}
               </div>

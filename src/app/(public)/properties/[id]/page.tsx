@@ -165,7 +165,7 @@ export default async function PropertyDetailPage(
           {property.reviews && property.reviews.length > 0 && (
             <div>
               <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
-                <Star className="h-6 w-6 fill-yellow-400 text-yellow-500" />
+                <Star className="h-6 w-6 fill-warning text-warning" />
                 {property.averageRating?.toFixed(1)} ({property.reviews.length}{" "}
                 reviews)
               </h2>
@@ -183,7 +183,7 @@ export default async function PropertyDetailPage(
                         <p className="font-medium text-sm">
                           {review.tenant?.name || "Anonymous Tenant"}
                         </p>
-                        <div className="flex items-center text-yellow-500">
+                        <div className="flex items-center text-warning">
                           {Array.from({ length: 5 }).map((_, i) => (
                             <Star
                               key={i}

@@ -32,7 +32,8 @@
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
 
-  /* Border radius */
+  /* Unified Border radius: 12px / rounded-xl */
+  --radius-xl: var(--radius);
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
@@ -71,14 +72,14 @@
     --popover: hsl(0 0% 100%);
     --popover-foreground: hsl(240 10% 3.9%);
 
-    /* Premium Palette: Indigo (Primary), Purple (Secondary), Rose (Accent) */
+    /* 3 Brand Colors: Indigo (Primary), Purple (Secondary), Rose (Accent) */
     --primary: hsl(240 59% 61%);
     --primary-foreground: hsl(0 0% 98%);
     --secondary: hsl(283 39% 53%);
     --secondary-foreground: hsl(0 0% 98%);
     --accent: hsl(348 83% 47%);
     --accent-foreground: hsl(0 0% 98%);
-    
+
     --muted: hsl(240 4.8% 95.9%);
     --muted-foreground: hsl(240 3.8% 46.1%);
     --destructive: hsl(0 84.2% 60.2%);
@@ -86,7 +87,7 @@
     --border: hsl(240 5.9% 90%);
     --input: hsl(240 5.9% 90%);
     --ring: hsl(240 59% 61%);
-    
+
     --success: hsl(142.1 76.2% 36.3%);
     --success-foreground: hsl(0 0% 98%);
     --warning: hsl(38 92% 50%);
@@ -98,25 +99,26 @@
   .dark {
     --background: hsl(240 10% 3.9%);
     --foreground: hsl(0 0% 98%);
-    --card: hsl(240 10% 3.9%);
+    /* Card lifted above background for proper hierarchy and AA contrast */
+    --card: hsl(240 8% 8%);
     --card-foreground: hsl(0 0% 98%);
-    --popover: hsl(240 10% 3.9%);
+    --popover: hsl(240 8% 8%);
     --popover-foreground: hsl(0 0% 98%);
-    
-    --primary: hsl(240 59% 61%);
+
+    --primary: hsl(240 59% 65%);
     --primary-foreground: hsl(0 0% 98%);
-    --secondary: hsl(283 39% 53%);
+    --secondary: hsl(283 39% 58%);
     --secondary-foreground: hsl(0 0% 98%);
-    --accent: hsl(348 83% 47%);
+    --accent: hsl(348 83% 55%);
     --accent-foreground: hsl(0 0% 98%);
-    
-    --muted: hsl(240 3.7% 15.9%);
-    --muted-foreground: hsl(240 5% 64.9%);
-    --destructive: hsl(0 62.8% 30.6%);
+
+    --muted: hsl(240 4% 14%);
+    --muted-foreground: hsl(240 5% 65%);
+    --destructive: hsl(0 70% 50%);
     --destructive-foreground: hsl(0 0% 98%);
-    --border: hsl(240 3.7% 15.9%);
-    --input: hsl(240 3.7% 15.9%);
-    --ring: hsl(240 59% 61%);
+    --border: hsl(240 4% 18%);
+    --input: hsl(240 4% 18%);
+    --ring: hsl(240 59% 65%);
 
     --success: hsl(142.1 70% 45%);
     --success-foreground: hsl(0 0% 98%);
@@ -136,13 +138,4 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-}
-
-@keyframes flow-line {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(300%); }
-}
-
-@utility animate-flow-line {
-  animation: flow-line 3s linear infinite;
 }

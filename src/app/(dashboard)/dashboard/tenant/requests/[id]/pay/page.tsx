@@ -70,7 +70,7 @@ export default function PaymentInitiationPage({
   if (error) {
     return (
       <div className="container mx-auto max-w-lg mt-20 text-center space-y-6 p-8 border rounded-xl bg-card shadow-sm">
-        <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-destructive/15 text-destructive rounded-full flex items-center justify-center mx-auto mb-4">
           <svg
             className="w-8 h-8"
             fill="none"

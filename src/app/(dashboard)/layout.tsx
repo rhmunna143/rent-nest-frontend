@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { MobileSidebar } from "@/components/dashboard/MobileSidebar";
 import Logo from "@/utils/images/logo";
-import NavAvatar from "@/components/layout/Avatar";
+import { UserMenu } from "@/components/layout/UserMenu";
 
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 
@@ -27,7 +27,7 @@ export default function DashboardLayout({
           </span> */}
           
           <ThemeToggle />
-          <NavAvatar />
+          <UserMenu />
         </div>
       </header>
 

@@ -6,6 +6,7 @@ import { ArrowRight, FileText, CreditCard, Activity, DollarSign, ChevronLeft, Ch
 import {
   PropertyStatusBadge,
   RentalStatusBadge,
+  PaymentStatusBadge,
 } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
 import type { RentalRequest, Payment } from "@/types";
@@ -78,14 +79,14 @@ export default function TenantDashboardPage() {
       <div className="grid gap-6 md:grid-cols-3">
         <div className="p-6 border rounded-xl bg-card shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
           <div className="flex items-center gap-2 text-muted-foreground mb-4">
-            <FileText className="w-5 h-5 text-blue-500" />
+            <FileText className="w-5 h-5 text-primary" />
             <h3 className="font-medium text-sm">Total Requests</h3>
           </div>
           <p className="text-3xl font-bold">{rentals.length}</p>
         </div>
         <div className="p-6 border rounded-xl bg-card shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
           <div className="flex items-center gap-2 text-muted-foreground mb-4">
-            <Activity className="w-5 h-5 text-green-500" />
+            <Activity className="w-5 h-5 text-success" />
             <h3 className="font-medium text-sm">Active Rentals</h3>
           </div>
           <p className="text-3xl font-bold">
@@ -94,7 +95,7 @@ export default function TenantDashboardPage() {
         </div>
         <div className="p-6 border rounded-xl bg-card shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
           <div className="flex items-center gap-2 text-muted-foreground mb-4">
-            <DollarSign className="w-5 h-5 text-purple-500" />
+            <DollarSign className="w-5 h-5 text-secondary" />
             <h3 className="font-medium text-sm">Total Spent</h3>
           </div>
           <p className="text-3xl font-bold">
@@ -123,7 +124,7 @@ export default function TenantDashboardPage() {
         ) : (
           <>
             {error && (
-              <div className="p-4 bg-red-100 text-red-800 rounded-md text-sm mb-4">
+              <div className="p-4 bg-destructive/15 text-destructive rounded-xl text-sm mb-4">
                 Error loading data: {error}
               </div>
             )}
@@ -246,17 +247,7 @@ export default function TenantDashboardPage() {
                     </td>
                     <td className="px-4 py-4 font-medium">${payment.amount}</td>
                     <td className="px-4 py-4">
-                      <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                          payment.status === "COMPLETED"
-                            ? "bg-primary text-primary-foreground dark:bg-primary/60 dark:text-primary-foreground"
-                            : payment.status === "PENDING"
-                              ? "bg-accent-foreground text-accent-foreground dark:bg-yellow-900/30 dark:text-primary"
-                              : "bg-destructive text-destructive-foreground dark:bg-destructive/30 dark:text-destructive-foreground"
-                        }`}
-                      >
-                        {payment.status}
-                      </span>
+                      <PaymentStatusBadge status={payment.status} />
                     </td>
 
                     <td className="px-4 py-4 text-muted-foreground font-mono text-xs">

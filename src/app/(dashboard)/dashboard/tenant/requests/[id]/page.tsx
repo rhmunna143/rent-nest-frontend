@@ -236,8 +236,8 @@ export default function TenantRequestDetailPage({
               </h2>
 
               {hasReviewed ? (
-                <div className="p-6 bg-green-50 text-green-800 border border-green-200 rounded-lg text-center shadow-sm">
-                  <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-green-600" />
+                <div className="p-6 bg-success/10 text-success border border-success/20 rounded-xl text-center shadow-sm">
+                  <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-success" />
                   <p className="font-medium">Thank you for your review!</p>
                   <p className="text-sm mt-1">
                     Your feedback helps others make great decisions.
@@ -264,8 +264,8 @@ export default function TenantRequestDetailPage({
                           }
                           className={`p-1 transition-colors ${
                             selectedRating >= star
-                              ? "text-yellow-400"
-                              : "text-muted-foreground/30 hover:text-yellow-400/50"
+                              ? "text-warning"
+                              : "text-muted-foreground/30 hover:text-warning/50"
                           }`}
                         >
                           <Star
@@ -333,12 +333,12 @@ export default function TenantRequestDetailPage({
 
               {rental.status === "REJECTED" && (
                 <div className="relative flex items-start gap-4">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full border-2 border-red-500 bg-background z-10 shrink-0 mt-0.5 text-red-500">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full border-2 border-destructive bg-background z-10 shrink-0 mt-0.5 text-destructive">
                     <CheckCircle2 className="h-5 w-5" />
                   </div>
-                  <div className="flex-1 p-4 rounded-xl border border-red-200 bg-red-50 shadow-sm">
-                    <div className="font-bold text-red-700 mb-1">Rejected</div>
-                    <div className="text-sm text-red-600">
+                  <div className="flex-1 p-4 rounded-xl border border-destructive/20 bg-destructive/10 shadow-sm">
+                    <div className="font-bold text-destructive mb-1">Rejected</div>
+                    <div className="text-sm text-destructive/90">
                       The landlord declined this request.
                     </div>
                   </div>
@@ -366,7 +366,7 @@ export default function TenantRequestDetailPage({
               {(rental.status === "ACTIVE" || rental.status === "COMPLETED") &&
                 rental.payment && (
                   <div className="relative flex items-start gap-4">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full border-2 bg-background z-10 shrink-0 mt-0.5 border-green-500 text-green-500">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-full border-2 bg-background z-10 shrink-0 mt-0.5 border-success text-success">
                       <CheckCircle2 className="h-5 w-5" />
                     </div>
                     <div className="flex-1 p-4 rounded-xl border bg-card shadow-sm">

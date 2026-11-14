@@ -192,7 +192,7 @@ export default function AdminCategoriesPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => openEditForm(cat)}
-                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        className="text-primary hover:text-primary hover:bg-primary/10"
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -200,7 +200,7 @@ export default function AdminCategoriesPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => setDeleteId(cat.id)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

@@ -54,7 +54,7 @@ export default function AboutPage() {
           </div>
           <div className="grid md:grid-cols-3 gap-12">
             <div className="flex flex-col items-center text-center space-y-4">
-              <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary">
                 <ShieldCheck className="w-8 h-8" />
               </div>
               <h3 className="text-xl font-bold">Trust & Safety</h3>
@@ -63,7 +63,7 @@ export default function AboutPage() {
               </p>
             </div>
             <div className="flex flex-col items-center text-center space-y-4">
-              <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center text-green-600 dark:text-green-400">
+              <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center text-success">
                 <Building className="w-8 h-8" />
               </div>
               <h3 className="text-xl font-bold">Quality Listings</h3>
@@ -72,7 +72,7 @@ export default function AboutPage() {
               </p>
             </div>
             <div className="flex flex-col items-center text-center space-y-4">
-              <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center text-purple-600 dark:text-purple-400">
+              <div className="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center text-secondary">
                 <Users className="w-8 h-8" />
               </div>
               <h3 className="text-xl font-bold">Community First</h3>

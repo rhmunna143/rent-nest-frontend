@@ -93,7 +93,7 @@ function PaymentSuccessContent() {
 
       {status === "success" && (
         <div className="space-y-6 animate-in zoom-in duration-300">
-          <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+          <div className="w-20 h-20 bg-success/15 text-success rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
             <CheckCircle2 className="w-10 h-10" />
           </div>
           <h1 className="text-3xl font-bold text-foreground">
@@ -115,7 +115,7 @@ function PaymentSuccessContent() {
 
       {status === "timeout" && (
         <div className="space-y-6 animate-in fade-in duration-300">
-          <div className="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+          <div className="w-20 h-20 bg-primary/15 text-primary rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
             <Loader2 className="w-10 h-10 animate-spin" />
           </div>
           <h1 className="text-3xl font-bold text-foreground">
@@ -136,7 +136,7 @@ function PaymentSuccessContent() {
 
       {status === "error" && (
         <div className="space-y-6">
-          <div className="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+          <div className="w-20 h-20 bg-destructive/15 text-destructive rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
             <AlertCircle className="w-10 h-10" />
           </div>
           <h1 className="text-3xl font-bold text-foreground">

@@ -30,8 +30,6 @@ export function FloatingActions() {
   };
 
   const handleAiAssistantClick = () => {
-    // Placeholder for future AI Assistant implementation
-    // console.log("AI Assistant opening...");
     toast("AI Assistant live chat coming soon!");
   };
 

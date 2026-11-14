@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/lib/api-client";
 import { toast } from "sonner";
-import { createRentalSchema, type CreateRentalInput } from "@/lib/schemas/rental";
+import { createRentalSchema, type CreateRentalInput } from "@/lib/schemas/rental.schema";
 
 import { Button } from "@/components/ui/button";
 import {

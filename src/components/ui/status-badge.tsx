@@ -1,31 +1,31 @@
-import { cn } from "@/lib/cn";
+import { Badge, type BadgeProps } from "@/components/ui/badge";
 import type { RentalStatus, PropertyStatus, PaymentStatus } from "@/types";
 
 // ─── Rental Status ─────────────────────────────────────────
 
 const rentalStatusConfig: Record<
   RentalStatus,
-  { label: string; className: string }
+  { label: string; variant: BadgeProps["variant"] }
 > = {
   PENDING: {
     label: "Pending",
-    className: "bg-warning/10 text-warning border-warning/20",
+    variant: "warning",
   },
   APPROVED: {
     label: "Approved",
-    className: "bg-primary/10 text-primary border-primary/20",
+    variant: "default",
   },
   REJECTED: {
     label: "Rejected",
-    className: "bg-destructive/10 text-destructive border-destructive/20",
+    variant: "destructive",
   },
   ACTIVE: {
     label: "Active",
-    className: "bg-success/10 text-success border-success/20",
+    variant: "success",
   },
   COMPLETED: {
     label: "Completed",
-    className: "bg-muted text-muted-foreground border-border",
+    variant: "muted",
   },
 };
 
@@ -33,19 +33,19 @@ const rentalStatusConfig: Record<
 
 const propertyStatusConfig: Record<
   PropertyStatus,
-  { label: string; className: string }
+  { label: string; variant: BadgeProps["variant"] }
 > = {
   AVAILABLE: {
     label: "Available",
-    className: "bg-success/10 text-success border-success/20",
+    variant: "success",
   },
   RENTED: {
     label: "Rented",
-    className: "bg-primary/10 text-primary border-primary/20",
+    variant: "default",
   },
   UNAVAILABLE: {
     label: "Unavailable",
-    className: "bg-muted text-muted-foreground border-border",
+    variant: "muted",
   },
 };
 
@@ -53,80 +53,77 @@ const propertyStatusConfig: Record<
 
 const paymentStatusConfig: Record<
   PaymentStatus,
-  { label: string; className: string }
+  { label: string; variant: BadgeProps["variant"] }
 > = {
   PENDING: {
     label: "Pending",
-    className: "bg-warning/10 text-warning border-warning/20",
+    variant: "warning",
   },
   COMPLETED: {
     label: "Completed",
-    className: "bg-success/10 text-success border-success/20",
+    variant: "success",
   },
   FAILED: {
     label: "Failed",
-    className: "bg-destructive/10 text-destructive border-destructive/20",
+    variant: "destructive",
   },
 };
 
-// ─── Component ─────────────────────────────────────────────
+// ─── Components ─────────────────────────────────────────────
 
-interface RentalStatusBadgeProps {
+export interface RentalStatusBadgeProps {
   status: RentalStatus;
   className?: string;
 }
 
 export function RentalStatusBadge({ status, className }: RentalStatusBadgeProps) {
-  const config = rentalStatusConfig[status];
+  const config = rentalStatusConfig[status] ?? {
+    label: status,
+    variant: "muted",
+  };
   return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold",
-        config.className,
-        className
-      )}
-    >
+    <Badge variant={config.variant} className={className}>
       {config.label}
-    </span>
+    </Badge>
   );
 }
 
-interface PropertyStatusBadgeProps {
+export interface PropertyStatusBadgeProps {
   status: PropertyStatus;
   className?: string;
 }
 
-export function PropertyStatusBadge({ status, className }: PropertyStatusBadgeProps) {
-  const config = propertyStatusConfig[status];
+export function PropertyStatusBadge({
+  status,
+  className,
+}: PropertyStatusBadgeProps) {
+  const config = propertyStatusConfig[status] ?? {
+    label: status,
+    variant: "muted",
+  };
   return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold",
-        config.className,
-        className
-      )}
-    >
+    <Badge variant={config.variant} className={className}>
       {config.label}
-    </span>
+    </Badge>
   );
 }
 
-interface PaymentStatusBadgeProps {
+export interface PaymentStatusBadgeProps {
   status: PaymentStatus;
   className?: string;
 }
 
-export function PaymentStatusBadge({ status, className }: PaymentStatusBadgeProps) {
-  const config = paymentStatusConfig[status];
+export function PaymentStatusBadge({
+  status,
+  className,
+}: PaymentStatusBadgeProps) {
+  const config = paymentStatusConfig[status] ?? {
+    label: status,
+    variant: "muted",
+  };
   return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold",
-        config.className,
-        className
-      )}
-    >
+    <Badge variant={config.variant} className={className}>
       {config.label}
-    </span>
+    </Badge>
   );
 }

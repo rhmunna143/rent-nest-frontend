@@ -98,7 +98,7 @@ export default function AdminDashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
         {/* Total Properties */}
         <div className="p-6 border rounded-xl bg-card shadow-sm flex items-center gap-4">
-          <div className="w-14 h-14 bg-blue-500/10 text-blue-600 rounded-xl flex items-center justify-center shrink-0">
+          <div className="w-14 h-14 bg-primary/10 text-primary rounded-xl flex items-center justify-center shrink-0">
             <Building className="w-7 h-7" />
           </div>
           <div>
@@ -113,7 +113,7 @@ export default function AdminDashboardPage() {
 
         {/* Total Categories */}
         <div className="p-6 border rounded-xl bg-card shadow-sm flex items-center gap-4">
-          <div className="w-14 h-14 bg-emerald-500/10 text-emerald-600 rounded-xl flex items-center justify-center shrink-0">
+          <div className="w-14 h-14 bg-success/10 text-success rounded-xl flex items-center justify-center shrink-0">
             <Tags className="w-7 h-7" />
           </div>
           <div>
@@ -126,14 +126,14 @@ export default function AdminDashboardPage() {
 
         {/* System Status */}
         <div className="p-6 border rounded-xl bg-card shadow-sm flex items-center gap-4">
-          <div className="w-14 h-14 bg-purple-500/10 text-purple-600 rounded-xl flex items-center justify-center shrink-0">
+          <div className="w-14 h-14 bg-secondary/10 text-secondary rounded-xl flex items-center justify-center shrink-0">
             <TrendingUp className="w-7 h-7" />
           </div>
           <div>
             <p className="text-sm font-medium text-muted-foreground">
               Marketplace Status
             </p>
-            <h2 className="text-xl font-bold text-green-600 flex items-center gap-2">
+            <h2 className="text-xl font-bold text-success flex items-center gap-2">
               <ShieldCheck className="w-5 h-5" /> Operational
             </h2>
           </div>
@@ -156,7 +156,7 @@ export default function AdminDashboardPage() {
                   <CartesianGrid
                     strokeDasharray="3 3"
                     vertical={false}
-                    stroke="hsl(var(--muted))"
+                    stroke="var(--border)"
                   />
                   <XAxis
                     dataKey="name"
@@ -177,10 +177,11 @@ export default function AdminDashboardPage() {
                     }}
                   />
                   <Tooltip
-                    cursor={{ fill: "hsl(var(--muted)/0.5)" }}
                     contentStyle={{
-                      borderRadius: "8px",
-                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "12px",
+                      border: "1px solid var(--border)",
+                      backgroundColor: "var(--card)",
+                      color: "var(--card-foreground)",
                     }}
                   />
                   <Bar
@@ -219,10 +220,11 @@ export default function AdminDashboardPage() {
                       ))}
                     </Pie>
                     <Tooltip
-                      cursor={{ fill: "hsl(var(--muted)/0.5)" }}
                       contentStyle={{
-                        borderRadius: "8px",
-                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "12px",
+                        border: "1px solid var(--border)",
+                        backgroundColor: "var(--card)",
+                        color: "var(--card-foreground)",
                       }}
                     />
                   </PieChart>

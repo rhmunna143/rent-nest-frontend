@@ -16,3 +16,7 @@ export const rentalRequestSchema = z.object({
 });
 
 export type RentalRequestInput = z.infer<typeof rentalRequestSchema>;
+
+// Aliases for unified usage
+export const createRentalSchema = rentalRequestSchema;
+export type CreateRentalInput = RentalRequestInput;

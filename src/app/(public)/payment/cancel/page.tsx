@@ -18,7 +18,7 @@ function PaymentCancelContent() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4 space-y-6">
-      <div className="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+      <div className="w-20 h-20 bg-destructive/15 text-destructive rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
         <XCircle className="w-10 h-10" />
       </div>
 

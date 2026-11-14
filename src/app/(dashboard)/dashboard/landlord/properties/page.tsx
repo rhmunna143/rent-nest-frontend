@@ -237,7 +237,7 @@ export default function LandlordPropertiesPage() {
                           <DropdownMenuSeparator />
 
                           <DropdownMenuItem
-                            className="text-red-600 focus:text-red-600"
+                            className="text-destructive focus:text-destructive focus:bg-destructive/10"
                             onClick={() => setPropertyToDelete(property.id)}
                           >
                             <Trash2 className="w-4 h-4 mr-2" />

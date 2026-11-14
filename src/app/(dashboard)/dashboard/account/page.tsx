@@ -36,19 +36,11 @@ import {
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import { FormField, SubmitButton } from "@/components/shared";
 import type { User } from "@/types";
 import { cn } from "@/lib/cn";
-
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .slice(0, 2)
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
-}
+import { getInitials } from "@/lib/format";
 
 export default function AccountPage() {
   const router = useRouter();
@@ -104,10 +96,10 @@ export default function AccountPage() {
   if (isLoading) {
     return (
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-        <LoadingSkeleton className="h-10 w-48 mb-6" />
+        <Skeleton className="h-10 w-48 mb-6" />
         <div className="grid gap-6 md:grid-cols-7">
-          <LoadingSkeleton className="h-64 md:col-span-2 rounded-xl" />
-          <LoadingSkeleton className="h-96 md:col-span-5 rounded-xl" />
+          <Skeleton className="h-64 md:col-span-2 rounded-xl" />
+          <Skeleton className="h-96 md:col-span-5 rounded-xl" />
         </div>
       </div>
     );
@@ -167,8 +159,8 @@ export default function AccountPage() {
                   <span className="text-muted-foreground flex items-center gap-2">
                     <BadgeInfo className="h-4 w-4" /> Account Status
                   </span>
-                  <span className="font-medium text-green-600 bg-green-100 px-2 py-0.5 rounded text-xs">
-                    Active
+                  <span className="font-medium text-success bg-success/15 px-2.5 py-0.5 rounded-full text-xs">
+                    {user.status ?? (user.isActive ? "Active" : "Active")}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">

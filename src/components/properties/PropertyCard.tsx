@@ -34,7 +34,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
         <div className="absolute top-2 right-2 flex flex-col items-end gap-2">
           {property.averageRating !== undefined && property.averageRating > 0 && (
             <div className="bg-background/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-medium flex items-center gap-1 shadow-sm">
-              <Star className="h-3 w-3 fill-yellow-400 text-yellow-500" />
+              <Star className="h-3 w-3 fill-warning text-warning" />
               {property.averageRating.toFixed(1)}
             </div>
           )}

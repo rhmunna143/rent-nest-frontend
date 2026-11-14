@@ -121,18 +121,18 @@ export default async function HomePage() {
 
             <div className="flex items-center justify-center lg:justify-start gap-8 pt-6 text-sm text-muted-foreground font-medium">
               <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-500" /> No hidden
+                <CheckCircle className="w-4 h-4 text-success" /> No hidden
                 fees
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-500" /> Verified
+                <CheckCircle className="w-4 h-4 text-success" /> Verified
                 Landlords
               </div>
             </div>
           </div>
 
           <div className="flex-1 w-full relative z-10">
-            <div className="absolute inset-0 bg-linear-to-tr from-primary/20 to-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute inset-0 bg-linear-to-tr from-primary/20 to-secondary/20 rounded-full blur-3xl animate-pulse"></div>
             <DotLottieReact
               src="https://lottie.host/3cfcbdbf-6602-4989-ab0b-d24f6aee3294/5tajUe8fVj.lottie"
               loop
@@ -149,7 +149,7 @@ export default async function HomePage() {
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute bottom-0 left-0 h-125 w-125 rounded-full bg-blue-500/5 blur-[100px]"
+          className="pointer-events-none absolute bottom-0 left-0 h-125 w-125 rounded-full bg-secondary/5 blur-[100px]"
         />
       </section>
 
@@ -175,7 +175,7 @@ export default async function HomePage() {
             {/* Step 1 */}
             <div className="relative z-10 flex flex-col items-center text-center space-y-6 group bottom-6">
               <div className="w-32 h-32 bg-card rounded-full shadow-xl border-4 border-background flex items-center justify-center p-4 transition-transform group-hover:scale-110 duration-300">
-                <div className="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
+                <div className="w-20 h-20 bg-primary/10 text-primary rounded-full flex items-center justify-center">
                   <Search className="w-10 h-10" />
                 </div>
               </div>
@@ -195,7 +195,7 @@ export default async function HomePage() {
             {/* Step 2 */}
             <div className="relative z-10 flex flex-col items-center text-center space-y-6 group bottom-6">
               <div className="w-32 h-32 bg-card rounded-full shadow-xl border-4 border-background flex items-center justify-center p-4 transition-transform group-hover:scale-110 duration-300">
-                <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center">
+                <div className="w-20 h-20 bg-success/10 text-success rounded-full flex items-center justify-center">
                   <CreditCard className="w-10 h-10" />
                 </div>
               </div>
@@ -217,7 +217,7 @@ export default async function HomePage() {
             {/* Step 3 */}
             <div className="relative z-10 flex flex-col items-center text-center space-y-6 group bottom-6">
               <div className="w-32 h-32 bg-card rounded-full shadow-xl border-4 border-background flex items-center justify-center p-4 transition-transform group-hover:scale-110 duration-300">
-                <div className="w-20 h-20 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center">
+                <div className="w-20 h-20 bg-secondary/10 text-secondary rounded-full flex items-center justify-center">
                   <HomeIcon className="w-10 h-10" />
                 </div>
               </div>
@@ -309,13 +309,13 @@ export default async function HomePage() {
               </p>
               <ul className="space-y-4 pt-4">
                 <li className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-success/15 text-success flex items-center justify-center shrink-0">
                     <CheckCircle className="w-4 h-4" />
                   </div>
                   <span className="font-medium">100% verified properties</span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-success/15 text-success flex items-center justify-center shrink-0">
                     <CheckCircle className="w-4 h-4" />
                   </div>
                   <span className="font-medium">
@@ -323,7 +323,7 @@ export default async function HomePage() {
                   </span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-success/15 text-success flex items-center justify-center shrink-0">
                     <CheckCircle className="w-4 h-4" />
                   </div>
                   <span className="font-medium">
@@ -346,7 +346,7 @@ export default async function HomePage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col-reverse md:flex-row items-center gap-12">
             <div className="flex-1 space-y-6">
-              <div className="inline-flex items-center gap-2 rounded-full bg-blue-100 text-blue-700 px-4 py-1.5 text-sm font-semibold tracking-wide uppercase">
+              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-4 py-1.5 text-sm font-semibold tracking-wide uppercase">
                 <CircleUserRound /> For Landlords
               </div>
               <h2 className="text-3xl md:text-5xl font-bold tracking-tight leading-tight">
@@ -360,7 +360,7 @@ export default async function HomePage() {
               </p>
               <ul className="space-y-4 pt-4">
                 <li className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
                     <CheckCircle className="w-4 h-4" />
                   </div>
                   <span className="font-medium">
@@ -368,7 +368,7 @@ export default async function HomePage() {
                   </span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
                     <CheckCircle className="w-4 h-4" />
                   </div>
                   <span className="font-medium">
@@ -376,7 +376,7 @@ export default async function HomePage() {
                   </span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
                     <CheckCircle className="w-4 h-4" />
                   </div>
                   <span className="font-medium">

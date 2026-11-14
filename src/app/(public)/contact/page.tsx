@@ -9,6 +9,7 @@ import { Mail, MapPin, Phone } from "lucide-react";
 
 import { FormField } from "@/components/shared";
 import { SubmitButton } from "@/components/shared";
+import { api } from "@/lib/api-client";
 
 const contactSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -34,13 +35,14 @@ export default function ContactPage() {
   const onSubmit = async (data: ContactFormValues) => {
     setIsSubmitting(true);
     try {
-      // Simulate API call for serverless environment
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      console.log("Contact form submitted:", data);
-      toast.success("Message sent successfully! We'll get back to you soon.");
-      reset();
-    } catch (error) {
+      const res = await api.post("/contact", data);
+      if (res.ok) {
+        toast.success("Message sent successfully! We'll get back to you soon.");
+        reset();
+      } else {
+        toast.error(res.message || "Failed to send message. Please try again later.");
+      }
+    } catch {
       toast.error("Failed to send message. Please try again later.");
     } finally {
       setIsSubmitting(false);

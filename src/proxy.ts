@@ -1,128 +1,143 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { jwtVerify } from "jose";
+import { dashboardFor, isValidRole } from "@/lib/roles";
 
-const BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080/api";
+const BACKEND_ORIGIN =
+  process.env.API_ORIGIN ?? "http://localhost:8080";
+const JWT_SECRET =
+  process.env.JWT_ACCESS_SECRET ??
+  "jask-rthtrhijibigjjrlertnu5y785hfgyugwrt6ggfst3r4rtfrdsfgshyreyryrgdy==vvv";
 
-// Route ---> required role map
+const encodedSecret = new TextEncoder().encode(JWT_SECRET);
 
+// Protected routes and their required role
 const ROLE_ROUTES: Record<string, string> = {
   "/dashboard/tenant": "TENANT",
   "/dashboard/landlord": "LANDLORD",
   "/dashboard/admin": "ADMIN",
 };
 
-function dashboardFor(role: string): string {
-  switch (role) {
-    case "TENANT":
-      return "/dashboard/tenant";
-    case "LANDLORD":
-      return "/dashboard/landlord";
-    case "ADMIN":
-      return "/dashboard/admin";
-    default:
-      return "/";
-  }
+interface TokenVerificationResult {
+  userId: string;
+  role: string;
 }
 
-// Fast path: read rn_role cookie 
-//
-// After login/register the client sets a lightweight readable cookie
-// `rn_role` so the proxy can determine the user's role without making
-// a network round-trip to the backend on every navigation.
-// The JWT httpOnly cookies still protect actual data - the backend
-// validates the token on every API call regardless.
-
-const VALID_ROLES = new Set(["TENANT", "LANDLORD", "ADMIN"]);
-
-function readRoleCookie(request: NextRequest): string | null {
-  const role = request.cookies.get("rn_role")?.value;
-  return role && VALID_ROLES.has(role) ? role : null;
-}
-
-// Slow path: ask the backend (fallback only)
-//
-// Used only when `rn_role` is absent but JWT cookies are present
-// (e.g. old session from before this cookie was introduced, or
-// the cookie was cleared manually).
-
-async function fetchRoleFromBackend(
-  request: NextRequest,
-): Promise<string | null> {
-  const cookieHeader = request.headers.get("cookie") ?? "";
-  if (!cookieHeader) return null;
-
+async function verifyToken(token: string): Promise<TokenVerificationResult | null> {
   try {
-    const res = await fetch(`${BASE_URL}/auth/me`, {
-      headers: { cookie: cookieHeader },
-      cache: "no-store",
-    });
-
-    if (res.status === 401) {
-      // Attempt a silent refresh
-      const refreshRes = await fetch(`${BASE_URL}/auth/refresh-token`, {
-        method: "POST",
-        headers: { cookie: cookieHeader },
-        cache: "no-store",
-      });
-      if (!refreshRes.ok) return null;
-
-      // Retry /auth/me after refresh
-      const retryRes = await fetch(`${BASE_URL}/auth/me`, {
-        headers: { cookie: cookieHeader },
-        cache: "no-store",
-      });
-      if (!retryRes.ok) return null;
-      const body = await retryRes.json();
-      return (body as { data?: { role?: string } }).data?.role ?? null;
+    const { payload } = await jwtVerify(token, encodedSecret);
+    if (payload && typeof payload.role === "string" && isValidRole(payload.role)) {
+      return {
+        userId: String(payload.userId ?? ""),
+        role: payload.role,
+      };
     }
-
-    if (!res.ok) return null;
-    const body = await res.json();
-    return (body as { data?: { role?: string } }).data?.role ?? null;
+    return null;
   } catch {
     return null;
   }
 }
 
-// Proxy 
+async function attemptServerRefresh(
+  request: NextRequest
+): Promise<{ result: TokenVerificationResult; setCookieHeaders: string[] } | null> {
+  const cookieHeader = request.headers.get("cookie") ?? "";
+  if (!cookieHeader || !request.cookies.has("refreshToken")) {
+    return null;
+  }
+
+  try {
+    const refreshRes = await fetch(`${BACKEND_ORIGIN}/api/auth/refresh-token`, {
+      method: "POST",
+      headers: { cookie: cookieHeader },
+      cache: "no-store",
+    });
+
+    if (!refreshRes.ok) return null;
+
+    // Extract set-cookie headers
+    const setCookieHeaders = refreshRes.headers.getSetCookie
+      ? refreshRes.headers.getSetCookie()
+      : [refreshRes.headers.get("set-cookie")].filter(Boolean) as string[];
+
+    // Extract new accessToken from Set-Cookie or verify it
+    let newAccessToken: string | null = null;
+    for (const cookieStr of setCookieHeaders) {
+      const match = cookieStr.match(/accessToken=([^;]+)/);
+      if (match) {
+        newAccessToken = match[1];
+        break;
+      }
+    }
+
+    if (!newAccessToken) return null;
+
+    const verified = await verifyToken(newAccessToken);
+    if (!verified) return null;
+
+    return { result: verified, setCookieHeaders };
+  } catch {
+    return null;
+  }
+}
 
 async function proxyFn(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const matchedPrefix = Object.keys(ROLE_ROUTES).find((prefix) =>
-    pathname.startsWith(prefix),
+    pathname.startsWith(prefix)
   );
 
+  // If route is /dashboard/account, any authenticated user can access it
+  const isAccountRoute = pathname.startsWith("/dashboard/account");
+
   // Route is not protected - let it through
-  if (!matchedPrefix) return NextResponse.next();
+  if (!matchedPrefix && !isAccountRoute) {
+    return NextResponse.next();
+  }
 
-  const requiredRole = ROLE_ROUTES[matchedPrefix];
+  const requiredRole = matchedPrefix ? ROLE_ROUTES[matchedPrefix] : null;
 
-  // 1️⃣  Fast path - rn_role cookie (set by client after login)
-  let userRole = readRoleCookie(request);
+  // 1️⃣ Verify the httpOnly accessToken cookie with jose
+  const accessToken = request.cookies.get("accessToken")?.value;
+  let authResult: TokenVerificationResult | null = null;
+  let newSetCookies: string[] = [];
 
-  // 2️⃣  Slow path - backend call (only if JWT cookies present but rn_role is missing)
-  if (!userRole) {
-    const hasJwt =
-      request.cookies.has("accessToken") || request.cookies.has("refreshToken");
-    if (hasJwt) {
-      userRole = await fetchRoleFromBackend(request);
+  if (accessToken) {
+    authResult = await verifyToken(accessToken);
+  }
+
+  // 2️⃣ If accessToken is expired/invalid, try silent refresh with refreshToken
+  if (!authResult && request.cookies.has("refreshToken")) {
+    const refreshData = await attemptServerRefresh(request);
+    if (refreshData) {
+      authResult = refreshData.result;
+      newSetCookies = refreshData.setCookieHeaders;
     }
   }
 
-  // Not authenticated - redirect to login
-  if (!userRole) {
+  // 3️⃣ If still not authenticated, redirect to login with safe returnTo
+  if (!authResult) {
     const loginUrl = new URL("/auth/login", request.url);
     loginUrl.searchParams.set("returnTo", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // Wrong role - redirect to their own dashboard
-  if (userRole !== requiredRole) {
-    return NextResponse.redirect(new URL(dashboardFor(userRole), request.url));
+  // 4️⃣ Check role authorization: if route requires specific role, verify
+  if (requiredRole && authResult.role !== requiredRole) {
+    // Redirect to their own role dashboard
+    const destination = dashboardFor(authResult.role);
+    const redirectRes = NextResponse.redirect(new URL(destination, request.url));
+    newSetCookies.forEach((header) => {
+      redirectRes.headers.append("set-cookie", header);
+    });
+    return redirectRes;
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+  newSetCookies.forEach((header) => {
+    response.headers.append("set-cookie", header);
+  });
+  return response;
 }
 
 export default proxyFn;

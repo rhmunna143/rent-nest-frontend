@@ -11,8 +11,11 @@ import { Suspense } from "react";
 import { loginSchema, type LoginInput } from "@/lib/schemas/auth.schema";
 import { api } from "@/lib/api-client";
 import { useAuth } from "@/context/AuthContext";
+import { dashboardFor } from "@/lib/roles";
+import { applyServerErrors } from "@/lib/errors";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import {
   Card,
@@ -26,29 +29,20 @@ import type { User } from "@/types";
 import Logo from "@/utils/images/logo";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
-function dashboardFor(role: string) {
-  switch (role) {
-    case "TENANT":
-      return "/dashboard/tenant";
-    case "LANDLORD":
-      return "/dashboard/landlord";
-    case "ADMIN":
-      return "/dashboard/admin";
-    default:
-      return "/";
-  }
-}
-
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const returnTo = searchParams.get("returnTo");
   const { refreshUser } = useAuth();
 
+  const enableDemoLogin =
+    process.env.NEXT_PUBLIC_ENABLE_DEMO_LOGIN === "true";
+
   const {
     register,
     handleSubmit,
     setValue,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -58,15 +52,15 @@ function LoginForm() {
     switch (role) {
       case "ADMIN":
         setValue("email", "admin@rentnest.com");
-        setValue("password", "admin123");
+        setValue("password", "Demo@1234");
         break;
       case "LANDLORD":
-        setValue("email", "landlord@example.com");
-        setValue("password", "password123");
+        setValue("email", "landlord@rentnest.com");
+        setValue("password", "Demo@1234");
         break;
       case "TENANT":
-        setValue("email", "tenant@example.com");
-        setValue("password", "password123");
+        setValue("email", "tenant@rentnest.com");
+        setValue("password", "Demo@1234");
         break;
     }
     toast.info(`${role} credentials filled. Click "Sign in" to continue.`);
@@ -76,14 +70,22 @@ function LoginForm() {
     const result = await api.post<{ user: User }>("/auth/login", data);
 
     if (!result.ok) {
-      toast.error(result.message ?? "Invalid email or password");
+      if (result.errorDetails) {
+        applyServerErrors(setError, result.errorDetails);
+      }
+      toast.error(result.message || "Invalid email or password");
       return;
     }
 
     await refreshUser();
     toast.success("Welcome back!");
 
-    const destination = returnTo ?? dashboardFor(result.data.user.role);
+    // F1.7: Hardened returnTo guard: accept only relative paths starting with a single '/'
+    let destination = dashboardFor(result.data.user.role);
+    if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//") && !returnTo.includes("://")) {
+      destination = returnTo;
+    }
+
     router.push(destination);
     router.refresh();
   }
@@ -103,7 +105,7 @@ function LoginForm() {
         className="w-full mx-auto hidden md:flex"
       />
 
-      <Card className="w-full max-w-md shadow-lg animate-fade-in">
+      <Card className="w-full max-w-md shadow-lg animate-fade-in mx-auto">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-2">
             <Logo />
@@ -113,27 +115,47 @@ function LoginForm() {
         </CardHeader>
 
         <CardContent>
-          <div className="grid grid-cols-3 gap-2 mb-6">
-            <Button variant="outline" size="sm" type="button" onClick={() => setDemoCredentials("ADMIN")}>
-              Admin
-            </Button>
-            <Button variant="outline" size="sm" type="button" onClick={() => setDemoCredentials("LANDLORD")}>
-              Landlord
-            </Button>
-            <Button variant="outline" size="sm" type="button" onClick={() => setDemoCredentials("TENANT")}>
-              Tenant
-            </Button>
-          </div>
-          <div className="relative mb-6">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">
-                Or continue with email
-              </span>
-            </div>
-          </div>
+          {enableDemoLogin && (
+            <>
+              <div className="grid grid-cols-3 gap-2 mb-6">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  type="button"
+                  onClick={() => setDemoCredentials("ADMIN")}
+                >
+                  Admin
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  type="button"
+                  onClick={() => setDemoCredentials("LANDLORD")}
+                >
+                  Landlord
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  type="button"
+                  onClick={() => setDemoCredentials("TENANT")}
+                >
+                  Tenant
+                </Button>
+              </div>
+              <div className="relative mb-6">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground">
+                    Or continue with email
+                  </span>
+                </div>
+              </div>
+            </>
+          )}
+
           <form
             onSubmit={handleSubmit(onSubmit)}
             id="login-form"
@@ -164,9 +186,8 @@ function LoginForm() {
             {/* Password */}
             <div className="space-y-1.5">
               <Label htmlFor="login-password">Password</Label>
-              <Input
+              <PasswordInput
                 id="login-password"
-                type="password"
                 placeholder="Your password"
                 autoComplete="current-password"
                 aria-invalid={!!errors.password}
@@ -198,10 +219,11 @@ function LoginForm() {
             </Button>
           </form>
 
-          {/* Admin hint */}
-          <p className="mt-4 text-xs text-center text-muted-foreground">
-            Use the buttons above for quick demo access.
-          </p>
+          {enableDemoLogin && (
+            <p className="mt-4 text-xs text-center text-muted-foreground">
+              Click the demo buttons above to pre-fill test credentials.
+            </p>
+          )}
         </CardContent>
 
         <CardFooter className="justify-center">

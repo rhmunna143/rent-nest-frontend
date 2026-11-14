@@ -37,10 +37,13 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PasswordInput } from "@/components/ui/password-input";
+import { PasswordStrength } from "@/components/ui/password-strength";
 import { FormField, SubmitButton } from "@/components/shared";
 import type { User } from "@/types";
 import { cn } from "@/lib/cn";
 import { getInitials } from "@/lib/format";
+import { applyServerErrors } from "@/lib/errors";
 
 export default function AccountPage() {
   const router = useRouter();
@@ -50,10 +53,14 @@ export default function AccountPage() {
     register,
     handleSubmit,
     reset,
+    setError,
+    watch,
     formState: { errors, isSubmitting, isDirty },
   } = useForm<ProfileUpdateInput>({
     resolver: zodResolver(profileUpdateSchema),
   });
+
+  const newPasswordValue = watch("password", "");
 
   // Redirect unauthenticated users
   useEffect(() => {
@@ -69,28 +76,44 @@ export default function AccountPage() {
         name: user.name ?? "",
         phone: user.phone ?? "",
         profileImage: user.profileImage ?? "",
+        currentPassword: "",
         password: "",
+        confirmPassword: "",
       });
     }
   }, [user, reset]);
 
   async function onSubmit(data: ProfileUpdateInput) {
-    // Remove empty optional fields before sending
-    const payload = Object.fromEntries(
-      Object.entries(data).filter(([, v]) => v !== "" && v !== undefined),
-    );
+    // Remove empty optional fields and confirmPassword before sending
+    const payload: Record<string, unknown> = {};
+    if (data.name) payload.name = data.name;
+    if (data.phone) payload.phone = data.phone;
+    if (data.profileImage) payload.profileImage = data.profileImage;
+    if (data.password) {
+      payload.password = data.password;
+      payload.currentPassword = data.currentPassword;
+    }
 
     const result = await api.patch<User>("/auth/me", payload);
 
     if (!result.ok) {
-      const detail = result.errorDetails?.[0];
-      toast.error(detail?.message ?? result.message);
+      if (result.errorDetails) {
+        applyServerErrors(setError, result.errorDetails);
+      }
+      toast.error(result.message || "Failed to update profile");
       return;
     }
 
     await refreshUser();
     toast.success("Profile updated successfully");
-    reset({ ...data, password: "" });
+    reset({
+      name: result.data.name ?? "",
+      phone: result.data.phone ?? "",
+      profileImage: result.data.profileImage ?? "",
+      currentPassword: "",
+      password: "",
+      confirmPassword: "",
+    });
   }
 
   if (isLoading) {
@@ -261,21 +284,60 @@ export default function AccountPage() {
                 <Separator className="my-6" />
 
                 {/* Security Section */}
-                <div>
-                  <h3 className="text-lg font-medium mb-4">Security</h3>
-                  <FormField
-                    id="account-password"
-                    type="password"
-                    label={
-                      <div className="flex items-center gap-1.5 font-medium">
-                        <Lock className="h-4 w-4 text-muted-foreground" /> Change Password
-                      </div>
-                    }
-                    placeholder="Enter new password"
-                    autoComplete="new-password"
-                    error={errors.password?.message}
-                    {...register("password")}
-                  />
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Security</h3>
+                  <p className="text-sm text-muted-foreground">
+                    To change your password, provide your current password and a new secure password.
+                  </p>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="current-password">Current Password</Label>
+                    <PasswordInput
+                      id="current-password"
+                      placeholder="Enter current password"
+                      autoComplete="current-password"
+                      aria-invalid={!!errors.currentPassword}
+                      {...register("currentPassword")}
+                    />
+                    {errors.currentPassword && (
+                      <p className="text-xs text-destructive">
+                        {errors.currentPassword.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="account-password">New Password</Label>
+                    <PasswordInput
+                      id="account-password"
+                      placeholder="Enter new password (min. 8 chars, upper, lower, digit)"
+                      autoComplete="new-password"
+                      aria-invalid={!!errors.password}
+                      {...register("password")}
+                    />
+                    <PasswordStrength password={newPasswordValue} />
+                    {errors.password && (
+                      <p className="text-xs text-destructive">
+                        {errors.password.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="confirm-password">Confirm New Password</Label>
+                    <PasswordInput
+                      id="confirm-password"
+                      placeholder="Confirm new password"
+                      autoComplete="new-password"
+                      aria-invalid={!!errors.confirmPassword}
+                      {...register("confirmPassword")}
+                    />
+                    {errors.confirmPassword && (
+                      <p className="text-xs text-destructive">
+                        {errors.confirmPassword.message}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </CardContent>
               <CardFooter className="bg-muted/30 px-6 py-4 border-t flex justify-end">

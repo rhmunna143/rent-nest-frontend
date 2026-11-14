@@ -5,14 +5,18 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { Loader2, Home, Users, Building2, ArrowLeft } from "lucide-react";
+import { Loader2, Users, Building2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 import { registerSchema, type RegisterInput } from "@/lib/schemas/auth.schema";
 import { api } from "@/lib/api-client";
 import { useAuth } from "@/context/AuthContext";
+import { dashboardFor } from "@/lib/roles";
+import { applyServerErrors } from "@/lib/errors";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
+import { PasswordStrength } from "@/components/ui/password-strength";
 import { Label } from "@/components/ui/label";
 import {
   Card,
@@ -27,33 +31,26 @@ import type { User } from "@/types";
 import Logo from "@/utils/images/logo";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
-function dashboardFor(role: string) {
-  switch (role) {
-    case "TENANT":
-      return "/dashboard/tenant";
-    case "LANDLORD":
-      return "/dashboard/landlord";
-    default:
-      return "/";
-  }
-}
-
 export default function RegisterPage() {
   const router = useRouter();
   const { refreshUser } = useAuth();
   const [selectedRole, setSelectedRole] = useState<"TENANT" | "LANDLORD">(
-    "TENANT",
+    "TENANT"
   );
 
   const {
     register,
     handleSubmit,
     setValue,
+    setError,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
     defaultValues: { role: "TENANT" },
   });
+
+  const passwordValue = watch("password", "");
 
   const onRoleSelect = (role: "TENANT" | "LANDLORD") => {
     setSelectedRole(role);
@@ -61,12 +58,21 @@ export default function RegisterPage() {
   };
 
   async function onSubmit(data: RegisterInput) {
-    const result = await api.post<User>("/auth/register", data);
+    const payload = {
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      role: data.role,
+      ...(data.phone ? { phone: data.phone } : {}),
+    };
+
+    const result = await api.post<User>("/auth/register", payload);
 
     if (!result.ok) {
-      // Surface field-level errors from errorDetails
-      const detail = result.errorDetails?.[0];
-      toast.error(detail?.message ?? result.message);
+      if (result.errorDetails) {
+        applyServerErrors(setError, result.errorDetails);
+      }
+      toast.error(result.message || "Failed to create account");
       return;
     }
 
@@ -90,7 +96,7 @@ export default function RegisterPage() {
         className="w-full max-w-xxl mx-auto hidden md:flex"
       />
 
-      <Card className="w-full max-w-md shadow-lg animate-fade-in">
+      <Card className="w-full max-w-md shadow-lg animate-fade-in mx-auto">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-2">
             <Logo />
@@ -108,7 +114,7 @@ export default function RegisterPage() {
             onSubmit={handleSubmit(onSubmit)}
             id="register-form"
             noValidate
-            className="space-y-5"
+            className="space-y-4"
           >
             {/* Role selector */}
             <div className="space-y-2">
@@ -121,10 +127,10 @@ export default function RegisterPage() {
                     id={`role-${role.toLowerCase()}`}
                     onClick={() => onRoleSelect(role)}
                     className={cn(
-                      "flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all hover:border-primary/60",
+                      "flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all hover:border-primary/60",
                       selectedRole === role
                         ? "border-primary bg-primary/5"
-                        : "border-muted bg-card",
+                        : "border-muted bg-card"
                     )}
                   >
                     {role === "TENANT" ? (
@@ -132,7 +138,7 @@ export default function RegisterPage() {
                     ) : (
                       <Building2 className="h-6 w-6 text-primary" />
                     )}
-                    <span className="text-sm font-medium">
+                    <span className="text-sm font-semibold">
                       {role === "TENANT" ? "Tenant" : "Landlord"}
                     </span>
                     <span className="text-xs text-muted-foreground text-center">
@@ -198,13 +204,30 @@ export default function RegisterPage() {
               )}
             </div>
 
+            {/* Phone (Optional) */}
+            <div className="space-y-1.5">
+              <Label htmlFor="register-phone">Phone number (optional)</Label>
+              <Input
+                id="register-phone"
+                type="tel"
+                placeholder="+1 (555) 000-0000"
+                autoComplete="tel"
+                aria-invalid={!!errors.phone}
+                {...register("phone")}
+              />
+              {errors.phone && (
+                <p className="text-xs text-destructive">
+                  {errors.phone.message}
+                </p>
+              )}
+            </div>
+
             {/* Password */}
             <div className="space-y-1.5">
               <Label htmlFor="register-password">Password</Label>
-              <Input
+              <PasswordInput
                 id="register-password"
-                type="password"
-                placeholder="Min. 6 characters"
+                placeholder="At least 8 characters"
                 autoComplete="new-password"
                 aria-invalid={!!errors.password}
                 aria-describedby={
@@ -212,6 +235,7 @@ export default function RegisterPage() {
                 }
                 {...register("password")}
               />
+              <PasswordStrength password={passwordValue} />
               {errors.password && (
                 <p
                   id="register-password-error"
@@ -224,7 +248,7 @@ export default function RegisterPage() {
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full mt-2"
               disabled={isSubmitting}
               id="register-submit"
             >

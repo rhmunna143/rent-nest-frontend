@@ -109,6 +109,7 @@ export interface Review {
   rating: number;
   comment?: string | null;
   tenant?: Pick<User, "id" | "name" | "profileImage">;
+  property?: Pick<Property, "id" | "title" | "location">;
   createdAt: string;
   updatedAt: string;
 }

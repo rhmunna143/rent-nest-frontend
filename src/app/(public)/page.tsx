@@ -29,6 +29,7 @@ import { getInitials } from "@/lib/format";
 import { faqs } from "@/lib/data/faq";
 import { blogPosts } from "@/lib/data/blog";
 import { serverFetch } from "@/lib/server-api";
+import { siteConfig } from "@/lib/site-config";
 import type { Property, Category, PublicStats, Review } from "@/types";
 import type { Metadata } from "next";
 
@@ -55,8 +56,25 @@ export default async function HomePage() {
   const featuredProperties = propertiesRes.ok ? (propertiesRes.data ?? []) : [];
   const reviews = reviewsRes.ok ? (reviewsRes.data ?? []) : [];
 
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: siteConfig.name,
+    url: siteConfig.url,
+    description: siteConfig.description,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${siteConfig.url}/properties?search={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+      />
       {/* 1. HERO SECTION (60-70vh constraint) */}
       <section
         className="relative overflow-hidden bg-linear-to-b from-primary/5 via-background to-background py-12 lg:py-0 lg:h-[65vh] min-h-[520px] flex items-center border-b"

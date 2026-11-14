@@ -1,144 +1,158 @@
 # 🏡 RentNest Frontend
 
-**Find & List Rental Properties with Ease**
+**Modern Rental Property Marketplace — Built with Next.js 16, TypeScript & Tailwind CSS**
 
-RentNest is a comprehensive rental property marketplace built with modern web technologies. It seamlessly connects **Tenants** looking for their next home, **Landlords** managing property portfolios, and **Admins** overseeing the platform ecosystem.
-
-Built on **Next.js (App Router)** and styled with **Tailwind CSS**, RentNest provides a blazingly fast, accessible, and heavily animated user experience.
+RentNest is a production-grade rental property marketplace platform connecting verified **Tenants**, **Landlords**, and **Admins**. Engineered with the **Next.js 16 App Router**, **React 19**, and a cohesive **design token system**, RentNest provides real-time rental listings, Stripe payments, server-backed wishlists, Cloudinary media uploads, role-based dashboards, and an AI-powered property assistant.
 
 ---
 
-## 🔗 Project Links & Demo
+## 🔗 Project Overview & Live Demo
 
-- **Frontend Repo:** [https://github.com/rhmunna143/rent-nest-frontend](https://github.com/rhmunna143/rent-nest-frontend)
+- **Frontend Repository:** [https://github.com/rhmunna143/rent-nest-frontend](https://github.com/rhmunna143/rent-nest-frontend)
 - **Live Frontend:** [https://rent-nest-frontend-sigma.vercel.app](https://rent-nest-frontend-sigma.vercel.app)
-- **Backend API:** `https://rent-nest-backend-eight.vercel.app/api`
-- **Demo Video:** [https://youtu.be/z8wbl2pG3k8](https://youtu.be/z8wbl2pG3k8)
-- **Backend Repo:** [https://github.com/rhmunna143/rent-nest-backend](https://github.com/rhmunna143/rent-nest-backend)
-
-### 🔐 Admin Demo Credentials
-To explore the Admin dashboard on the live site without registering, you can use the seeded admin account:
-- **Email:** `admin@rentnest.com`
-- **Password:** `admin123`
+- **Live Backend API:** `https://rent-nest-backend-eight.vercel.app/api` (Local: `http://localhost:8080/api`)
+- **Backend Repository:** [https://github.com/rhmunna143/rent-nest-backend](https://github.com/rhmunna143/rent-nest-backend)
+- **Demo Video Walkthrough:** [https://youtu.be/z8wbl2pG3k8](https://youtu.be/z8wbl2pG3k8)
 
 ---
 
-## ✨ Comprehensive Features
+## 🔐 Seeded Demo Credentials
 
-### 🌐 Public Marketplace
-- **Dynamic Homepage:** Beautiful landing page featuring Lottie animations, animated flow lines, and dynamic stats counters powered by Intersection Observers.
-- **Advanced Property Search:** Browse available properties with rich filtering (price, category, bedrooms).
-- **Rich Property Details:** View property galleries, landlord information, aggregated reviews, and an integrated "Request to Rent" flow.
+One-click demo login buttons are provided on `/auth/login` to explore each role instantly:
 
-### 👤 Tenant Experience
-- **Secure Requests:** Safely request to rent a property with custom move-in dates and messages.
-- **Stripe Integration:** Seamless payment flow for approved requests using Stripe Checkout.
-- **Payment Lifecycle Dashboard:** Track requests through `PENDING` ➔ `APPROVED` ➔ `ACTIVE` ➔ `COMPLETED`. 
-- **Review System:** Leave verified ratings and reviews for completed rentals.
-
-### 🏢 Landlord Experience
-- **Property Management:** Full CRUD capabilities for properties with instant status toggling (`AVAILABLE`, `RENTED`, `UNAVAILABLE`).
-- **Request Moderation:** Approve or reject incoming tenant requests with optimistic UI updates.
-- **Analytics Overview:** See at-a-glance metrics for total properties and incoming request volume.
-
-### 🛡️ Admin Experience
-- **Live Platform Analytics:** A responsive, multi-column dashboard featuring live charts (built with `recharts`) showing active properties and platform categories.
-- **Category Management:** Full CRUD interface for managing global property categories used by landlords.
-- **Content Moderation:** Built a foundational content moderation queue for categories and global platform health.
-- **Robust Security:** Strict middleware-level route guarding ensures Admins are the only users who can access platform settings.
-
-### 🌟 New Features & Upgrades
-- **Standalone Informational Pages:** Implemented comprehensive "About Us", "Contact", and domain-specific "Rental Living Guides" (Blog) complete with rich markdown formatting and dynamic routing.
-- **Dark/Light Mode:** Seamless theme switching integrated across the entire platform using `next-themes` with zero hydration mismatches.
-- **Demo Login System:** One-click seeded demo login buttons for all three roles (Admin, Landlord, Tenant) to effortlessly explore the platform.
-- **Saved Properties (Wishlist):** A localized tenant feature to heart and save favorite properties, accessible via a dedicated "Saved" tab in the dashboard.
-- **AI Assistant Ready:** Pre-configured a "Floating Actions" widget ready for the upcoming Gemini AI API Chatbot integration.
+| Role | Email | Password | Access & Capabilities |
+| :--- | :--- | :--- | :--- |
+| **Admin** | `admin@rentnest.com` | `admin123` | Platform analytics, User management (ban/unban), Property moderation, Categories CRUD, Contact inquiries, Rentals & Payments audit |
+| **Landlord** | `landlord@rentnest.com` | `Demo@1234` | Earnings overview, Property CRUD with Cloudinary image upload, Rental request approvals/declines |
+| **Tenant** | `tenant@rentnest.com` | `Demo@1234` | Explore listings, Submit rent requests, Stripe checkout & payment sync, Server-backed Wishlist, Reviews |
 
 ---
 
-## 🚀 Unique & Standout Features
+## 📐 Architecture & Engineering Highlights
 
-- **Bulletproof Stripe Webhook Synchronization:** Stripe checkout sessions redirect immediately, often before the backend webhook has finished updating the database. RentNest implements a smart UI polling strategy on the `/payment/success` page that visually verifies the backend database before showing a success checkmark.
-- **Intelligent Payment Fallbacks:** When redirecting back from Stripe, third-party gateways often strip custom query parameters (like `rentalId`). RentNest solves this elegantly by securely caching context in `localStorage` right before checkout, ensuring a flawless post-payment UX regardless of URL parameter stripping.
-- **Dynamic Mobile Responsiveness:** Dashboard layouts feature a persistent sidebar on desktop that seamlessly transitions into a sleek, state-aware hamburger `Sheet` drawer on tablets and mobile devices. 
-- **Advanced UI Animations:** Includes custom CSS keyframe `flow-line` animations, Lottie animations optimized to prevent React hydration mismatches (via deferred mounting), and scroll-triggered stat counters.
-- **Airtight Middleware Security:** Role-based access control isn't just hidden in the UI. Next.js Middleware acts as a unified gatekeeper, strictly routing unauthenticated or unauthorized roles away from protected nested routes.
+### 1. Design Token System & WCAG AA Contrast
+- **3 Brand Tokens:** Defined strictly in `src/app/globals.css` using HSL CSS variables:
+  - `--primary` (Indigo / Primary brand actions)
+  - `--secondary` (Muted action accents)
+  - `--accent` (Interactive highlights & badges)
+- **Semantic Tokens:** `--success`, `--warning`, `--destructive`, `--background`, `--card`, `--muted`, `--border`.
+- **Zero Raw Tailwind Palette Colors:** All raw color classes (`bg-blue-*`, `text-red-*`, `bg-emerald-*`) eliminated in favor of semantic token utility classes.
+- **Unified Corner Radius:** Consistent `rounded-xl` token for all Cards, Buttons, Inputs, Dialogs, Selects, and Dropdowns (`rounded-full` reserved for avatars and status pills).
 
----
+### 2. Cryptographic Route Security (`src/proxy.ts`)
+- Edge-compatible Next.js 16 proxy middleware inspecting `accessToken` and `refreshToken` cookies.
+- **Signature Verification:** Uses `jose` with `jwtVerify` and `HS256` against `JWT_ACCESS_SECRET`.
+- **Role Isolation:** Verifies role-based access rules for `/dashboard/admin/*`, `/dashboard/landlord/*`, and `/dashboard/tenant/*`. Invalid or manipulated tokens are instantly cleared and redirected to `/auth/login?returnTo=...`.
 
-## 🧗 Challenges Faced & Overcome
+### 3. Unified Data Table (`DataTable`)
+- Powered by `@tanstack/react-table` in `src/components/ui/data-table.tsx`.
+- Single reusable table component serving every tabular view across Admin, Landlord, and Tenant portals.
+- Supports client/server sorting, fuzzy search filtering, status facets, pagination, and dropdown row actions (View, Edit, Ban, Moderate, Delete).
 
-Throughout the development of RentNest, several complex technical hurdles were overcome to ensure a premium user experience:
+### 4. Direct Cloudinary Uploads (`ImageUploader`)
+- Signed directly from the backend via `POST /api/uploads/sign`.
+- Strict 2MB image limit, client-side format validation (JPEG, PNG, WebP), upload progress feedback, and manual URL input fallback.
 
-1. **Hydration Mismatches with Lottie Animations:**
-   - **Challenge:** Implementing advanced Lottie animations (`@lottiefiles/dotlottie-react`) caused Next.js server-side hydration errors because the canvas elements rendered differently on the server versus the client browser.
-   - **Solution:** Engineered a deferred-mounting hook (`isMounted` state) that entirely skips Server-Side Rendering (SSR) for the floating Lottie elements, deferring them to client-side only. This completely eliminated console errors while preserving SEO for the rest of the page.
+### 5. Server-Backed Wishlist (`useFavorites`)
+- Replaces legacy local storage hooks with TanStack Query hooks (`useFavorites`, `useAddFavorite`, `useRemoveFavorite`).
+- Automated one-time migration of existing `rentnest_wishlist` items on first tenant login.
+- Status badge indicators for favorited properties (e.g. `AVAILABLE`, `RENTED`).
+- Heart actions automatically suppressed for Landlords and Admins.
 
-2. **Payment Gateway Parameter Stripping:**
-   - **Challenge:** The backend initiated Stripe Checkout sessions without preserving the frontend's `rentalId` in the `successUrl`. When Stripe redirected the user back to the success page, it only provided a `session_id`, leaving the frontend blind as to which rental request to verify.
-   - **Solution:** Implemented a robust pre-flight caching mechanism. The exact moment a user clicks "Pay", the frontend saves the `rentalId` into browser `localStorage`. When Stripe redirects back, the success page intelligently falls back to `localStorage` if the URL parameters are stripped, guaranteeing 100% reliability.
+### 6. AI Property Assistant (Gemini)
+- Integrated in `src/app/api/assistant/route.ts` with per-IP rate limiting (10 req/min).
+- Natural language query extraction into validated search filter JSON via Zod (`search`, `minPrice`, `maxPrice`, `bedrooms`).
+- Queries the real `/api/properties` endpoint with extracted parameters and streams live property cards into the interactive chat `Sheet`.
+- Clean fallback: If `GEMINI_API_KEY` is omitted, the assistant trigger button is cleanly hidden with zero client console errors.
 
-3. **Dashboard Layout Squishing on Tablets (1024px):**
-   - **Challenge:** The dashboard layout's fixed sidebar was originally set to remain open on medium screens (`md:block`), which severely squished the `recharts` graphs and admin analytics cards on iPad Pro dimensions (1024px).
-   - **Solution:** Refactored the Tailwind breakpoint architecture across `layout.tsx`, `MobileSidebar.tsx`, and `page.tsx`. Shifted the persistent sidebar to strictly `lg` (1024px+), while simultaneously expanding the fluid grid columns to `xl` (1280px+). This allowed the layout to gracefully drop into a spacious 2-column view on 1024px screens, providing a flawless tablet experience.
-
-4. **Data Type Casting from Legacy APIs:**
-   - **Challenge:** Integrating live data into the Recharts components failed initially because the backend returned numeric values (like total properties) as strings.
-   - **Solution:** Implemented strict frontend type-casting and fallback UI skeletons to ensure the charts rendered safely and correctly regardless of backend typing quirks.
+### 7. Performance & SEO
+- **Zero Raw `<img>`:** All media rendered via `next/image` with responsive `sizes`, `fill` or explicit dimensions, and priority loading on above-the-fold hero elements.
+- **Dynamic SEO:**
+  - `src/app/sitemap.ts`: Dynamic sitemap generated for all static pages, blog articles, and active properties.
+  - `src/app/robots.ts`: Crawling rules protecting private dashboard routes.
+  - JSON-LD Structured Data: `Residence` and `Offer` schema on property detail pages; `WebSite` search schema on home page.
+  - Skip-to-content accessibility link and full ARIA keyboard navigation.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Framework:** Next.js 15+ (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS (v4) + Shadcn UI
-- **Forms:** React Hook Form + Zod validation
-- **Charts:** Recharts
-- **Icons & Assets:** Lucide React, DotLottie
-- **Data Fetching:** Native fetch API with custom `ApiClient` wrapper
+- **Framework:** Next.js 16.2.12 (App Router with Turbopack)
+- **Library:** React 19.2.8 & React DOM 19.2.8
+- **Language:** TypeScript 5.8
+- **Styling:** Tailwind CSS v4, PostCSS, Class Variance Authority (`cva`), `tailwind-merge`
+- **Component Primitives:** Radix UI (`@radix-ui/react-dialog`, `@radix-ui/react-select`, `@radix-ui/react-tabs`, `@radix-ui/react-accordion`, `@radix-ui/react-dropdown-menu`, `@radix-ui/react-popover`)
+- **State & Data Fetching:** TanStack React Query v5, TanStack Table v8
+- **Forms & Validation:** React Hook Form v7, Zod v4, `@hookform/resolvers`
+- **Security & JWT:** `jose` (HS256 cryptographic verification)
+- **Charts:** Recharts v3 (Dynamic SSR-safe code-splitting)
+- **Icons & Animation:** Lucide React, DotLottie (`@lottiefiles/dotlottie-react`)
+- **Notifications:** Sonner Toast
 
 ---
 
-## 💻 Local Setup & Installation
-
-Follow these steps to get the RentNest frontend running on your local machine.
+## 📦 Getting Started
 
 ### Prerequisites
-- **Node.js**: v18.17.0 or higher
-- **npm** or **pnpm** (npm is used in this guide)
-- **Git**
+- Node.js 20+ or 22+
+- npm or yarn
 
-### Installation
+### 1. Clone the repository
+```bash
+git clone https://github.com/rhmunna143/rent-nest-frontend.git
+cd rent-nest-frontend
+```
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/yourusername/rent-nest-frontend.git
-   cd rent-nest-frontend
-   ```
+### 2. Install dependencies
+```bash
+npm install
+```
 
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+### 3. Environment Variables
+Create a `.env.local` file in the root directory:
 
-3. **Configure Environment Variables:**
-   Create a `.env.local` file in the root of the project and add your backend API URL and any other necessary secrets:
-   ```env
-   # Example .env.local
-   NEXT_PUBLIC_API_URL=http://localhost:8080/api
-   ```
-   *(Note: Ensure your backend server is running locally on port 8080, or point this to your deployed backend URL).*
+```env
+# Client API Route Base (Proxied through Next.js rewrites)
+NEXT_PUBLIC_API_BASE_URL=/api
 
-4. **Run the Development Server:**
-   ```bash
-   npm run dev
-   ```
+# Live Backend Origin
+API_ORIGIN=http://localhost:8080
 
-5. **Open the Application:**
-   Open your browser and navigate to [http://localhost:3000](http://localhost:3000). You should see the RentNest landing page!
+# Secret for cryptographic token verification (must match backend)
+JWT_ACCESS_SECRET=jask-rthtrhijibigjjrlertnu5y785hfgyugwrt6ggfst3r4rtfrdsfgshyreyryrgdy==vvv
+
+# Seeded Demo Login Visibility
+NEXT_PUBLIC_ENABLE_DEMO_LOGIN=true
+
+# Optional: Google Gemini API key for AI Assistant
+GEMINI_API_KEY=
+```
+
+### 4. Development Server
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) to view the application.
 
 ---
 
-> Built with ❤️ by the RentNest Team. [@rhmunna143](https://rhmunna.pro.bd)
+## 🧪 Quality Assurance & Build Commands
 
+All code must pass strict quality checks:
+
+```bash
+# 1. TypeScript Verification (0 errors)
+npm run typecheck
+
+# 2. ESLint Validation (0 warnings, 0 errors)
+npm run lint
+
+# 3. Next.js Production Build (exits code 0)
+npm run build
+```
+
+---
+
+## 📄 License
+
+This project is licensed under the ISC License.

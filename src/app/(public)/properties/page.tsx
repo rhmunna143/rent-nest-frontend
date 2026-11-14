@@ -1,8 +1,10 @@
 import { PropertyCard } from "@/components/properties/PropertyCard";
-import { PropertyFilters } from "@/components/properties/PropertyFilters";
-import { SortControl } from "@/components/properties/SortControl";
+import { PropertyFilterBar } from "@/components/properties/PropertyFilterBar";
 import { Pagination } from "@/components/ui/pagination-controls";
-import type { Category, Property } from "@/types";
+import { PageHeader } from "@/components/shared/page-header";
+import { serverFetch } from "@/lib/server-api";
+import type { Category, Property, Paginated } from "@/types";
+import type { Metadata } from "next";
 
 interface PropertiesPageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -10,13 +12,21 @@ interface PropertiesPageProps {
 
 export const dynamic = "force-dynamic";
 
+export const metadata: Metadata = {
+  title: "Explore Rental Properties | RentNest",
+  description:
+    "Discover apartments, houses, studios, and condominiums for rent. Filter by location, price, bedroom count, and amenities.",
+};
+
 export default async function PropertiesPage(props: PropertiesPageProps) {
   const searchParams = await props.searchParams;
-  const BASE_URL =
-    process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
 
-  // Build query string from searchParams
+  // Build query string for the backend API
   const params = new URLSearchParams();
+  if (!searchParams.limit) {
+    params.set("limit", "12");
+  }
+
   for (const [key, value] of Object.entries(searchParams)) {
     if (value) {
       if (Array.isArray(value)) {
@@ -27,92 +37,65 @@ export default async function PropertiesPage(props: PropertiesPageProps) {
     }
   }
 
-  // Fetch Categories for Sidebar
-  let categories: Category[] = [];
-  try {
-    const catRes = await fetch(`${BASE_URL}/categories`, { cache: "no-store" });
-    const catData = await catRes.json();
-    if (catData.success) {
-      categories = catData.data;
-    }
-  } catch (error) {
-    console.error("Failed to fetch categories", error);
-  }
+  // Fetch categories for filter dropdown
+  const [categoriesRes, propertiesRes] = await Promise.all([
+    serverFetch<Category[]>("/categories", { next: { revalidate: 60, tags: ["categories"] } }),
+    serverFetch<Property[]>(`/properties?${params.toString()}`, { cache: "no-store" }),
+  ]);
 
-  // Fetch Properties
-  let properties: Property[] = [];
-  let meta = { page: 1, limit: 10, total: 0, totalPages: 1 };
-  try {
-    const propRes = await fetch(`${BASE_URL}/properties?${params.toString()}`, {
-      cache: "no-store",
-    });
-    const propData = await propRes.json();
-    if (propData.success) {
-      properties = propData.data;
-      
-      // Fallback local filtering in case the mock API doesn't support these advanced filters
-      const minPrice = Number(searchParams.minPrice) || 0;
-      const maxPrice = Number(searchParams.maxPrice) || Infinity;
-      const status = searchParams.status as string;
-      const categoryId = searchParams.categoryId as string;
-      const search = searchParams.search as string;
-
-      properties = properties.filter((p) => {
-        let match = true;
-        if (p.rentAmount < minPrice || p.rentAmount > maxPrice) match = false;
-        if (status && p.status !== status) match = false;
-        if (categoryId && p.categoryId !== categoryId) match = false;
-        if (search && !p.title.toLowerCase().includes(search.toLowerCase())) match = false;
-        return match;
-      });
-
-      if (propData.meta) {
-        meta = propData.meta;
-        // Adjust meta total to reflect local filtering
-        meta.total = properties.length;
-        meta.totalPages = Math.ceil(meta.total / meta.limit);
-      }
-    }
-  } catch (error) {
-    console.error("Failed to fetch properties", error);
-  }
+  const categories = categoriesRes.ok ? (categoriesRes.data ?? []) : [];
+  const properties = propertiesRes.ok ? (propertiesRes.data ?? []) : [];
+  const meta = (propertiesRes.ok && propertiesRes.meta)
+    ? propertiesRes.meta
+    : {
+        page: 1,
+        limit: 12,
+        total: properties.length,
+        totalPages: Math.max(1, Math.ceil(properties.length / 12)),
+      };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Browse Properties</h1>
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      {/* Page Header */}
+      <PageHeader
+        title="Explore Properties"
+        description="Find verified rental accommodations matching your lifestyle and budget."
+      />
 
-      <div className="flex flex-col md:flex-row gap-8">
-        <aside className="w-full md:w-64 shrink-0">
-          <PropertyFilters categories={categories} />
-        </aside>
+      {/* Top Filter Bar with Debounced Search and Mobile Sheet */}
+      <PropertyFilterBar categories={categories} />
 
-        <main className="flex-1 min-w-0">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold">
-              {meta.total} {meta.total === 1 ? "Result" : "Results"}
-            </h2>
-            <SortControl />
+      {/* Results Header */}
+      <div id="results-heading" className="flex items-center justify-between pt-2">
+        <p className="text-sm font-semibold text-foreground">
+          Showing {properties.length > 0 ? (meta.page - 1) * meta.limit + 1 : 0}–
+          {Math.min(meta.page * meta.limit, meta.total)} of {meta.total} properties
+        </p>
+      </div>
+
+      {/* Main Grid: 4 columns on xl desktop */}
+      {properties.length === 0 ? (
+        <div className="text-center py-20 border rounded-2xl bg-card/60 border-dashed space-y-3">
+          <h3 className="text-lg font-bold">No properties match your criteria</h3>
+          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+            Try adjusting your search terms, broadening the price range, or clearing active filters.
+          </p>
+        </div>
+      ) : (
+        <>
+          <div
+            id="property-grid"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+          >
+            {properties.map((prop, idx) => (
+              <PropertyCard key={prop.id} property={prop} priority={idx < 4} />
+            ))}
           </div>
 
-          {properties.length === 0 ? (
-            <div className="text-center py-24 border rounded-lg bg-muted/20 border-dashed">
-              <h3 className="text-xl font-medium mb-2">No properties found</h3>
-              <p className="text-muted-foreground">
-                Try adjusting your filters to find what you're looking for.
-              </p>
-            </div>
-          ) : (
-            <>
-              <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                {properties.map((prop) => (
-                  <PropertyCard key={prop.id} property={prop} />
-                ))}
-              </div>
-              <Pagination meta={meta} />
-            </>
-          )}
-        </main>
-      </div>
+          {/* Numbered Pagination */}
+          <Pagination meta={meta} targetId="results-heading" />
+        </>
+      )}
     </div>
   );
 }

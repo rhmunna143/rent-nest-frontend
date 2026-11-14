@@ -58,10 +58,14 @@ export interface Property {
   amenities: string[];
   images: string[];
   status: PropertyStatus;
+  isFeatured?: boolean;
   categoryId: string;
   landlordId: string;
   category?: Category;
-  landlord?: Pick<User, "id" | "name" | "email" | "phone" | "profileImage">;
+  landlord?: Pick<User, "id" | "name" | "email" | "phone" | "profileImage"> & {
+    createdAt?: string;
+    _count?: { properties: number };
+  };
   reviews?: Review[];
   averageRating?: number;
   createdAt: string;

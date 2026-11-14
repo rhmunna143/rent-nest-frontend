@@ -5,49 +5,81 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone, CheckCircle2, MessageSquare } from "lucide-react";
 
-import { FormField } from "@/components/shared";
-import { SubmitButton } from "@/components/shared";
-import { api } from "@/lib/api-client";
+import { FormField, FormTextarea, SubmitButton } from "@/components/shared";
+import { Button } from "@/components/ui/button";
+import { useSubmitContact } from "@/hooks/api/useContact";
+import { applyServerErrors } from "@/lib/errors";
+import { siteConfig } from "@/lib/site-config";
 
 const contactSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
   subject: z.string().min(5, "Subject must be at least 5 characters"),
   message: z.string().min(10, "Message must be at least 10 characters"),
+  // Honeypot field for bot suppression
+  website: z.string().optional(),
 });
 
 type ContactFormValues = z.infer<typeof contactSchema>;
 
 export default function ContactPage() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const contactMutation = useSubmitContact();
+
+  const form = useForm<ContactFormValues>({
+    resolver: zodResolver(contactSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      subject: "",
+      message: "",
+      website: "",
+    },
+  });
 
   const {
     register,
     handleSubmit,
     reset,
-    formState: { errors },
-  } = useForm<ContactFormValues>({
-    resolver: zodResolver(contactSchema),
-  });
+    formState: { errors, isSubmitting },
+  } = form;
 
   const onSubmit = async (data: ContactFormValues) => {
-    setIsSubmitting(true);
+    // Honeypot detection: bots auto-fill hidden website field
+    if (data.website && data.website.trim().length > 0) {
+      setIsSuccess(true);
+      reset();
+      return;
+    }
+
     try {
-      const res = await api.post("/contact", data);
-      if (res.ok) {
-        toast.success("Message sent successfully! We'll get back to you soon.");
-        reset();
+      await contactMutation.mutateAsync({
+        name: data.name,
+        email: data.email,
+        subject: data.subject,
+        message: data.message,
+      });
+
+      setIsSuccess(true);
+      toast.success("Message sent successfully! We will get back to you soon.");
+      reset();
+    } catch (err: unknown) {
+      const errorWithDetails = err as {
+        message?: string;
+        errorDetails?: Array<{ field?: string; message: string }>;
+      };
+
+      if (errorWithDetails.errorDetails && errorWithDetails.errorDetails.length > 0) {
+        applyServerErrors(form.setError, errorWithDetails.errorDetails);
       } else {
-        toast.error(res.message || "Failed to send message. Please try again later.");
+        toast.error(errorWithDetails.message || "Failed to send message. Please try again later.");
       }
-    } catch {
-      toast.error("Failed to send message. Please try again later.");
-    } finally {
-      setIsSubmitting(false);
     }
   };
+
+  const isLoading = isSubmitting || contactMutation.isPending;
 
   return (
     <div className="container mx-auto py-12 md:py-24 px-4 sm:px-6">
@@ -60,107 +92,140 @@ export default function ContactPage() {
         </p>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-12 max-w-5xl mx-auto">
+      <div className="grid lg:grid-cols-2 gap-12 max-w-5xl mx-auto items-start">
         {/* Contact Information */}
         <div className="space-y-8">
           <div>
-            <h2 className="text-2xl font-semibold mb-6">Get in Touch</h2>
-            <p className="text-muted-foreground mb-8">
-              Fill out the form and our team will get back to you within 24 hours. For urgent matters, please call our support line.
+            <h2 className="text-2xl font-semibold mb-3">Get in Touch</h2>
+            <p className="text-muted-foreground">
+              Fill out the form and our team will get back to you within 24 hours. For urgent matters, please reach out directly via phone or email.
             </p>
           </div>
 
           <div className="space-y-6">
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center shrink-0">
                 <MapPin className="w-6 h-6 text-primary" />
               </div>
               <div>
                 <h3 className="font-medium text-lg">Headquarters</h3>
-                <p className="text-muted-foreground">
-                  123 Nest Avenue, Suite 400<br />
-                  San Francisco, CA 94105
-                </p>
+                <p className="text-muted-foreground">{siteConfig.contact.address}</p>
               </div>
             </div>
 
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center shrink-0">
                 <Mail className="w-6 h-6 text-primary" />
               </div>
               <div>
                 <h3 className="font-medium text-lg">Email Support</h3>
-                <p className="text-muted-foreground">support@rentnest.com</p>
+                <a
+                  href={`mailto:${siteConfig.contact.email}`}
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
+                  {siteConfig.contact.email}
+                </a>
               </div>
             </div>
 
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center shrink-0">
                 <Phone className="w-6 h-6 text-primary" />
               </div>
               <div>
                 <h3 className="font-medium text-lg">Phone Support</h3>
-                <p className="text-muted-foreground">1-800-555-0199</p>
+                <a
+                  href={`tel:${siteConfig.contact.phone.replace(/[^0-9+]/g, "")}`}
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
+                  {siteConfig.contact.phone}
+                </a>
                 <p className="text-sm text-muted-foreground">Mon-Fri, 9am-6pm PST</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Contact Form */}
-        <div className="bg-card border rounded-2xl p-6 md:p-8 shadow-sm">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              id="name"
-              label="Full Name"
-              error={errors.name?.message}
-              placeholder="John Doe"
-              {...register("name")}
-            />
-
-            <FormField
-              id="email"
-              label="Email Address"
-              error={errors.email?.message}
-              type="email"
-              placeholder="john@example.com"
-              {...register("email")}
-            />
-
-            <FormField
-              id="subject"
-              label="Subject"
-              error={errors.subject?.message}
-              placeholder="How can we help?"
-              {...register("subject")}
-            />
-
-            <div className="grid gap-2">
-              <label htmlFor="message" className={errors.message ? "text-destructive text-sm font-medium leading-none" : "text-sm font-medium leading-none"}>
-                Message
-              </label>
-              <textarea
-                id="message"
-                {...register("message")}
-                className={`flex min-h-[120px] w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors.message ? "border-destructive focus-visible:ring-destructive" : "border-input"}`}
-                placeholder="Please describe your issue or question in detail..."
-                aria-invalid={!!errors.message}
-                aria-describedby={errors.message ? "message-error" : undefined}
-              />
-              {errors.message && (
-                <p id="message-error" className="text-sm font-medium text-destructive">
-                  {errors.message.message}
-                </p>
-              )}
+        {/* Contact Form or Success State */}
+        <div className="bg-card border rounded-xl p-6 md:p-8 shadow-sm">
+          {isSuccess ? (
+            <div className="py-12 text-center space-y-4">
+              <div className="w-16 h-16 rounded-full bg-success/10 text-success mx-auto flex items-center justify-center">
+                <CheckCircle2 className="w-8 h-8" />
+              </div>
+              <h3 className="text-2xl font-semibold">Message Received</h3>
+              <p className="text-muted-foreground max-w-sm mx-auto">
+                Thank you for reaching out. One of our property specialists will review your inquiry and follow up within one business day.
+              </p>
+              <Button
+                variant="outline"
+                className="mt-4"
+                onClick={() => setIsSuccess(false)}
+              >
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Send Another Message
+              </Button>
             </div>
+          ) : (
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
+              {/* Honeypot field (hidden from real users) */}
+              <div className="hidden" aria-hidden="true">
+                <label htmlFor="contact-website">Website</label>
+                <input
+                  id="contact-website"
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  {...register("website")}
+                />
+              </div>
 
-            <SubmitButton
-              isLoading={isSubmitting}
-              className="w-full"
-            >
-              {isSubmitting ? "Sending..." : "Send Message"}
-            </SubmitButton>
-          </form>
+              <FormField
+                id="name"
+                label="Full Name"
+                error={errors.name?.message}
+                placeholder="Jane Doe"
+                disabled={isLoading}
+                {...register("name")}
+              />
+
+              <FormField
+                id="email"
+                label="Email Address"
+                error={errors.email?.message}
+                type="email"
+                placeholder="jane@example.com"
+                disabled={isLoading}
+                {...register("email")}
+              />
+
+              <FormField
+                id="subject"
+                label="Subject"
+                error={errors.subject?.message}
+                placeholder="Inquiry about rental listing or property management"
+                disabled={isLoading}
+                {...register("subject")}
+              />
+
+              <FormTextarea
+                id="message"
+                label="Message"
+                error={errors.message?.message}
+                placeholder="Please describe your question or issue in detail..."
+                rows={5}
+                disabled={isLoading}
+                {...register("message")}
+              />
+
+              <SubmitButton
+                isLoading={isLoading}
+                className="w-full"
+              >
+                {isLoading ? "Sending Message..." : "Send Message"}
+              </SubmitButton>
+            </form>
+          )}
         </div>
       </div>
     </div>

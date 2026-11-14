@@ -6,3 +6,5 @@ export * from "./useCategories";
 export * from "./useStats";
 export * from "./useAdmin";
 export * from "./useFavorites";
+export * from "./useContact";
+export * from "./useNewsletter";

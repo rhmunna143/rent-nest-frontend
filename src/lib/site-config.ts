@@ -3,6 +3,7 @@ export const siteConfig = {
   description:
     "Modern rental property marketplace connecting verified tenants and landlords directly with secure Stripe payments.",
   url: process.env.NEXT_PUBLIC_APP_URL || "https://rentnest.vercel.app",
+  policyLastUpdated: "August 15, 2026",
   contact: {
     email: "support@rentnest.com",
     phone: "+1 (800) 555-0199",
@@ -17,7 +18,8 @@ export const siteConfig = {
   links: {
     terms: "/terms",
     privacy: "/privacy",
-    help: "/contact",
+    help: "/help",
+    contact: "/contact",
     about: "/about",
     properties: "/properties",
     blog: "/blog",

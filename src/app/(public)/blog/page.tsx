@@ -1,7 +1,15 @@
 import Link from "next/link";
+import Image from "next/image";
 import { blogPosts } from "@/lib/data/blog";
-import { Calendar, User, Clock, ArrowRight } from "lucide-react";
+import { Clock, ArrowRight } from "lucide-react";
 import { format } from "date-fns";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Rental Living Guides & Insights | RentNest",
+  description:
+    "Expert advice, market insights, and practical tips for both tenants and landlords in the modern rental ecosystem.",
+};
 
 export default function BlogIndexPage() {
   return (
@@ -17,16 +25,25 @@ export default function BlogIndexPage() {
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
         {blogPosts.map((post) => (
-          <article key={post.id} className="flex flex-col bg-card border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
-            {/* Optional Cover Image Placeholder */}
+          <article
+            key={post.id}
+            className="flex flex-col bg-card border rounded-xl overflow-hidden shadow-2xs hover:shadow-md transition-shadow group h-full"
+          >
+            {/* Cover Image Container */}
             <div className="h-48 bg-muted w-full relative overflow-hidden">
               {post.coverImage ? (
-                <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <Image
+                  src={post.coverImage}
+                  alt={post.title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                />
               ) : (
                 <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-primary/5 group-hover:scale-105 transition-transform duration-500" />
               )}
             </div>
-            
+
             <div className="p-6 flex flex-col flex-1">
               <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
                 <span className="bg-primary/10 text-primary px-2.5 py-1 rounded-full font-medium">
@@ -37,20 +54,20 @@ export default function BlogIndexPage() {
                   {post.readTime}
                 </span>
               </div>
-              
+
               <Link href={`/blog/${post.slug}`} className="group-hover:text-primary transition-colors">
-                <h2 className="text-2xl font-bold mb-3 line-clamp-2 leading-tight">
+                <h2 className="text-xl font-bold mb-3 line-clamp-2 leading-tight">
                   {post.title}
                 </h2>
               </Link>
-              
-              <p className="text-muted-foreground mb-6 line-clamp-3 flex-1">
+
+              <p className="text-muted-foreground text-sm mb-6 line-clamp-3 flex-1">
                 {post.excerpt}
               </p>
-              
+
               <div className="flex items-center justify-between mt-auto pt-4 border-t">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold">
                     {post.author.charAt(0)}
                   </div>
                   <div className="flex flex-col">
@@ -60,8 +77,9 @@ export default function BlogIndexPage() {
                     </span>
                   </div>
                 </div>
-                <Link 
+                <Link
                   href={`/blog/${post.slug}`}
+                  aria-label={`Read ${post.title}`}
                   className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
                 >
                   <ArrowRight className="w-4 h-4" />

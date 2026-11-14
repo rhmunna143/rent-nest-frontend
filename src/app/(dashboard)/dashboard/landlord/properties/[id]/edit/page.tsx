@@ -7,6 +7,7 @@ import { PropertyForm } from "@/components/properties/PropertyForm";
 import type { PropertyInput } from "@/lib/schemas/property.schema";
 import type { Property } from "@/types";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/errors";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -34,8 +35,8 @@ export default function EditPropertyPage({
           toast.error(res.message || "Failed to load property details");
           router.push("/dashboard/landlord/properties");
         }
-      } catch (err: any) {
-        toast.error(err.message || "An unexpected error occurred");
+      } catch (err: unknown) {
+        toast.error(getErrorMessage(err) || "An unexpected error occurred");
         router.push("/dashboard/landlord/properties");
       } finally {
         setIsLoading(false);
@@ -64,8 +65,8 @@ export default function EditPropertyPage({
       } else {
         toast.error(res.message || "Failed to update property");
       }
-    } catch (err: any) {
-      toast.error(err.message || "An unexpected error occurred");
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err) || "An unexpected error occurred");
     } finally {
       setIsSubmitting(false);
     }

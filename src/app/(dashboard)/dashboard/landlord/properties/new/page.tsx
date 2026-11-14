@@ -6,6 +6,7 @@ import { api } from "@/lib/api-client";
 import { PropertyForm } from "@/components/properties/PropertyForm";
 import type { PropertyInput } from "@/lib/schemas/property.schema";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/errors";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -33,8 +34,8 @@ export default function NewPropertyPage() {
       } else {
         toast.error(res.message || "Failed to create property");
       }
-    } catch (err: any) {
-      toast.error(err.message || "An unexpected error occurred");
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err) || "An unexpected error occurred");
     } finally {
       setIsSubmitting(false);
     }

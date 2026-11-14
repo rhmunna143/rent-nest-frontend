@@ -1,25 +1,20 @@
 "use client";
 
-import { useWishlist } from "@/hooks/useWishlist";
+import { useFavorites } from "@/hooks/api/useFavorites";
 import { PropertyCard } from "@/components/properties/PropertyCard";
-import { Heart, Home } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Heart, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { EmptyState } from "@/components/shared";
 
-import { useRouter } from "next/navigation";
-
 export default function SavedPropertiesPage() {
-  const { savedProperties, isInitialized } = useWishlist();
   const router = useRouter();
+  const { data: savedProperties = [], isLoading } = useFavorites();
 
-  if (!isInitialized) {
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-pulse space-y-4 flex flex-col items-center">
-          <div className="w-12 h-12 bg-muted rounded-full" />
-          <div className="w-32 h-4 bg-muted rounded" />
-        </div>
+      <div className="flex flex-col items-center justify-center min-h-80 space-y-3">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">Loading your saved properties...</p>
       </div>
     );
   }
@@ -31,7 +26,7 @@ export default function SavedPropertiesPage() {
           Saved Properties
         </h1>
         <p className="text-muted-foreground">
-          Properties you've favorited for quick access.
+          Properties you have bookmarked for quick access and status tracking.
         </p>
       </div>
 
@@ -39,7 +34,7 @@ export default function SavedPropertiesPage() {
         <EmptyState
           icon={Heart}
           title="No saved properties yet"
-          description="You haven't added any properties to your wishlist. Start exploring to find your dream home."
+          description="You haven't added any properties to your wishlist. Explore available rentals to save your favorites."
           action={{
             label: "Browse Properties",
             onClick: () => router.push("/properties"),

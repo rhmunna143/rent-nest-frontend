@@ -185,6 +185,22 @@ export function useUpdateProperty() {
   });
 }
 
+export function useUpdatePropertyStatus() {
+  const update = useUpdateProperty();
+
+  return useMutation({
+    mutationFn: async ({
+      propertyId,
+      status,
+    }: {
+      propertyId: string;
+      status: PropertyStatus;
+    }) => {
+      return update.mutateAsync({ id: propertyId, data: { status } });
+    },
+  });
+}
+
 export function useDeleteProperty() {
   const queryClient = useQueryClient();
 

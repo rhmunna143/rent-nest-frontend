@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { notFound, useParams } from "next/navigation";
 import { format } from "date-fns";
 import {
@@ -197,11 +198,13 @@ export default function TenantRequestDetailPage({
 
               <div className="flex gap-4 pt-2">
                 {property.images && property.images.length > 0 && (
-                  <div className="w-32 h-32 shrink-0 rounded-md overflow-hidden bg-muted">
-                    <img
+                  <div className="relative w-32 h-32 shrink-0 rounded-xl overflow-hidden bg-muted">
+                    <Image
                       src={property.images[0]}
                       alt={property.title}
-                      className="w-full h-full object-cover"
+                      fill
+                      sizes="128px"
+                      className="object-cover"
                     />
                   </div>
                 )}

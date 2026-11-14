@@ -39,6 +39,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PasswordInput } from "@/components/ui/password-input";
 import { PasswordStrength } from "@/components/ui/password-strength";
+import { ImageUploader } from "@/components/ui/image-uploader";
 import { FormField, SubmitButton } from "@/components/shared";
 import type { User } from "@/types";
 import { cn } from "@/lib/cn";
@@ -54,6 +55,7 @@ export default function AccountPage() {
     handleSubmit,
     reset,
     setError,
+    setValue,
     watch,
     formState: { errors, isSubmitting, isDirty },
   } = useForm<ProfileUpdateInput>({
@@ -266,20 +268,28 @@ export default function AccountPage() {
                   </div>
                 </div>
 
-                {/* Profile image URL */}
-                <FormField
-                  id="account-profile-image"
-                  type="url"
-                  label={
-                    <div className="flex items-center gap-1.5 font-medium">
-                      <ImageIcon className="h-4 w-4 text-muted-foreground" /> Profile Image URL
-                    </div>
-                  }
-                  description="Provide a direct link to an image (e.g., Imgur, GitHub)."
-                  placeholder="https://example.com/your-photo.jpg"
-                  error={errors.profileImage?.message}
-                  {...register("profileImage")}
-                />
+                {/* Profile image with Cloudinary Direct Uploader */}
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-1.5 font-medium">
+                    <ImageIcon className="h-4 w-4 text-muted-foreground" /> Profile Avatar
+                  </Label>
+                  <ImageUploader
+                    value={watch("profileImage") ? [watch("profileImage")!] : []}
+                    onChange={(urls) => {
+                      setValue("profileImage", urls[urls.length - 1] || "", {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      });
+                    }}
+                    maxImages={1}
+                    folder="avatars"
+                  />
+                  {errors.profileImage && (
+                    <p className="text-xs text-destructive">
+                      {errors.profileImage.message}
+                    </p>
+                  )}
+                </div>
 
                 <Separator className="my-6" />
 

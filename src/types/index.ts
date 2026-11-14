@@ -150,25 +150,25 @@ export interface PublicStats {
 export interface AdminStats {
   totals: {
     users: number;
+    tenants: number;
+    landlords: number;
     properties: number;
+    availableProperties: number;
     rentals: number;
+    pendingRentals: number;
     revenue: number;
   };
-  charts: {
-    categoryDistribution: { name: string; count: number }[];
-    monthlyGrowth: { month: string; users: number; rentals: number; revenue: number }[];
-    rentalStatuses: { status: RentalStatus; count: number }[];
-  };
+  rentalsByStatus: { status: RentalStatus; count: number }[];
+  propertiesByCategory: { name: string; count: number }[];
+  monthly: { month: string; users: number; rentals: number; revenue: number }[];
 }
 
 export interface LandlordStats {
-  totals: {
-    totalProperties: number;
-    activeRentals: number;
-    pendingRequests: number;
-    totalEarnings: number;
-  };
-  monthlyEarnings: { month: string; amount: number }[];
+  totalProperties: number;
+  activeRentals: number;
+  pendingRequests: number;
+  earnings: number;
+  monthly: { month: string; requests: number; earnings: number }[];
 }
 
 // --- API Response Shapes ---

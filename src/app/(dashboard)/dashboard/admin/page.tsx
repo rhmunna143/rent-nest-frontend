@@ -1,180 +1,213 @@
 "use client";
 
-import { useAuth } from "@/context/AuthContext";
-import { useEffect, useState } from "react";
-import { ShieldCheck, Tags, Building, TrendingUp } from "lucide-react";
+import * as React from "react";
 import Link from "next/link";
+import {
+  Users,
+  Building,
+  FileText,
+  DollarSign,
+  TrendingUp,
+  Tags,
+  ShieldCheck,
+  ArrowUpRight,
+} from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { useAdminStats } from "@/hooks/api/useStats";
+import { ChartCard, DynamicResponsiveContainer } from "@/components/dashboard/ChartCard";
+import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
-import { api } from "@/lib/api-client";
-import type { Category } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatCurrency } from "@/lib/format";
 import {
   BarChart,
   Bar,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
-  Cell,
-  PieChart,
-  Pie,
+  Legend,
 } from "recharts";
+
+const STATUS_COLORS: Record<string, string> = {
+  COMPLETED: "var(--success)",
+  APPROVED: "var(--primary)",
+  ACTIVE: "var(--secondary)",
+  PENDING: "var(--warning)",
+  REJECTED: "var(--destructive)",
+};
+
+const CATEGORY_COLORS = [
+  "var(--primary)",
+  "var(--secondary)",
+  "var(--accent)",
+  "var(--success)",
+  "var(--warning)",
+  "var(--muted-foreground)",
+];
 
 export default function AdminDashboardPage() {
   const { user } = useAuth();
-
-  const [totalProperties, setTotalProperties] = useState<number | null>(null);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchAnalytics() {
-      try {
-        // Fetch categories to get the total number of categories and the properties breakdown
-        const catRes = await api.get<Category[]>("/categories");
-        if (catRes.ok && catRes.data) {
-          setCategories(catRes.data);
-        }
-
-        // Fetch properties with limit=1 just to extract the total count from pagination meta
-        const propRes = await api.get<unknown[]>("/properties?limit=1");
-        if (propRes.ok && propRes.meta) {
-          setTotalProperties(propRes.meta.total);
-        } else if (propRes.ok && propRes.data) {
-          // fallback if meta isn't correctly returning total
-          setTotalProperties(propRes.data.length);
-        }
-      } catch (error) {
-        console.error("Failed to load analytics", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchAnalytics();
-  }, []);
-
-  // Prepare data for the chart (Properties per Category)
-  const chartData = categories.map((cat) => ({
-    name: cat.name,
-    properties: cat._count?.properties || 0,
-  }));
-
-  // Theme colors for the bars
-  const COLORS = [
-    "#0ea5e9",
-    "#10b981",
-    "#8b5cf6",
-    "#f59e0b",
-    "#f43f5e",
-    "#64748b",
-  ];
+  const { data: stats, isLoading, isError } = useAdminStats();
 
   if (isLoading) {
     return (
-      <div className="space-y-6 p-4">
-        <Skeleton className="h-10 w-48 mb-4" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Skeleton className="h-32" />
-          <Skeleton className="h-32" />
-          <Skeleton className="h-32" />
+      <div className="space-y-8 p-4 sm:p-6 lg:p-8">
+        <Skeleton className="h-10 w-64 rounded-xl" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-32 rounded-xl" />
+          ))}
         </div>
-        <Skeleton className="h-100 mt-8" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Skeleton className="h-80 rounded-xl" />
+          <Skeleton className="h-80 rounded-xl" />
+        </div>
       </div>
     );
   }
 
+  const totals = stats?.totals ?? {
+    users: 0,
+    tenants: 0,
+    landlords: 0,
+    properties: 0,
+    availableProperties: 0,
+    rentals: 0,
+    pendingRentals: 0,
+    revenue: 0,
+  };
+
+  const propertiesByCategory = (stats?.propertiesByCategory ?? []).filter(
+    (c: { name: string; count: number }) => c.count > 0
+  );
+  const rentalsByStatus = stats?.rentalsByStatus ?? [];
+  const monthlyData = stats?.monthly ?? [];
+
   return (
-    <div className="space-y-8 p-4">
-      <div>
-        <h1 className="text-3xl font-bold text-primary">Admin Analytics</h1>
-        <p className="text-muted-foreground mt-2">
-          Welcome back, {user?.name || "Admin"}. Here is your live platform
-          overview.
-        </p>
-      </div>
+    <div className="space-y-8 p-4 sm:p-6 lg:p-8">
+      {/* Header */}
+      <PageHeader
+        title="Admin Control Center"
+        description={`Welcome back, ${user?.name || "Administrator"}. Here is your real-time platform financial and operational metrics.`}
+        actions={
+          <div className="flex gap-2">
+            <Button asChild size="sm" variant="outline" className="rounded-xl">
+              <Link href="/dashboard/admin/users">Manage Users</Link>
+            </Button>
+            <Button asChild size="sm" className="rounded-xl">
+              <Link href="/dashboard/admin/properties">Moderate Properties</Link>
+            </Button>
+          </div>
+        }
+      />
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+      {/* 4 Summary Cards from totals */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Total Users */}
+        <div className="p-6 rounded-xl border bg-card shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Total Users
+            </p>
+            <p className="text-3xl font-extrabold text-foreground">{totals.users}</p>
+            <p className="text-xs text-muted-foreground">
+              {totals.tenants} tenants • {totals.landlords} landlords
+            </p>
+          </div>
+          <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <Users className="h-6 w-6" />
+          </div>
+        </div>
+
         {/* Total Properties */}
-        <div className="p-6 border rounded-xl bg-card shadow-sm flex items-center gap-4">
-          <div className="w-14 h-14 bg-primary/10 text-primary rounded-xl flex items-center justify-center shrink-0">
-            <Building className="w-7 h-7" />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">
-              Active Properties
+        <div className="p-6 rounded-xl border bg-card shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Properties
             </p>
-            <h2 className="text-3xl font-bold">
-              {totalProperties !== null ? totalProperties : "—"}
-            </h2>
+            <p className="text-3xl font-extrabold text-foreground">{totals.properties}</p>
+            <p className="text-xs text-muted-foreground">
+              {totals.availableProperties} available for rent
+            </p>
+          </div>
+          <div className="h-12 w-12 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
+            <Building className="h-6 w-6" />
           </div>
         </div>
 
-        {/* Total Categories */}
-        <div className="p-6 border rounded-xl bg-card shadow-sm flex items-center gap-4">
-          <div className="w-14 h-14 bg-success/10 text-success rounded-xl flex items-center justify-center shrink-0">
-            <Tags className="w-7 h-7" />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">
-              Platform Categories
+        {/* Total Rentals */}
+        <div className="p-6 rounded-xl border bg-card shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Rental Requests
             </p>
-            <h2 className="text-3xl font-bold">{categories.length}</h2>
+            <p className="text-3xl font-extrabold text-foreground">{totals.rentals}</p>
+            <p className="text-xs text-muted-foreground">
+              {totals.pendingRentals} pending approval
+            </p>
+          </div>
+          <div className="h-12 w-12 rounded-xl bg-accent/10 text-accent flex items-center justify-center shrink-0">
+            <FileText className="h-6 w-6" />
           </div>
         </div>
 
-        {/* System Status */}
-        <div className="p-6 border rounded-xl bg-card shadow-sm flex items-center gap-4">
-          <div className="w-14 h-14 bg-secondary/10 text-secondary rounded-xl flex items-center justify-center shrink-0">
-            <TrendingUp className="w-7 h-7" />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">
-              Marketplace Status
+        {/* Gross Revenue */}
+        <div className="p-6 rounded-xl border bg-card shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Platform Volume
             </p>
-            <h2 className="text-xl font-bold text-success flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5" /> Operational
-            </h2>
+            <p className="text-3xl font-extrabold text-primary">
+              {formatCurrency(totals.revenue)}
+            </p>
+            <p className="text-xs text-muted-foreground">Total settled payments</p>
+          </div>
+          <div className="h-12 w-12 rounded-xl bg-success/10 text-success flex items-center justify-center shrink-0">
+            <DollarSign className="h-6 w-6" />
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Chart Section */}
-        <div className="xl:col-span-2 border rounded-xl bg-card shadow-sm p-6 flex flex-col">
-          <h3 className="text-lg font-semibold mb-6">Properties by Category & Share</h3>
-          {chartData.length > 0 ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 h-87.5">
-              <div className="w-full h-full">
-                <h4 className="text-sm font-medium text-muted-foreground text-center mb-2">Total Count</h4>
-                <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={chartData}
-                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+      {/* Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Line Chart: Monthly Trends (7 cols) */}
+        <div className="lg:col-span-7">
+          <ChartCard
+            title="Monthly Activity & Revenue Trend"
+            description="Track new user registrations, lease applications, and processed payment revenue over time."
+            hasData={monthlyData.length > 0}
+          >
+            <div className="h-72 w-full pt-4">
+              <DynamicResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={monthlyData}
+                  margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
                 >
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    vertical={false}
-                    stroke="var(--border)"
-                  />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
                   <XAxis
-                    dataKey="name"
+                    dataKey="month"
                     axisLine={false}
                     tickLine={false}
-                    tick={{
-                      fill: "currentColor",
-                      fontSize: 12,
-                    }}
-                    dy={10}
+                    tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
                   />
                   <YAxis
+                    yAxisId="left"
                     axisLine={false}
                     tickLine={false}
-                    tick={{
-                      fill: "currentColor",
-                      fontSize: 12,
-                    }}
+                    tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+                  />
+                  <YAxis
+                    yAxisId="right"
+                    orientation="right"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
                   />
                   <Tooltip
                     contentStyle={{
@@ -184,83 +217,134 @@ export default function AdminDashboardPage() {
                       color: "var(--card-foreground)",
                     }}
                   />
-                  <Bar
-                    dataKey="properties"
-                    radius={[4, 4, 0, 0]}
-                    maxBarSize={60}
+                  <Legend />
+                  <Line
+                    yAxisId="left"
+                    type="monotone"
+                    dataKey="users"
+                    name="New Users"
+                    stroke="var(--primary)"
+                    strokeWidth={2}
+                    dot={{ r: 3 }}
+                  />
+                  <Line
+                    yAxisId="left"
+                    type="monotone"
+                    dataKey="rentals"
+                    name="Rentals"
+                    stroke="var(--secondary)"
+                    strokeWidth={2}
+                    dot={{ r: 3 }}
+                  />
+                  <Line
+                    yAxisId="right"
+                    type="monotone"
+                    dataKey="revenue"
+                    name="Volume ($)"
+                    stroke="var(--success)"
+                    strokeWidth={2}
+                    dot={{ r: 3 }}
+                  />
+                </LineChart>
+              </DynamicResponsiveContainer>
+            </div>
+          </ChartCard>
+        </div>
+
+        {/* Pie Chart: Rentals by Status (5 cols) */}
+        <div className="lg:col-span-5">
+          <ChartCard
+            title="Rentals by Status"
+            description="Distribution of rental request statuses across the marketplace."
+            hasData={rentalsByStatus.length > 0}
+          >
+            <div className="h-72 w-full pt-2">
+              <DynamicResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={rentalsByStatus}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={55}
+                    outerRadius={85}
+                    paddingAngle={4}
+                    dataKey="count"
+                    nameKey="status"
                   >
-                    {chartData.map((entry, index) => (
+                    {rentalsByStatus.map((entry: { status: string; count: number }) => (
                       <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
+                        key={entry.status}
+                        fill={STATUS_COLORS[entry.status] || "var(--primary)"}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: "12px",
+                      border: "1px solid var(--border)",
+                      backgroundColor: "var(--card)",
+                      color: "var(--card-foreground)",
+                    }}
+                  />
+                  <Legend />
+                </PieChart>
+              </DynamicResponsiveContainer>
+            </div>
+          </ChartCard>
+        </div>
+
+        {/* Bar Chart: Properties by Category (12 cols) */}
+        <div className="lg:col-span-12">
+          <ChartCard
+            title="Properties by Category"
+            description="Active listing density across all registered residential property categories."
+            hasData={propertiesByCategory.length > 0}
+            actions={
+              <Button asChild variant="outline" size="sm" className="rounded-xl">
+                <Link href="/dashboard/admin/categories">Manage Categories</Link>
+              </Button>
+            }
+          >
+            <div className="h-72 w-full pt-4">
+              <DynamicResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={propertiesByCategory}
+                  margin={{ top: 10, right: 10, left: -10, bottom: 20 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                  <XAxis
+                    dataKey="name"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
+                    interval={0}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+                    allowDecimals={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: "12px",
+                      border: "1px solid var(--border)",
+                      backgroundColor: "var(--card)",
+                      color: "var(--card-foreground)",
+                    }}
+                  />
+                  <Bar dataKey="count" name="Properties" radius={[6, 6, 0, 0]} maxBarSize={50}>
+                    {propertiesByCategory.map((_: unknown, idx: number) => (
+                      <Cell
+                        key={`cell-${idx}`}
+                        fill={CATEGORY_COLORS[idx % CATEGORY_COLORS.length]}
                       />
                     ))}
                   </Bar>
                 </BarChart>
-              </ResponsiveContainer>
-              </div>
-              <div className="w-full h-full">
-                <h4 className="text-sm font-medium text-muted-foreground text-center mb-2">Category Share</h4>
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={chartData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      paddingAngle={5}
-                      dataKey="properties"
-                    >
-                      {chartData.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        borderRadius: "12px",
-                        border: "1px solid var(--border)",
-                        backgroundColor: "var(--card)",
-                        color: "var(--card-foreground)",
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
+              </DynamicResponsiveContainer>
             </div>
-          ) : (
-            <div className="h-87.5 flex items-center justify-center text-muted-foreground border-2 border-dashed rounded-lg">
-              No category data available to chart.
-            </div>
-          )}
-        </div>
-
-        {/* Quick Actions / Info */}
-        <div className="space-y-6">
-          <div className="border rounded-xl bg-card shadow-sm p-6">
-            <h3 className="text-lg font-semibold mb-2">Category Management</h3>
-            <p className="text-muted-foreground text-sm mb-4">
-              Create and manage the primary classification tags used by
-              landlords to list their properties.
-            </p>
-            <Button className="w-full" asChild>
-              <Link href="/dashboard/admin/categories">Manage Categories</Link>
-            </Button>
-          </div>
-
-          <div className="border rounded-xl bg-muted/30 p-6">
-            <h3 className="text-sm font-semibold mb-2 uppercase text-muted-foreground tracking-wider">
-              Dashboard Scope
-            </h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Because global user aggregates and historical revenue endpoints
-              are currently out of scope for the backend v1 API, this dashboard
-              exclusively showcases 100% live property and category metrics.
-            </p>
-          </div>
+          </ChartCard>
         </div>
       </div>
     </div>

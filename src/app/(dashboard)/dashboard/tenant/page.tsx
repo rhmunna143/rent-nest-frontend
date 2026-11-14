@@ -1,292 +1,255 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
-import { format } from "date-fns";
-import { ArrowRight, FileText, CreditCard, Activity, DollarSign, ChevronLeft, ChevronRight } from "lucide-react";
+import { type ColumnDef } from "@tanstack/react-table";
 import {
-  PropertyStatusBadge,
-  RentalStatusBadge,
-  PaymentStatusBadge,
-} from "@/components/ui/status-badge";
+  FileText,
+  CreditCard,
+  Building,
+  DollarSign,
+  ArrowRight,
+  ExternalLink,
+} from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { useRentals } from "@/hooks/api/useRentals";
+import { usePayments } from "@/hooks/api/usePayments";
+import { ChartCard, DynamicResponsiveContainer } from "@/components/dashboard/ChartCard";
+import { PageHeader } from "@/components/shared/page-header";
+import { DataTable } from "@/components/ui/data-table";
+import { PaymentStatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
-import type { RentalRequest, Payment } from "@/types";
-import { api } from "@/lib/api-client";
-import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { EmptyState } from "@/components/shared";
+import { formatCurrency, formatDate } from "@/lib/format";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+} from "recharts";
+import type { Payment } from "@/types";
 
 export default function TenantDashboardPage() {
-  const [rentals, setRentals] = useState<RentalRequest[]>([]);
-  const [payments, setPayments] = useState<Payment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
+  const { data: rentalsData, isLoading: rentalsLoading } = useRentals();
+  const { data: paymentsData, isLoading: paymentsLoading } = usePayments();
 
-  // Pagination states
-  const [requestsPage, setRequestsPage] = useState(1);
-  const [paymentsPage, setPaymentsPage] = useState(1);
-  const itemsPerPage = 5;
-
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const [rentalsRes, paymentsRes] = await Promise.all([
-          api.get<RentalRequest[]>("/rentals"),
-          api.get<Payment[]>("/payments"),
-        ]);
-
-        if (rentalsRes.ok) {
-          setRentals(rentalsRes.data || []);
-        } else {
-          setError(rentalsRes.message ?? "Failed to load rentals");
-        }
-
-        if (paymentsRes.ok) {
-          setPayments(paymentsRes.data || []);
-        }
-      } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : "An unexpected error occurred");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadData();
-  }, []);
+  const isLoading = rentalsLoading || paymentsLoading;
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-4 space-y-8">
-        <Skeleton className="h-10 w-64 mb-2" />
-        <div className="space-y-4 pt-8">
-          <Skeleton className="h-48 w-full" />
+      <div className="space-y-8 p-4 sm:p-6 lg:p-8">
+        <Skeleton className="h-10 w-64 rounded-xl" />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-32 rounded-xl" />
+          ))}
         </div>
+        <Skeleton className="h-80 rounded-xl" />
       </div>
     );
   }
 
+  const rentals = rentalsData?.data ?? [];
+  const payments = paymentsData?.data ?? [];
+
+  const activeRentalsCount = rentals.filter((r) => r.status === "ACTIVE").length;
+  const totalSpent = payments
+    .filter((p) => p.status === "COMPLETED")
+    .reduce((sum, p) => sum + Number(p.amount || 0), 0);
+
+  // Group payments by month for the Spend-per-Month Bar Chart
+  const spendByMonth = payments
+    .filter((p) => p.status === "COMPLETED")
+    .reduce((acc, p) => {
+      const date = new Date(p.createdAt);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      if (!acc[monthKey]) {
+        acc[monthKey] = { month: monthKey, amount: 0 };
+      }
+      acc[monthKey].amount += Number(p.amount);
+      return acc;
+    }, {} as Record<string, { month: string; amount: number }>);
+
+  const chartData = Object.values(spendByMonth).sort((a, b) =>
+    a.month.localeCompare(b.month)
+  );
+
+  const paymentColumns: ColumnDef<Payment>[] = [
+    {
+      accessorKey: "transactionId",
+      header: "Transaction",
+      cell: ({ row }) => {
+        const id = row.original.transactionId || row.original.id;
+        return (
+          <span className="font-mono text-xs font-semibold text-muted-foreground">
+            {id.slice(0, 16)}...
+          </span>
+        );
+      },
+    },
+    {
+      accessorKey: "rentalRequest",
+      header: "Property",
+      cell: ({ row }) => {
+        const prop = row.original.rentalRequest?.property;
+        if (!prop) return <span className="text-xs text-muted-foreground">Lease Payment</span>;
+        return (
+          <div className="space-y-0.5">
+            <Link
+              href={`/properties/${prop.id}`}
+              target="_blank"
+              className="text-xs font-semibold hover:underline flex items-center gap-1 line-clamp-1"
+            >
+              <span>{prop.title}</span>
+              <ExternalLink className="h-3 w-3 text-muted-foreground" />
+            </Link>
+            <p className="text-[11px] text-muted-foreground">{prop.location}</p>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "amount",
+      header: "Amount",
+      cell: ({ row }) => (
+        <span className="text-xs font-bold text-primary">
+          {formatCurrency(row.original.amount)}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => <PaymentStatusBadge status={row.original.status} />,
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Date",
+      cell: ({ row }) => (
+        <span className="text-xs text-muted-foreground">
+          {formatDate(row.original.createdAt)}
+        </span>
+      ),
+    },
+  ];
+
   return (
-    <div className="container mx-auto p-4 space-y-12">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight mb-2">
-          Tenant Dashboard
-        </h1>
-        <p className="text-muted-foreground">
-          Manage your rental requests and view your payment history.
-        </p>
+    <div className="space-y-8 p-4 sm:p-6 lg:p-8">
+      {/* Header */}
+      <PageHeader
+        title="Tenant Dashboard"
+        description={`Welcome back, ${user?.name || "Renter"}. Track your lease applications, active rentals, and payment records.`}
+        actions={
+          <div className="flex gap-2">
+            <Button asChild variant="outline" size="sm" className="rounded-xl">
+              <Link href="/dashboard/tenant/requests">My Requests</Link>
+            </Button>
+            <Button asChild size="sm" className="rounded-xl">
+              <Link href="/properties">Browse Properties</Link>
+            </Button>
+          </div>
+        }
+      />
+
+      {/* 3 Metric Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="p-6 rounded-xl border bg-card shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Total Requests
+            </p>
+            <p className="text-3xl font-extrabold text-foreground">{rentals.length}</p>
+            <p className="text-xs text-muted-foreground">Submitted applications</p>
+          </div>
+          <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <FileText className="h-6 w-6" />
+          </div>
+        </div>
+
+        <div className="p-6 rounded-xl border bg-card shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Active Rentals
+            </p>
+            <p className="text-3xl font-extrabold text-foreground">{activeRentalsCount}</p>
+            <p className="text-xs text-muted-foreground">Currently leased homes</p>
+          </div>
+          <div className="h-12 w-12 rounded-xl bg-success/10 text-success flex items-center justify-center shrink-0">
+            <Building className="h-6 w-6" />
+          </div>
+        </div>
+
+        <div className="p-6 rounded-xl border bg-card shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Total Spent
+            </p>
+            <p className="text-3xl font-extrabold text-primary">
+              {formatCurrency(totalSpent)}
+            </p>
+            <p className="text-xs text-muted-foreground">Settled lease payments</p>
+          </div>
+          <div className="h-12 w-12 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
+            <DollarSign className="h-6 w-6" />
+          </div>
+        </div>
       </div>
 
-      {/* Overview Cards */}
-      <div className="grid gap-6 md:grid-cols-3">
-        <div className="p-6 border rounded-xl bg-card shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-          <div className="flex items-center gap-2 text-muted-foreground mb-4">
-            <FileText className="w-5 h-5 text-primary" />
-            <h3 className="font-medium text-sm">Total Requests</h3>
-          </div>
-          <p className="text-3xl font-bold">{rentals.length}</p>
+      {/* Spend-Per-Month Bar Chart */}
+      <ChartCard
+        title="Monthly Rental Spend"
+        description="Historical view of completed lease payments processed via Stripe."
+        hasData={chartData.length > 0}
+        emptyMessage="No completed payments yet to chart."
+      >
+        <div className="h-64 w-full pt-4">
+          <DynamicResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+              <XAxis
+                dataKey="month"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+              />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+              />
+              <Tooltip
+                contentStyle={{
+                  borderRadius: "12px",
+                  border: "1px solid var(--border)",
+                  backgroundColor: "var(--card)",
+                  color: "var(--card-foreground)",
+                }}
+              />
+              <Bar dataKey="amount" name="Spend ($)" fill="var(--primary)" radius={[6, 6, 0, 0]} maxBarSize={50} />
+            </BarChart>
+          </DynamicResponsiveContainer>
         </div>
-        <div className="p-6 border rounded-xl bg-card shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-          <div className="flex items-center gap-2 text-muted-foreground mb-4">
-            <Activity className="w-5 h-5 text-success" />
-            <h3 className="font-medium text-sm">Active Rentals</h3>
-          </div>
-          <p className="text-3xl font-bold">
-            {rentals.filter(r => r.status === "ACTIVE").length}
+      </ChartCard>
+
+      {/* Payment History DataTable */}
+      <div id="payments" className="space-y-4 pt-4 border-t">
+        <div>
+          <h2 className="text-lg font-bold">Payment History</h2>
+          <p className="text-xs text-muted-foreground">
+            Audit history of your rental deposits and monthly lease charges.
           </p>
         </div>
-        <div className="p-6 border rounded-xl bg-card shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-          <div className="flex items-center gap-2 text-muted-foreground mb-4">
-            <DollarSign className="w-5 h-5 text-secondary" />
-            <h3 className="font-medium text-sm">Total Spent</h3>
-          </div>
-          <p className="text-3xl font-bold">
-            ${payments.filter(p => p.status === "COMPLETED").reduce((sum, p) => sum + Number(p.amount), 0).toLocaleString()}
-          </p>
-        </div>
+
+        <DataTable
+          columns={paymentColumns}
+          data={payments}
+          isLoading={paymentsLoading}
+          searchPlaceholder="Search payments..."
+        />
       </div>
-
-      {/* Requests Section */}
-      <section className="space-y-4" id="requests">
-        <div className="flex items-center gap-2 border-b pb-2">
-          <FileText className="h-5 w-5 text-primary" />
-          <h2 className="text-2xl font-semibold">My Rental Requests</h2>
-        </div>
-
-        {rentals.length === 0 ? (
-          <EmptyState
-            icon={FileText}
-            title="No rental requests yet"
-            description="You haven't made any rental requests. Start browsing properties to find your next home."
-            action={{
-              label: "Browse Properties",
-              onClick: () => window.location.href = "/properties",
-            }}
-          />
-        ) : (
-          <>
-            {error && (
-              <div className="p-4 bg-destructive/15 text-destructive rounded-xl text-sm mb-4">
-                Error loading data: {error}
-              </div>
-            )}
-            <div className="border rounded-lg overflow-hidden bg-card shadow-sm overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead className="bg-muted/50 text-muted-foreground">
-                  <tr>
-                    <th className="px-4 py-3 font-medium">Property</th>
-                    <th className="px-4 py-3 font-medium">Status</th>
-                    <th className="px-4 py-3 font-medium">Move-in Date</th>
-                    <th className="px-4 py-3 font-medium text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {rentals.slice((requestsPage - 1) * itemsPerPage, requestsPage * itemsPerPage).map((rental) => (
-                    <tr
-                      key={rental.id}
-                      className="hover:bg-muted/20 transition-colors"
-                    >
-                      <td className="px-4 py-4">
-                        <div className="font-medium text-base">
-                          {rental.property?.title || "Unknown Property"}
-                        </div>
-                        <div className="text-muted-foreground text-xs">
-                          {rental.property?.location}
-                        </div>
-                      </td>
-                      <td className="px-4 py-4">
-                        <RentalStatusBadge status={rental.status as "PENDING" | "APPROVED" | "ACTIVE" | "COMPLETED" | "REJECTED"} />
-                      </td>
-                      <td className="px-4 py-4">
-                        {rental.moveInDate
-                          ? format(new Date(rental.moveInDate), "MMM d, yyyy")
-                          : "Not specified"}
-                      </td>
-                      <td className="px-4 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          {rental.status === "APPROVED" && (
-                            <Button size="sm" variant="default" asChild>
-                              <Link href={`/dashboard/tenant/requests/${rental.id}/pay`}>
-                                Pay Now
-                              </Link>
-                            </Button>
-                          )}
-                          <Button variant="ghost" size="sm" asChild>
-                            <Link href={`/dashboard/tenant/requests/${rental.id}`}>
-                              View <ArrowRight className="ml-2 h-4 w-4" />
-                            </Link>
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {/* Pagination for Rentals */}
-              {rentals.length > itemsPerPage && (
-                <div className="flex items-center justify-between px-4 py-3 border-t">
-                  <span className="text-sm text-muted-foreground">
-                    Showing {(requestsPage - 1) * itemsPerPage + 1} to {Math.min(requestsPage * itemsPerPage, rentals.length)} of {rentals.length}
-                  </span>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setRequestsPage(p => Math.max(1, p - 1))}
-                      disabled={requestsPage === 1}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setRequestsPage(p => Math.min(Math.ceil(rentals.length / itemsPerPage), p + 1))}
-                      disabled={requestsPage === Math.ceil(rentals.length / itemsPerPage)}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </>
-        )}
-      </section>
-
-      {/* Payments Section */}
-      <section className="space-y-4" id="payments">
-        <div className="flex items-center gap-2 border-b pb-2">
-          <CreditCard className="h-5 w-5 text-primary" />
-          <h2 className="text-2xl font-semibold">Payment History</h2>
-        </div>
-
-        {payments.length === 0 ? (
-          <EmptyState
-            icon={CreditCard}
-            title="No payments yet"
-            description="Your payment history will appear here once you've made a payment."
-          />
-        ) : (
-          <div className="border rounded-xl bg-card shadow-sm overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="bg-muted/50 text-muted-foreground">
-                <tr>
-                  <th className="px-4 py-3 font-medium">Date</th>
-                  <th className="px-4 py-3 font-medium">Amount</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3 font-medium">Transaction ID</th>
-                </tr>
-              </thead>
-
-              <tbody className="divide-y">
-                {payments.slice((paymentsPage - 1) * itemsPerPage, paymentsPage * itemsPerPage).map((payment) => (
-                  <tr
-                    key={payment.id}
-                    className="hover:bg-muted/20 transition-colors"
-                  >
-                    <td className="px-4 py-4">
-                      {format(new Date(payment.createdAt), "MMM d, yyyy")}
-                    </td>
-                    <td className="px-4 py-4 font-medium">${payment.amount}</td>
-                    <td className="px-4 py-4">
-                      <PaymentStatusBadge status={payment.status} />
-                    </td>
-
-                    <td className="px-4 py-4 text-muted-foreground font-mono text-xs">
-                      {payment.transactionId || "N/A"}
-                    </td>
-
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {/* Pagination for Payments */}
-            {payments.length > itemsPerPage && (
-              <div className="flex items-center justify-between px-4 py-3 border-t">
-                <span className="text-sm text-muted-foreground">
-                  Showing {(paymentsPage - 1) * itemsPerPage + 1} to {Math.min(paymentsPage * itemsPerPage, payments.length)} of {payments.length}
-                </span>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPaymentsPage(p => Math.max(1, p - 1))}
-                    disabled={paymentsPage === 1}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPaymentsPage(p => Math.min(Math.ceil(payments.length / itemsPerPage), p + 1))}
-                    disabled={paymentsPage === Math.ceil(payments.length / itemsPerPage)}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </section>
     </div>
   );
 }

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api-client";
+import { toast } from "sonner";
 import {
   Home,
   Settings,
@@ -17,8 +18,8 @@ import {
   CreditCard,
   Heart,
   DollarSign,
-  ShieldAlert,
-  BarChart3,
+  ShieldCheck,
+  Mail,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -29,17 +30,23 @@ export function Sidebar() {
   const router = useRouter();
 
   const handleLogout = async () => {
-    await api.post("/auth/logout", {});
+    try {
+      await api.post("/auth/logout", {});
+    } catch {
+      // ignore
+    }
     clearUser();
+    toast.success("Logged out successfully");
     router.push("/auth/login");
+    router.refresh();
   };
 
   if (isLoading) {
     return (
       <aside className="w-64 border-r bg-card flex-col flex min-h-[calc(100vh-4rem)] p-4 space-y-4">
-        <Skeleton className="h-8 w-full" />
-        <Skeleton className="h-8 w-full" />
-        <Skeleton className="h-8 w-full" />
+        <Skeleton className="h-8 w-full rounded-xl" />
+        <Skeleton className="h-8 w-full rounded-xl" />
+        <Skeleton className="h-8 w-full rounded-xl" />
       </aside>
     );
   }
@@ -48,25 +55,30 @@ export function Sidebar() {
 
   // Role-specific navigation links
   const tenantLinks = [
-    { name: "Dashboard", href: "/dashboard/tenant", icon: LayoutDashboard },
-    { name: "My Requests", href: "/dashboard/tenant#requests", icon: FileText },
+    { name: "Overview", href: "/dashboard/tenant", icon: LayoutDashboard },
+    { name: "My Requests", href: "/dashboard/tenant/requests", icon: FileText },
     { name: "Payments", href: "/dashboard/tenant#payments", icon: CreditCard },
     { name: "Saved Properties", href: "/dashboard/tenant/saved", icon: Heart },
+    { name: "Profile & Account", href: "/dashboard/account", icon: Settings },
   ];
 
   const landlordLinks = [
-    { name: "Dashboard", href: "/dashboard/landlord", icon: LayoutDashboard },
+    { name: "Overview", href: "/dashboard/landlord", icon: LayoutDashboard },
     { name: "My Properties", href: "/dashboard/landlord/properties", icon: Building },
-    { name: "Requests", href: "/dashboard/landlord/requests", icon: Inbox },
-    { name: "Earnings", href: "/dashboard/landlord#earnings", icon: DollarSign },
+    { name: "Rental Requests", href: "/dashboard/landlord/requests", icon: Inbox },
+    { name: "Earnings & Revenue", href: "/dashboard/landlord#earnings", icon: DollarSign },
+    { name: "Profile & Account", href: "/dashboard/account", icon: Settings },
   ];
 
   const adminLinks = [
-    { name: "Dashboard", href: "/dashboard/admin", icon: LayoutDashboard },
-    { name: "Categories", href: "/dashboard/admin/categories", icon: Tags },
-    { name: "Moderation", href: "/dashboard/admin/moderation", icon: ShieldAlert },
-    { name: "Analytics", href: "/dashboard/admin#analytics", icon: BarChart3 },
+    { name: "Overview", href: "/dashboard/admin", icon: LayoutDashboard },
     { name: "Users", href: "/dashboard/admin/users", icon: Users },
+    { name: "Properties", href: "/dashboard/admin/properties", icon: ShieldCheck },
+    { name: "Rental Requests", href: "/dashboard/admin/rentals", icon: FileText },
+    { name: "Payments", href: "/dashboard/admin/payments", icon: CreditCard },
+    { name: "Categories", href: "/dashboard/admin/categories", icon: Tags },
+    { name: "Messages", href: "/dashboard/admin/messages", icon: Mail },
+    { name: "Settings", href: "/dashboard/account", icon: Settings },
   ];
 
   const roleLinks =
@@ -83,54 +95,46 @@ export function Sidebar() {
       <div className="flex-1 px-3 py-6 space-y-6">
         {/* Role Menu */}
         <div>
-          <h3 className="mb-2 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            {user.role} MENU
+          <h3 className="mb-2 px-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            {user.role} PORTAL
           </h3>
           <nav className="space-y-1">
             {roleLinks.map((link) => {
-              const isActive = pathname === link.href;
+              const isActive =
+                link.href.includes("#")
+                  ? pathname === link.href.split("#")[0]
+                  : pathname === link.href;
               const Icon = link.icon;
               return (
                 <Link
-                  key={link.href}
+                  key={link.name}
                   href={link.href}
-                  className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                  className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
                     isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      ? "bg-primary text-primary-foreground shadow-xs font-semibold"
+                      : "text-muted-foreground hover:bg-accent hover:text-foreground"
                   }`}
                 >
-                  <Icon className="h-4 w-4" />
-                  {link.name}
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span>{link.name}</span>
                 </Link>
               );
             })}
           </nav>
         </div>
 
-        {/* General Menu */}
+        {/* Quick Nav */}
         <div>
-          <h3 className="mb-2 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            ACCOUNT
+          <h3 className="mb-2 px-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            NAVIGATION
           </h3>
           <nav className="space-y-1">
             <Link
-              href="/dashboard/account"
-              className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                pathname === "/dashboard/account"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              }`}
-            >
-              <Settings className="h-4 w-4" />
-              Settings
-            </Link>
-            <Link
               href="/"
-              className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-muted-foreground hover:bg-muted hover:text-foreground"
+              className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors text-muted-foreground hover:bg-accent hover:text-foreground"
             >
-              <Home className="h-4 w-4" />
-              Back to Site
+              <Home className="h-4 w-4 shrink-0" />
+              <span>Back to Site</span>
             </Link>
           </nav>
         </div>
@@ -139,10 +143,10 @@ export function Sidebar() {
       <div className="border-t p-4">
         <Button
           variant="outline"
-          className="w-full justify-start text-muted-foreground cursor-pointer"
+          className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl"
           onClick={handleLogout}
         >
-          <LogOut className="mr-2 h-4 w-4" />
+          <LogOut className="mr-2 h-4 w-4 shrink-0" />
           Logout
         </Button>
       </div>

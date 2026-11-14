@@ -1,20 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import * as React from "react";
+import { type ColumnDef } from "@tanstack/react-table";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   categorySchema,
   type CategoryInput,
 } from "@/lib/schemas/category.schema";
-import { api } from "@/lib/api-client";
-import { type Category } from "@/types";
+import {
+  useCategories,
+  useCreateCategory,
+  useUpdateCategory,
+  useDeleteCategory,
+} from "@/hooks/api/useCategories";
+import { DataTable } from "@/components/ui/data-table";
+import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Tags } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   Dialog,
   DialogContent,
@@ -22,16 +29,28 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
+import { Plus, Pencil, Trash2, MoreHorizontal, Tags } from "lucide-react";
+import type { Category } from "@/types";
 
 export default function AdminCategoriesPage() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: categories = [], isLoading } = useCategories();
+  const createMutation = useCreateCategory();
+  const updateMutation = useUpdateCategory();
+  const deleteMutation = useDeleteCategory();
 
   // Modal states
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isFormOpen, setIsFormOpen] = React.useState(false);
+  const [editingCategory, setEditingCategory] = React.useState<Category | null>(null);
+  const [deleteTarget, setDeleteTarget] = React.useState<Category | null>(null);
 
   const {
     register,
@@ -42,25 +61,6 @@ export default function AdminCategoriesPage() {
     resolver: zodResolver(categorySchema),
     defaultValues: { name: "", description: "" },
   });
-
-  const loadCategories = async () => {
-    try {
-      const res = await api.get<Category[]>("/categories");
-      if (res.ok && res.data) {
-        setCategories(res.data);
-      } else {
-        toast.error("Failed to load categories");
-      }
-    } catch (err: any) {
-      toast.error(err.message || "An error occurred");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadCategories();
-  }, []);
 
   const openNewForm = () => {
     setEditingCategory(null);
@@ -76,190 +76,175 @@ export default function AdminCategoriesPage() {
 
   const onSubmit = async (data: CategoryInput) => {
     try {
-      let res;
       if (editingCategory) {
-        res = await api.put(`/admin/categories/${editingCategory.id}`, data);
+        await updateMutation.mutateAsync({
+          id: editingCategory.id,
+          data: { name: data.name, description: data.description || undefined },
+        });
+        toast.success(`Category "${data.name}" updated successfully!`);
       } else {
-        res = await api.post("/admin/categories", data);
+        await createMutation.mutateAsync({
+          name: data.name,
+          description: data.description || undefined,
+        });
+        toast.success(`Category "${data.name}" created successfully!`);
       }
-
-      if (res.ok) {
-        toast.success(
-          `Category ${editingCategory ? "updated" : "created"} successfully!`,
-        );
-        setIsFormOpen(false);
-        loadCategories(); // reload table
-      } else {
-        if (res.status === 409) {
-          toast.error("A category with this name already exists.");
-        } else {
-          toast.error(res.message || "Operation failed");
-        }
-      }
-    } catch (err: any) {
-      toast.error(err.message || "An unexpected error occurred");
+      setIsFormOpen(false);
+    } catch (err) {
+      toast.error((err as Error).message || "Operation failed");
     }
   };
 
   const handleDelete = async () => {
-    if (!deleteId) return;
+    if (!deleteTarget) return;
     try {
-      const res = await api.delete(`/admin/categories/${deleteId}`);
-      if (res.ok) {
-        toast.success("Category deleted successfully.");
-        loadCategories();
-      } else {
-        if (res.status === 409) {
-          toast.error(
-            "Cannot delete category. It is currently in use by active properties.",
-          );
-        } else {
-          toast.error(res.message || "Failed to delete category");
-        }
-      }
-    } catch (err: any) {
-      toast.error(err.message || "An unexpected error occurred");
+      await deleteMutation.mutateAsync(deleteTarget.id);
+      toast.success(`Category "${deleteTarget.name}" deleted successfully.`);
+    } catch (err) {
+      toast.error((err as Error).message || "Failed to delete category");
     } finally {
-      setDeleteId(null);
+      setDeleteTarget(null);
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="space-y-6 p-4">
-        <Skeleton className="h-10 w-48" />
-        <Skeleton className="h-64 w-full" />
-      </div>
-    );
-  }
+  const columns: ColumnDef<Category>[] = [
+    {
+      accessorKey: "name",
+      header: "Category Name",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          <Tags className="h-4 w-4 text-primary shrink-0" />
+          <span className="font-semibold text-sm">{row.original.name}</span>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "description",
+      header: "Description",
+      cell: ({ row }) => (
+        <span className="text-xs text-muted-foreground line-clamp-1 max-w-sm">
+          {row.original.description || "—"}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "_count",
+      header: "Properties",
+      cell: ({ row }) => {
+        const count = row.original._count?.properties ?? 0;
+        return (
+          <Badge variant="outline" className="text-xs font-semibold">
+            {count} {count === 1 ? "property" : "properties"}
+          </Badge>
+        );
+      },
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => {
+        const cat = row.original;
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg">
+                <MoreHorizontal className="h-4 w-4" />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40 rounded-xl">
+              <DropdownMenuLabel className="text-xs">Category</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => openEditForm(cat)}
+                className="cursor-pointer text-xs"
+              >
+                <Pencil className="mr-2 h-3.5 w-3.5" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setDeleteTarget(cat)}
+                className="text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer text-xs"
+              >
+                <Trash2 className="mr-2 h-3.5 w-3.5" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
 
   return (
-    <div className="space-y-6 p-4">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-primary flex items-center gap-2">
-            <Tags className="h-7 w-7" /> Categories
-          </h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Manage property categories and tags.
-          </p>
-        </div>
-        <Button onClick={openNewForm}>
-          <Plus className="w-4 h-4 mr-2" /> Add Category
-        </Button>
-      </div>
+    <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+      <PageHeader
+        title="Category Management"
+        description="Configure classifications and property types for landlord listing submissions."
+        actions={
+          <Button onClick={openNewForm} className="rounded-xl">
+            <Plus className="w-4 h-4 mr-2" /> Add Category
+          </Button>
+        }
+      />
 
-      <div className="border rounded-xl bg-card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-muted/50 text-muted-foreground uppercase text-xs">
-              <tr>
-                <th className="px-6 py-4 font-semibold">Name</th>
-                <th className="px-6 py-4 font-semibold">Description</th>
-                <th className="px-6 py-4 font-semibold text-center">
-                  Properties
-                </th>
-                <th className="px-6 py-4 font-semibold text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {categories.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={4}
-                    className="px-6 py-8 text-center text-muted-foreground"
-                  >
-                    No categories found. Create one to get started.
-                  </td>
-                </tr>
-              ) : (
-                categories.map((cat) => (
-                  <tr
-                    key={cat.id}
-                    className="hover:bg-muted/30 transition-colors"
-                  >
-                    <td className="px-6 py-4 font-medium">{cat.name}</td>
-                    <td className="px-6 py-4 text-muted-foreground max-w-xs truncate">
-                      {cat.description || "—"}
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <span className="inline-flex items-center justify-center bg-primary/10 text-primary rounded-full px-2.5 py-0.5 font-medium text-xs">
-                        {cat._count?.properties || 0}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => openEditForm(cat)}
-                        className="text-primary hover:text-primary hover:bg-primary/10"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setDeleteId(cat.id)}
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <DataTable
+        columns={columns}
+        data={categories}
+        isLoading={isLoading}
+        searchKey="name"
+        searchPlaceholder="Filter categories by name..."
+      />
 
       {/* Create / Edit Modal */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md rounded-2xl">
           <form onSubmit={handleSubmit(onSubmit)}>
             <DialogHeader>
-              <DialogTitle>
+              <DialogTitle className="text-lg font-bold">
                 {editingCategory ? "Edit Category" : "Create Category"}
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div>
-                <Label htmlFor="name">Name *</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="name" className="text-xs font-semibold">
+                  Name *
+                </Label>
                 <Input
                   id="name"
-                  placeholder="e.g. Apartments"
+                  placeholder="e.g. Apartments, Duplex, Condo"
+                  className="rounded-xl"
                   {...register("name")}
                 />
                 {errors.name && (
-                  <p className="text-sm text-destructive mt-1">
-                    {errors.name.message}
-                  </p>
+                  <p className="text-xs text-destructive">{errors.name.message}</p>
                 )}
               </div>
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <textarea
+              <div className="space-y-1.5">
+                <Label htmlFor="description" className="text-xs font-semibold">
+                  Description (Optional)
+                </Label>
+                <Textarea
                   id="description"
-                  className="flex min-h-25 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  placeholder="Optional description..."
+                  className="min-h-24 rounded-xl"
+                  placeholder="Briefly describe what residential structures belong in this category..."
                   {...register("description")}
                 />
                 {errors.description && (
-                  <p className="text-sm text-destructive mt-1">
-                    {errors.description.message}
-                  </p>
+                  <p className="text-xs text-destructive">{errors.description.message}</p>
                 )}
               </div>
             </div>
-            <DialogFooter>
+            <DialogFooter className="gap-2">
               <Button
                 type="button"
                 variant="outline"
+                className="rounded-xl"
                 onClick={() => setIsFormOpen(false)}
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button type="submit" className="rounded-xl" disabled={isSubmitting}>
                 {isSubmitting ? "Saving..." : "Save Category"}
               </Button>
             </DialogFooter>
@@ -268,14 +253,18 @@ export default function AdminCategoriesPage() {
       </Dialog>
 
       {/* Delete Confirmation */}
-      <ConfirmDialog
-        open={!!deleteId}
-        onOpenChange={(open) => !open && setDeleteId(null)}
-        onConfirm={handleDelete}
-        title="Delete Category"
-        description="Are you sure you want to delete this category? This action cannot be undone."
-        variant="destructive"
-      />
+      {deleteTarget && (
+        <ConfirmDialog
+          open={Boolean(deleteTarget)}
+          onOpenChange={(open) => !open && setDeleteTarget(null)}
+          onConfirm={handleDelete}
+          title="Delete Category"
+          description={`Are you sure you want to delete "${deleteTarget.name}"? If any properties are currently assigned to this category, the deletion will be rejected.`}
+          confirmLabel="Delete Category"
+          variant="destructive"
+          isLoading={deleteMutation.isPending}
+        />
+      )}
     </div>
   );
 }

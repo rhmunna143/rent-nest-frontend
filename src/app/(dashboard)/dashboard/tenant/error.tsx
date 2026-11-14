@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
 
@@ -11,26 +11,26 @@ export default function TenantDashboardError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  useEffect(() => {
-    console.error(error);
-  }, [error]);
-
   return (
-    <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4 text-center">
-      <AlertCircle className="h-10 w-10 text-destructive" />
+    <div className="flex min-h-[50vh] w-full flex-col items-center justify-center gap-4 text-center p-6">
+      <div className="h-12 w-12 rounded-full bg-destructive/10 text-destructive flex items-center justify-center">
+        <AlertCircle className="h-6 w-6" />
+      </div>
       <h2 className="text-2xl font-bold tracking-tight">Dashboard Error</h2>
-      <p className="text-muted-foreground max-w-md">
-        Failed to load your dashboard data. This might be a temporary issue or
-        your session may have expired.
+      <p className="text-sm text-muted-foreground max-w-md">
+        {error.message || "Failed to load tenant dashboard data. Please try again or log in."}
       </p>
-      <div className="flex gap-4 mt-4">
+      <div className="flex gap-3 mt-2">
         <Button
           variant="outline"
+          className="rounded-xl"
           onClick={() => (window.location.href = "/auth/login")}
         >
           Login Again
         </Button>
-        <Button onClick={() => reset()}>Try Again</Button>
+        <Button className="rounded-xl" onClick={() => reset()}>
+          Try Again
+        </Button>
       </div>
     </div>
   );

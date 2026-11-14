@@ -1,18 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import * as React from "react";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   propertySchema,
   type PropertyInput,
 } from "@/lib/schemas/property.schema";
-import { api } from "@/lib/api-client";
-import { type Category } from "@/types";
+import { useCategories } from "@/hooks/api/useCategories";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Trash2, Plus, Info, ImageIcon, DollarSign } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { ImageUploader } from "@/components/ui/image-uploader";
+import { Trash2, Plus, Info, ImageIcon, CheckCircle2, DollarSign } from "lucide-react";
 
 interface PropertyFormProps {
   initialData?: Partial<PropertyInput>;
@@ -20,29 +21,25 @@ interface PropertyFormProps {
   isSubmitting: boolean;
 }
 
+interface FormValues extends Omit<PropertyInput, "amenities"> {
+  amenities: { name: string }[];
+}
+
 export function PropertyForm({
   initialData,
   onSubmit,
   isSubmitting,
 }: PropertyFormProps) {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
-
-  const [amenityCount, setAmenityCount] = useState(
-    initialData?.amenities?.length ? initialData.amenities.length : 1,
-  );
-  const [imageCount, setImageCount] = useState(
-    initialData?.images?.length ? initialData.images.length : 1,
-  );
+  const { data: categories = [], isLoading: isLoadingCategories } = useCategories();
 
   const {
     register,
+    control,
     handleSubmit,
     setValue,
-    getValues,
+    watch,
     formState: { errors },
-  } = useForm<PropertyInput>({
-    resolver: zodResolver(propertySchema),
+  } = useForm<FormValues>({
     defaultValues: {
       title: initialData?.title || "",
       description: initialData?.description || "",
@@ -50,101 +47,85 @@ export function PropertyForm({
       rentAmount: initialData?.rentAmount || ("" as unknown as number),
       bedrooms: initialData?.bedrooms || ("" as unknown as number),
       bathrooms: initialData?.bathrooms || ("" as unknown as number),
-      amenities: initialData?.amenities || [""],
-      images: initialData?.images || [""],
       categoryId: initialData?.categoryId || "",
+      images: initialData?.images || [],
+      amenities: initialData?.amenities?.map((a) => ({ name: a })) || [
+        { name: "Wi-Fi" },
+        { name: "Air Conditioning" },
+      ],
     },
   });
 
-  useEffect(() => {
-    async function loadCategories() {
-      try {
-        const res = await api.get<Category[]>("/categories");
-        if (res.ok && res.data) {
-          setCategories(res.data);
-        }
-      } catch (err) {
-        console.error("Failed to load categories", err);
-      } finally {
-        setIsLoadingCategories(false);
-      }
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "amenities",
+  });
+
+  const images = watch("images");
+
+  const handleFormSubmit = async (values: FormValues) => {
+    // Map amenities back to string array and filter out empty entries
+    const cleanAmenities = values.amenities
+      .map((a) => a.name.trim())
+      .filter((name) => Boolean(name));
+
+    const payload: PropertyInput = {
+      ...values,
+      rentAmount: Number(values.rentAmount),
+      bedrooms: Number(values.bedrooms),
+      bathrooms: Number(values.bathrooms),
+      amenities: cleanAmenities,
+      images: values.images.filter((img) => Boolean(img?.trim())),
+    };
+
+    // Client-side validation check
+    const validation = propertySchema.safeParse(payload);
+    if (!validation.success) {
+      return;
     }
-    loadCategories();
-  }, []);
+
+    await onSubmit(payload);
+  };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-8">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         {/* Left Column: Basic Details & Pricing */}
-        <div className="space-y-8">
-          <div className="space-y-6">
-            <div className="flex items-center gap-2 border-b pb-2 text-primary">
-              <Info className="w-5 h-5" />
-              <h3 className="text-lg font-medium">Basic Information</h3>
+        <div className="space-y-6">
+          <div className="p-6 rounded-2xl border bg-card space-y-5 shadow-xs">
+            <div className="flex items-center gap-2 border-b pb-3 text-primary font-bold">
+              <Info className="h-5 w-5" />
+              <h3 className="text-base sm:text-lg">Basic Information</h3>
             </div>
 
-            <div>
-              <Label htmlFor="title" className="mb-1 block">
+            {/* Title */}
+            <div className="space-y-1.5">
+              <Label htmlFor="title" className="text-xs font-semibold">
                 Property Title *
               </Label>
               <Input
                 id="title"
-                placeholder="e.g. Modern Apartment in Downtown"
+                placeholder="e.g. Modern High-Rise Apartment in Downtown"
+                className="rounded-xl"
                 {...register("title")}
-                className="bg-background"
               />
               {errors.title && (
-                <p className="text-sm text-destructive mt-1">
-                  {errors.title.message}
-                </p>
+                <p className="text-xs text-destructive">{errors.title.message}</p>
               )}
             </div>
 
-            <div>
-              <Label htmlFor="description" className="mb-1 block">
-                Description *
-              </Label>
-              <textarea
-                id="description"
-                className="flex min-h-35 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                placeholder="Describe the property's key features, neighborhood, and unique selling points..."
-                {...register("description")}
-              />
-              {errors.description && (
-                <p className="text-sm text-destructive mt-1">
-                  {errors.description.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="location" className="mb-1 block">
-                Location / Address *
-              </Label>
-              <Input
-                id="location"
-                placeholder="e.g. 123 Main St, New York, NY 10001"
-                {...register("location")}
-                className="bg-background"
-              />
-              {errors.location && (
-                <p className="text-sm text-destructive mt-1">
-                  {errors.location.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="categoryId" className="mb-1 block">
-                Property Category *
+            {/* Category */}
+            <div className="space-y-1.5">
+              <Label htmlFor="categoryId" className="text-xs font-semibold">
+                Category *
               </Label>
               <select
                 id="categoryId"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="w-full h-10 rounded-xl border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 {...register("categoryId")}
                 disabled={isLoadingCategories}
               >
-                <option value="">Select a category</option>
+                <option value="">Select a Category</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
@@ -152,202 +133,188 @@ export function PropertyForm({
                 ))}
               </select>
               {errors.categoryId && (
-                <p className="text-sm text-destructive mt-1">
-                  {errors.categoryId.message}
-                </p>
+                <p className="text-xs text-destructive">{errors.categoryId.message}</p>
+              )}
+            </div>
+
+            {/* Location */}
+            <div className="space-y-1.5">
+              <Label htmlFor="location" className="text-xs font-semibold">
+                Location / Address *
+              </Label>
+              <Input
+                id="location"
+                placeholder="e.g. 142 Elm St, Austin, TX"
+                className="rounded-xl"
+                {...register("location")}
+              />
+              {errors.location && (
+                <p className="text-xs text-destructive">{errors.location.message}</p>
+              )}
+            </div>
+
+            {/* Description */}
+            <div className="space-y-1.5">
+              <Label htmlFor="description" className="text-xs font-semibold">
+                Full Description *
+              </Label>
+              <Textarea
+                id="description"
+                placeholder="Describe your property, proximity to transport, lease terms, and building features..."
+                className="min-h-32 rounded-xl"
+                {...register("description")}
+              />
+              {errors.description && (
+                <p className="text-xs text-destructive">{errors.description.message}</p>
               )}
             </div>
           </div>
 
-          <div className="space-y-6">
-            <div className="flex items-center gap-2 border-b pb-2 text-primary">
-              <DollarSign className="w-5 h-5" />
-              <h3 className="text-lg font-medium">Pricing & Layout</h3>
+          {/* Pricing & Room Specs Card */}
+          <div className="p-6 rounded-2xl border bg-card space-y-5 shadow-xs">
+            <div className="flex items-center gap-2 border-b pb-3 text-primary font-bold">
+              <DollarSign className="h-5 w-5" />
+              <h3 className="text-base sm:text-lg">Pricing & Specifications</h3>
             </div>
 
-            <div>
-              <Label htmlFor="rentAmount" className="mb-1 block">
-                Rent Amount ($/mo) *
-              </Label>
-              <Input
-                id="rentAmount"
-                type="number"
-                placeholder="e.g. 1500"
-                {...register("rentAmount", { valueAsNumber: true })}
-                className="bg-background"
-              />
-              {errors.rentAmount && (
-                <p className="text-sm text-destructive mt-1">
-                  {errors.rentAmount.message}
-                </p>
-              )}
-            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Rent Amount */}
+              <div className="space-y-1.5">
+                <Label htmlFor="rentAmount" className="text-xs font-semibold">
+                  Monthly Rent ($) *
+                </Label>
+                <Input
+                  id="rentAmount"
+                  type="number"
+                  placeholder="2400"
+                  className="rounded-xl"
+                  {...register("rentAmount", { valueAsNumber: true })}
+                />
+                {errors.rentAmount && (
+                  <p className="text-xs text-destructive">{errors.rentAmount.message}</p>
+                )}
+              </div>
 
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <Label htmlFor="bedrooms" className="mb-1 block">
+              {/* Bedrooms */}
+              <div className="space-y-1.5">
+                <Label htmlFor="bedrooms" className="text-xs font-semibold">
                   Bedrooms *
                 </Label>
                 <Input
                   id="bedrooms"
                   type="number"
-                  placeholder="e.g. 2"
+                  placeholder="2"
+                  className="rounded-xl"
                   {...register("bedrooms", { valueAsNumber: true })}
-                  className="bg-background"
                 />
                 {errors.bedrooms && (
-                  <p className="text-sm text-destructive mt-1">
-                    {errors.bedrooms.message}
-                  </p>
+                  <p className="text-xs text-destructive">{errors.bedrooms.message}</p>
                 )}
               </div>
-              <div>
-                <Label htmlFor="bathrooms" className="mb-1 block">
+
+              {/* Bathrooms */}
+              <div className="space-y-1.5">
+                <Label htmlFor="bathrooms" className="text-xs font-semibold">
                   Bathrooms *
                 </Label>
                 <Input
                   id="bathrooms"
                   type="number"
-                  placeholder="e.g. 1"
+                  placeholder="1"
+                  className="rounded-xl"
                   {...register("bathrooms", { valueAsNumber: true })}
-                  className="bg-background"
                 />
                 {errors.bathrooms && (
-                  <p className="text-sm text-destructive mt-1">
-                    {errors.bathrooms.message}
-                  </p>
+                  <p className="text-xs text-destructive">{errors.bathrooms.message}</p>
                 )}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right Column: Amenities & Media */}
-        <div className="space-y-8 bg-muted/30 p-6 rounded-xl border border-dashed border-muted-foreground/20">
-          <div className="space-y-6">
-            <div className="flex items-center justify-between border-b pb-2">
-              <div className="flex items-center gap-2 text-primary">
-                <ImageIcon className="w-5 h-5" />
-                <h3 className="text-lg font-medium">Media & Photos</h3>
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setImageCount((c) => c + 1)}
-                className="h-8"
-              >
-                <Plus className="w-4 h-4 mr-1" /> Add Image URL
-              </Button>
+        {/* Right Column: Photos & Amenities */}
+        <div className="space-y-6">
+          {/* Photos Upload Card */}
+          <div className="p-6 rounded-2xl border bg-card space-y-5 shadow-xs">
+            <div className="flex items-center gap-2 border-b pb-3 text-primary font-bold">
+              <ImageIcon className="h-5 w-5" />
+              <h3 className="text-base sm:text-lg">Property Photos *</h3>
             </div>
 
-            <div className="space-y-3">
-              {Array.from({ length: imageCount }).map((_, i) => (
-                <div key={`image-${i}`} className="flex items-start gap-2">
-                  <div className="flex-1">
-                    <Input
-                      placeholder="https://example.com/image.jpg"
-                      {...register(`images.${i}` as const)}
-                      className="bg-background"
-                    />
-                  </div>
-                  {imageCount > 1 && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="text-destructive hover:bg-destructive/10 shrink-0"
-                      onClick={() => {
-                        const current = getValues("images");
-                        current.splice(i, 1);
-                        setValue("images", current);
-                        setImageCount((c) => c - 1);
-                      }}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
-              ))}
-              {errors.images && (
-                <p className="text-sm text-destructive mt-1">
-                  {errors.images.message || "Please provide valid image URLs."}
-                </p>
+            <Controller
+              control={control}
+              name="images"
+              render={({ field }) => (
+                <ImageUploader
+                  value={field.value || []}
+                  onChange={(urls) => field.onChange(urls)}
+                  folder="properties"
+                />
               )}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Provide direct links to publicly hosted images (e.g. Imgur, AWS
-              S3). The first image will be used as the thumbnail.
-            </p>
+            />
+            {errors.images && (
+              <p className="text-xs text-destructive">
+                {errors.images.message || "Please provide at least one property image."}
+              </p>
+            )}
           </div>
 
-          <div className="space-y-6 pt-4">
-            <div className="flex items-center justify-between border-b pb-2">
-              <div className="flex items-center gap-2 text-primary">
-                <Plus className="w-5 h-5" />
-                <h3 className="text-lg font-medium">Amenities</h3>
+          {/* Amenities with useFieldArray (S14 resolved) */}
+          <div className="p-6 rounded-2xl border bg-card space-y-5 shadow-xs">
+            <div className="flex items-center justify-between border-b pb-3">
+              <div className="flex items-center gap-2 text-primary font-bold">
+                <CheckCircle2 className="h-5 w-5" />
+                <h3 className="text-base sm:text-lg">Amenities & Features</h3>
               </div>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => setAmenityCount((c) => c + 1)}
-                className="h-8"
+                onClick={() => append({ name: "" })}
+                className="h-8 rounded-xl text-xs"
               >
-                <Plus className="w-4 h-4 mr-1" /> Add Amenity
+                <Plus className="h-3.5 w-3.5 mr-1" /> Add Amenity
               </Button>
             </div>
 
-            <div className="space-y-3">
-              {Array.from({ length: amenityCount }).map((_, i) => (
-                <div key={`amenity-${i}`} className="flex items-start gap-2">
-                  <div className="flex-1">
-                    <Input
-                      placeholder="e.g. High-speed WiFi, In-unit Laundry"
-                      {...register(`amenities.${i}` as const)}
-                      className="bg-background"
-                    />
-                  </div>
-                  {amenityCount > 1 && (
+            <div className="space-y-2.5">
+              {fields.map((field, index) => (
+                <div key={field.id} className="flex items-center gap-2">
+                  <Input
+                    placeholder="e.g. In-Unit Washer/Dryer, Balcony, Parking"
+                    className="rounded-xl h-9 text-xs"
+                    {...register(`amenities.${index}.name` as const)}
+                  />
+                  {fields.length > 1 && (
                     <Button
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="text-destructive hover:bg-destructive/10 shrink-0"
-                      onClick={() => {
-                        const current = getValues("amenities");
-                        current.splice(i, 1);
-                        setValue("amenities", current);
-                        setAmenityCount((c) => c - 1);
-                      }}
+                      onClick={() => remove(index)}
+                      className="h-9 w-9 rounded-xl text-destructive hover:bg-destructive/10 shrink-0"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   )}
                 </div>
               ))}
-              {errors.amenities && (
-                <p className="text-sm text-destructive mt-1">
-                  {errors.amenities.message}
-                </p>
-              )}
             </div>
-            <p className="text-xs text-muted-foreground">
-              List the features and amenities that make this property stand out
-              to potential tenants.
-            </p>
+            {errors.amenities && (
+              <p className="text-xs text-destructive">{errors.amenities.message}</p>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="flex justify-end pt-6 border-t mt-8">
+      {/* Form Submission */}
+      <div className="flex justify-end gap-3 pt-4 border-t">
         <Button
           type="submit"
           size="lg"
           disabled={isSubmitting}
-          className="min-w-50 text-base"
+          className="rounded-xl px-8 font-semibold shadow-md"
         >
-          {isSubmitting ? "Processing..." : "Save Property Listing"}
+          {isSubmitting ? "Saving Property..." : "Publish Listing"}
         </Button>
       </div>
     </form>

@@ -43,16 +43,18 @@ function LoginForm() {
     handleSubmit,
     setValue,
     setError,
+    clearErrors,
     formState: { errors, isSubmitting },
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
   });
 
   const setDemoCredentials = (role: "ADMIN" | "LANDLORD" | "TENANT") => {
+    clearErrors(["email", "password"]);
     switch (role) {
       case "ADMIN":
         setValue("email", "admin@rentnest.com");
-        setValue("password", "Demo@1234");
+        setValue("password", "admin123");
         break;
       case "LANDLORD":
         setValue("email", "landlord@rentnest.com");

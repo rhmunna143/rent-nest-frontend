@@ -80,7 +80,7 @@ export default async function HomePage() {
         className="relative overflow-hidden bg-linear-to-b from-primary/5 via-background to-background py-12 lg:py-0 lg:h-[65vh] min-h-[520px] flex items-center border-b"
         aria-label="Hero section"
       >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
           <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             {/* Left Content */}
             <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
@@ -156,7 +156,7 @@ export default async function HomePage() {
       {/* 2. LIVE STATS SECTION */}
       {stats && (
         <section className="py-12 bg-card border-b" aria-label="Platform Statistics">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
               <div className="space-y-1">
                 <div className="text-3xl md:text-4xl font-extrabold text-foreground">
@@ -202,7 +202,7 @@ export default async function HomePage() {
       {/* 3. BROWSE BY CATEGORY SECTION */}
       {categories.length > 0 && (
         <section className="py-20 bg-background" aria-label="Browse by category">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-10 gap-4">
               <div>
                 <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
@@ -245,7 +245,7 @@ export default async function HomePage() {
       {/* 4. FEATURED LISTINGS (4 PER ROW) */}
       {featuredProperties.length > 0 && (
         <section className="py-20 bg-muted/20 border-y" aria-label="Featured rental listings">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-10 gap-4">
               <div>
                 <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-primary mb-1">
@@ -276,7 +276,7 @@ export default async function HomePage() {
 
       {/* 5. HOW IT WORKS SECTION */}
       <section className="py-20 bg-background" aria-label="How RentNest works">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
               How RentNest Works
@@ -329,7 +329,7 @@ export default async function HomePage() {
       {/* 7. TESTIMONIALS FROM REAL REVIEWS */}
       {reviews.length > 0 && (
         <section className="py-20 bg-background" aria-label="Tenant reviews">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-2xl mx-auto mb-12">
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
                 Loved by Renters
@@ -393,7 +393,7 @@ export default async function HomePage() {
 
       {/* 8. RENTAL LIVING GUIDES */}
       <section className="py-20 bg-muted/20 border-y" aria-label="Rental guides">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-10 gap-4">
             <div>
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
@@ -458,70 +458,76 @@ export default async function HomePage() {
 
       {/* 9. FAQ ACCORDION */}
       <section className="py-20 bg-background" aria-label="Frequently Asked Questions">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
-              Frequently Asked Questions
-            </h2>
-            <p className="text-muted-foreground text-sm sm:text-base">
-              Everything you need to know about renting and listing on RentNest.
-            </p>
-          </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
+                Frequently Asked Questions
+              </h2>
+              <p className="text-muted-foreground text-sm sm:text-base">
+                Everything you need to know about renting and listing on RentNest.
+              </p>
+            </div>
 
-          <Accordion type="single" collapsible className="w-full space-y-2">
-            {faqs.map((faq) => (
-              <AccordionItem
-                key={faq.id}
-                value={faq.id}
-                className="border rounded-xl px-4 bg-card shadow-2xs"
-              >
-                <AccordionTrigger className="text-left font-semibold text-sm sm:text-base hover:no-underline">
-                  {faq.question}
-                </AccordionTrigger>
-                <AccordionContent className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  {faq.answer}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+            <Accordion type="single" collapsible className="w-full space-y-2">
+              {faqs.map((faq) => (
+                <AccordionItem
+                  key={faq.id}
+                  value={faq.id}
+                  className="border rounded-xl px-4 bg-card shadow-2xs"
+                >
+                  <AccordionTrigger className="text-left font-semibold text-sm sm:text-base hover:no-underline">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
         </div>
       </section>
 
       {/* 10. NEWSLETTER SECTION */}
       <section className="py-16 bg-muted/30 border-y" aria-label="Newsletter subscription">
-        <div className="container mx-auto px-4 max-w-2xl text-center space-y-4">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-            Stay Updated with RentNest
-          </h2>
-          <p className="text-muted-foreground text-sm sm:text-base">
-            Get market insights, exclusive listing notifications, and rental guides delivered straight to your inbox.
-          </p>
-          <div className="pt-2">
-            <NewsletterForm />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-2xl mx-auto text-center space-y-4">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              Stay Updated with RentNest
+            </h2>
+            <p className="text-muted-foreground text-sm sm:text-base">
+              Get market insights, exclusive listing notifications, and rental guides delivered straight to your inbox.
+            </p>
+            <div className="pt-2">
+              <NewsletterForm />
+            </div>
           </div>
         </div>
       </section>
 
       {/* 11. FINAL CTA BANNER */}
       <section className="py-20 bg-card border-b" aria-label="Call to action">
-        <div className="container mx-auto px-4 text-center max-w-2xl space-y-6">
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-            Ready to Find Your Next Home?
-          </h2>
-          <p className="text-muted-foreground text-base sm:text-lg leading-relaxed">
-            Join thousands of satisfied tenants and landlords who rely on RentNest for straightforward, transparent property rentals.
-          </p>
-          <div className="pt-2">
-            <Button
-              size="lg"
-              className="h-12 px-8 text-base font-semibold rounded-xl shadow-md"
-              asChild
-              id="get-started-landing-cta"
-            >
-              <Link href="/auth/register">
-                Get Started for Free <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto space-y-6">
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+              Ready to Find Your Next Home?
+            </h2>
+            <p className="text-muted-foreground text-base sm:text-lg leading-relaxed">
+              Join thousands of satisfied tenants and landlords who rely on RentNest for straightforward, transparent property rentals.
+            </p>
+            <div className="pt-2">
+              <Button
+                size="lg"
+                className="h-12 px-8 text-base font-semibold rounded-xl shadow-md"
+                asChild
+                id="get-started-landing-cta"
+              >
+                <Link href="/auth/register">
+                  Get Started for Free <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </section>

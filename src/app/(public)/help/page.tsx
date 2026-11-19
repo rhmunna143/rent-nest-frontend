@@ -31,7 +31,7 @@ export default function HelpPage() {
   }, [search, selectedCategory]);
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 py-10 max-w-4xl space-y-10">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
       <PageHeader
         title="Help & Support Center"
         description="Find answers to common questions about leasing, listing properties, payments, and account security."

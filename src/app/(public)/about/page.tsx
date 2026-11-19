@@ -27,7 +27,7 @@ export default async function AboutPage() {
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
       <section className="bg-primary/5 py-20 lg:py-32">
-        <div className="container px-4 md:px-6 mx-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center text-center space-y-4 md:w-3/4 mx-auto">
             <h1 className="text-4xl md:text-5xl font-bold tracking-tighter">
               Redefining the Rental Experience
@@ -41,7 +41,7 @@ export default async function AboutPage() {
 
       {/* Stats Section — Real backend statistics */}
       <section className="py-16 bg-background border-b">
-        <div className="container px-4 md:px-6 mx-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div className="space-y-2">
               <h3 className="text-4xl font-bold text-primary">
@@ -73,7 +73,7 @@ export default async function AboutPage() {
 
       {/* Core Values */}
       <section className="py-20 lg:py-24">
-        <div className="container px-4 md:px-6 mx-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold mb-4">Our Core Values</h2>
             <p className="text-muted-foreground max-w-[600px] mx-auto">
@@ -114,7 +114,7 @@ export default async function AboutPage() {
 
       {/* CTA */}
       <section className="py-24 bg-primary text-primary-foreground text-center">
-        <div className="container px-4 md:px-6 mx-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold mb-6">Ready to find your next home?</h2>
           <p className="text-primary-foreground/80 mb-8 max-w-[600px] mx-auto text-lg">
             Join users who have discovered a seamless way to rent with RentNest.

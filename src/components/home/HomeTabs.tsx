@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 export function HomeTabs() {
   return (
     <section className="py-20 bg-muted/30" aria-label="Solutions for tenants and landlords">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-12">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
             Built for Everyone in the Rental Journey

@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function PropertiesLoading() {
   return (
-    <div className="container mx-auto px-4 py-8 flex flex-col md:flex-row gap-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row gap-8">
       {/* Sidebar Skeleton */}
       <aside className="w-full md:w-64 shrink-0 space-y-6">
         <div className="space-y-4 p-4 border rounded-lg bg-card">
